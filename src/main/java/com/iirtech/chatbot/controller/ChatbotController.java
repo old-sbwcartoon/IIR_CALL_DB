@@ -46,7 +46,7 @@ public class ChatbotController {
 		// 5. 입력대기
 	    int state = -1;
 	    Map<String, Object> resultMap = new HashMap();
-	    ChatbotModel cbm = new ChatbotModel(); 
+	    ChatbotModel cbm = new ChatbotModel();  
 	    String inputText = "";
 	    String speacker = "";
 	    try {
