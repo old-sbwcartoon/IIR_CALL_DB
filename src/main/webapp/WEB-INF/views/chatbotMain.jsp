@@ -14,6 +14,12 @@
 	대화를 입력하세요:   
 		<input class="user-input" type="text" style="width:300px;">
 		<button onclick="doInput()">입력</button>
+		<select>
+		  <option value="1">1단계</option>
+		  <option value="2">2단계</option>
+		  <option value="3">3단계</option>
+		  <option value="4">4단계</option>
+		</select>
 	</div>
 	<div>
 	    <ul class="dialog-ul" style="width: 600px; height: 700px; overflow: auto"></ul>
