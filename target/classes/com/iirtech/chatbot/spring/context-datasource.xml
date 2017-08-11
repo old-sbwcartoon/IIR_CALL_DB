@@ -6,7 +6,7 @@
      
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-        <property name="url" value="jdbc:mysql://106.255.230.162:36001/test_dev"/>
+        <property name="url" value="jdbc:mysql://106.255.230.162:36001/dev_CALL_2017"/>
         <property name="username" value="silhuett"/>
         <property name="password" value="dltnsal2"/>
     </bean>
