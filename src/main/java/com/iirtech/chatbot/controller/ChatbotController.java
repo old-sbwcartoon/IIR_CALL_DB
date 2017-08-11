@@ -54,8 +54,8 @@ public class ChatbotController {
 	    		state = Integer.parseInt((String)param.get("statusCd"));
 			switch(state) {
 			case 1: 
-				isUserTurn = cbm.decideSpeakerTurn(param);
-				resultMap = cbm.makeSentence();
+//				isUserTurn = cbm.decideSpeakerTurn(param);
+//				resultMap = cbm.makeSentence();
 				break;
 			case 2:
 			}
