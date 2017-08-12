@@ -2,24 +2,25 @@
  * 
  */
 var bot = {};
-bot.avatar = "/resources/img/bot.jpeg";
+//bot.avatar = "/resources/img/bot.jpeg";
+bot.avatar = "bot.jpeg";
 
 var usr = {};
-usr.avatar = "/resources/img/usr.jpeg";
+//usr.avatar = "/resources/img/usr.jpeg";
+usr.avatar = "usr.jpeg";
 
 function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
     var ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
+    hours = hours ? hours : 12;
     minutes = minutes < 10 ? '0'+minutes : minutes;
     var strTime = hours + ':' + minutes + ' ' + ampm;
     return strTime;
 }            
 
-//-- No use time. It is a javaScript effect.
-function insertChat(who, text, time = 0){
+function insertChat(who, text, imgfilepath){
     var control = "";
     var date = formatAMPM(new Date());
     
@@ -27,7 +28,7 @@ function insertChat(who, text, time = 0){
         
         control = '<li style="width:100%">' +
                         '<div class="msj macro">' +
-                        '<div class="avatar"><img class="img-circle" style="width:100%;" src="'+ bot.avatar +'" /></div>' +
+                        '<div class="avatar"><img class="img-circle" style="width:100%;" src="'+ imgfilepath + bot.avatar +'" /></div>' +
                             '<div class="text text-l">' +
                                 '<p>'+ text +'</p>' +
                                 '<p><small>'+date+'</small></p>' +
@@ -41,14 +42,14 @@ function insertChat(who, text, time = 0){
                                 '<p>'+text+'</p>' +
                                 '<p><small>'+date+'</small></p>' +
                             '</div>' +
-                        '<div class="avatar" style="padding:0px 0px 0px 10px !important"><img class="img-circle" style="width:100%;" src="'+usr.avatar+'" /></div>' +                                
+                        '<div class="avatar" style="padding:0px 0px 0px 10px !important"><img class="img-circle" style="width:100%;" src="'+ imgfilepath + usr.avatar+'" /></div>' +                                
                   '</li>'; 
     }
     setTimeout(
         function(){                        
             $(".dialog-ul").append(control);
-
-        }, time);
+        }
+    );
     
 }
 
@@ -70,9 +71,9 @@ $(".mytext").on("keyup", function(e){
 resetChat();
 
 function doInput(){
-	var userText = $('.user-input').val()
+	var userText = $('.userInput').val()
 	$.ajax({
-		   url: 'inputPreprocess.json'
+		   url: 'messageInput.json'
 		   ,async: false
 		   ,type: 'POST'
 		   ,data: {
@@ -87,7 +88,7 @@ function doInput(){
 			   //-- 채팅창 대화 쓰기
 			   // read only 속성을 봇이 계속 발화해야 하는 상황이면 추가한다.
 			   var jsonObj = JSON.parse(data);
-			   insertChat(jsonObj.Speacker,jsonObj.Message);  
+			   insertChat(jsonObj.Speacker,jsonObj.Message,jsonObj.imgSrc);  
 		   }
 		});
 }
