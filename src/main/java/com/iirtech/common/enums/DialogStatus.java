@@ -1,9 +1,13 @@
 package com.iirtech.common.enums;
 
+import java.util.HashMap;
+import java.util.Map;
+
 //대화 단계절 상태값 enum, 각 enum들의 계층도 고려하여 작성 
 public enum DialogStatus {
 
-	START_DIALOG("S000")
+	SYSTEM_ON("0000")
+	,START_DIALOG("S000")
 	,GREETING("S010")
 	,APPROACH_TOPIC("S011")
 	,START_TOPIC("S020")
@@ -30,12 +34,24 @@ public enum DialogStatus {
 	
 	private final String statusCd;
 	
-	DialogStatus(String code){
-		this.statusCd = code;
+	//enum에 value 값 부여하고 가져올 수 있게 하는 메소드 
+	DialogStatus(String statusCd){
+		this.statusCd = statusCd;
 	}
-	
 	public String getStatusCd() {
 		return statusCd;
 	}
+	
+	//역으로 enum의 value를 가지고 enum name을 찾기위한 메소드 
+    private static final Map<String, DialogStatus> lookup = new HashMap<String, DialogStatus>();
+    
+    static {
+        for (DialogStatus d : DialogStatus.values()) {
+            lookup.put(d.getStatusCd(), d);
+        }
+    }
+    public static DialogStatus get(String statusCd) {
+        return lookup.get(statusCd);
+    }
 	
 }

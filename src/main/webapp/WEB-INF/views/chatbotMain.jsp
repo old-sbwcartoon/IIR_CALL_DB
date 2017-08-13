@@ -19,5 +19,16 @@
 	<div>
 	    <ul class="dialog-ul" style="width: 600px; height: 700px; overflow: auto"></ul>
 	</div>        
+	<input type="hidden" id="speecher" value="${speecher}">
+	<input type="hidden" id="message" value="${message}">
+	<input type="hidden" id="imgSrc" value="${imgSrc}">
 </body>
+
+<script type="text/javascript">
+resetChat();
+var speecher = $('#speecher').val();
+var message = $('#message').val();
+var imgSrc = $('#imgSrc').val();
+insertChat(speecher,message,imgSrc);
+</script>
 </html>

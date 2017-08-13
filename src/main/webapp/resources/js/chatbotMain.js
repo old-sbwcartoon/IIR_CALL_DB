@@ -55,6 +55,9 @@ function insertChat(who, text, imgfilepath){
 
 function resetChat(){
     $(".dialog-ul").empty();
+    $(".speecher").val('');
+    $(".message").val('');
+    $(".imgSrc").val('');
 }
 
 $(".mytext").on("keyup", function(e){
@@ -67,9 +70,6 @@ $(".mytext").on("keyup", function(e){
     }
 });
 
-//-- 시작하면 채팅창 클리
-resetChat();
-
 function doInput(){
 	var userText = $('.userInput').val()
 	$.ajax({
@@ -78,7 +78,6 @@ function doInput(){
 		   ,type: 'POST'
 		   ,data: {
 		     userText : userText
-		     ,statusCd : userText //임시 
 		   }
 		   ,error: function() {
 		      $('#info').html('<p>An error has occurred</p>');
@@ -88,8 +87,7 @@ function doInput(){
 			   //-- 채팅창 대화 쓰기
 			   // read only 속성을 봇이 계속 발화해야 하는 상황이면 추가한다.
 			   var jsonObj = JSON.parse(data);
-			   insertChat(jsonObj.Speacker,jsonObj.Message,jsonObj.imgSrc);  
+			   insertChat(jsonObj.speecher,jsonObj.message,jsonObj.imgSrc);  
 		   }
 		});
 }
-

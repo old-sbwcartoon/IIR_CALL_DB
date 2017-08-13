@@ -15,10 +15,10 @@
         <div class="col-md-offset-5 col-md-3" align="center">
             <div align="center"  class="form-login">
 	            <h4>대화형 한국어 학습 시스템</h4>
-	            <form method="post" class="formLogin" action="doLogin.do" >
+	            <form method="post" class="formLogin" action="chatbotMain.do" >
 		            <input type="text" name="id" class="userName" style="width:200px;" placeholder="아아디(Id)" /><br>
 		            <input type="password" name="password" class="userPassword" style="width:200px;" placeholder="비밀번호(Password)" /><br><br>
-		            <button  onclick="doLogin()" >입장</button>
+		            <input type="button" class="btnLogin" value="입장" />
 	            </form>
             </div>
         </div>

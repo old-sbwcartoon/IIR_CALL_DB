@@ -4,5 +4,10 @@
 <properties>
 	<comment>system common properties, you should customize the values of entry</comment>
 	<entry key="imgfilepath">/resources/img/</entry>
-	<entry key="filepath">/resources/file/</entry>
+	<entry key="filepath">/Users/rnder_004/dev/workspace-sts-3.9.0.RELEASE/CALL/src/main/webapp/resources/file/</entry>
+	<entry key="systemfilepath">/Users/rnder_004/dev/workspace-sts-3.9.0.RELEASE/CALL/src/main/webapp/resources/file/systemfile/</entry>
+	<entry key="userfilepath">/Users/rnder_004/dev/workspace-sts-3.9.0.RELEASE/CALL/src/main/webapp/resources/file/userfile/</entry>
+	<entry key="userseqfilename">userSeq.txt</entry>
+	<entry key="systemdelimeter">|</entry>
+	<entry key="botname">이르</entry>
 </properties>
