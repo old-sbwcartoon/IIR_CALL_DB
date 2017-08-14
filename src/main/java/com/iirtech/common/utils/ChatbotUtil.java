@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.iirtech.common.enums.DialogStatus;
+
 /**
  * @Package   : com.iirtech.common.utils
  * @FileName  : ChatbotUtil.java
@@ -128,6 +130,77 @@ public class ChatbotUtil {
         }
 	}
 
-	
+	public static String[] getNextMessages(String statusCd, int nextMessageIdx) {
+		//파일 찾기
+				String fileName = DialogStatus.get(statusCd).toString()+".txt";
+				String path = fileName;
+
+				BufferedReader br = null;
+				//message 저장할 배열
+				String[] messageArr = null;
+				try {
+					br = new BufferedReader(new FileReader(path));
+					String message = "";
+					//다음 순서의 message 고르기
+					for (int i = 0; i < nextMessageIdx + 1; i++) {
+						message = br.readLine();
+						if (i == nextMessageIdx) {
+							break;
+						}
+					}
+
+					if (message.contains("|")) {
+						messageArr = message.split("|");
+					} else {
+						//하나일 경우에도 배열에 할당
+						messageArr = new String[1];
+						messageArr[0] = message;
+					}
+					
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				} finally {
+					try { br.close();} catch (IOException e) {e.printStackTrace();}
+				}
+				
+		return messageArr;
+	}
+
+	public static int getNextMessageIdx(String statusCd, int messageIdx) {
+		int nextMessageIdx = messageIdx + 1;
+		
+		String fileName = DialogStatus.get(statusCd).toString()+".txt";
+		String path = fileName;
+		
+		BufferedReader br = null;
+		int fileLineSize = 0;
+		try {
+			br = new BufferedReader(new FileReader(path));
+			while(br.readLine() != null) {
+				fileLineSize++;
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} finally {
+			try { br.close();} catch (IOException e) {e.printStackTrace();}
+		}
+		
+		//File 마지막 줄엔 다음 statusCd 들어있음
+		if (nextMessageIdx > fileLineSize - 1) {
+			nextMessageIdx = 0;
+		}
+		
+		return nextMessageIdx;
+	}
+
+	public static String getRightMessage(String string) {
+		//input message를 올바르게 고쳐서 리턴
+		return "";
+	}
 	
 }

@@ -14,24 +14,20 @@
 	<div class="macro" style="background:whitesmoke">
 	대화를 입력하세요:   
 		<input class="userInput" type="text" style="width:300px;">
-		<button onclick="doInput()">입력</button>
+		<button id="btn-input">입력</button>
 	</div>
 	<div>
 	    <ul class="dialog-ul" style="width: 600px; height: 700px; overflow: auto"></ul>
 	</div>        
-	<input type="hidden" id="speecher" value="${speecher}">
+	<%-- <input type="hidden" id="speecher" value="${speecher}">
 	<input type="hidden" id="message" value="${message}">
-	<input type="hidden" id="imgSrc" value="${imgSrc}">
+	<input type="hidden" id="imgSrc" value="${imgSrc}"> --%>
+	<input type="hidden" id="statusCd" value="${statusCd}">
+	<input type="hidden" id="messageIdx" value="${messageIdx}">
 </body>
 
-<script type="text/javascript">
-	resetChat();
-	var speecher = $('#speecher').val();
-	var message = $('#message').val();
-	var imgSrc = $('#imgSrc').val();
-	insertChat(speecher,message,imgSrc);
-	$(".speecher").val('');
-	$(".message").val('');
-	$(".imgSrc").val('');
-</script>
+<!-- <script type="text/javascript">
+	/* resetChat(); */
+	
+</script> -->
 </html>

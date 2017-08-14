@@ -1,3 +1,13 @@
+$(document).ready(function() {
+	
+	//init SYSTEM_ON
+	doInput("0000");
+	
+	btnEvent();
+	
+});
+
+
 /**
  * 
  */
@@ -57,9 +67,9 @@ function insertChat(who, text, imgfilepath){
 
 function resetChat(){
     $(".dialog-ul").empty();
-    $(".speecher").val('');
-    $(".message").val('');
-    $(".imgSrc").val('');
+    $("#speecher").val('');
+    $("#message").val('');
+    $("#imgSrc").val('');
 }
 
 $(".mytext").on("keyup", function(e){
@@ -72,14 +82,19 @@ $(".mytext").on("keyup", function(e){
     }
 });
 
-function doInput(){
-	var userText = $('.userInput').val()
+function doInput(statusCd, statusCdSeq){
+	var userText = $('.userInput').val();
+	var statusCd = statusCd;
+	var statusCdSeq = statusCdSeq;
+	
 	$.ajax({
 		   url: 'messageInput.json'
 		   ,async: false
 		   ,type: 'POST'
 		   ,data: {
 		     userText : userText
+		     , statusCd : statusCd
+		     , statusCdSeq : statusCdSeq
 		   }
 		   ,error: function() {
 		      $('#info').html('<p>An error has occurred</p>');
@@ -89,7 +104,19 @@ function doInput(){
 			   //-- 채팅창 대화 쓰기
 			   // read only 속성을 봇이 계속 발화해야 하는 상황이면 추가한다.
 			   var jsonObj = JSON.parse(data);
-			   insertChat(jsonObj.speecher,jsonObj.message,jsonObj.imgSrc);  
-		   }
+			   $('#messageNo').val(jsonObj.messageNo);
+			   //message 갯수만큼 뿌리기
+			   for (var i= 0; i < jsonObj.message.length; i++) {
+				   insertChat(jsonObj.speecher,jsonObj.message,jsonObj.imgSrc);  
+			   }
+		   	}
 		});
+}
+
+function btnEvent() {
+$('#btn-input').on('click', function() {
+		
+			doInput();
+
+	});
 }

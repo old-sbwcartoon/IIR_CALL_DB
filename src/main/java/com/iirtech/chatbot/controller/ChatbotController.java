@@ -79,25 +79,32 @@ public class ChatbotController {
 			String userSeq = String.valueOf(userInfoMap.get("userSeq"));
 			session.setAttribute("userSeq", userSeq);
 			
+			
+			
 			//세션의 lastDialogStatus 값, 입력문장 등 정보를 가지고 발화자, 상태코드, 메시지 생성
-			Map<String, Object> messageInfo = cbss.getMessageInfo(DialogStatus.SYSTEM_ON.getStatusCd(),null);
-			String returnSpeecher = messageInfo.get("returnSpeecher").toString();
-			String returnStatus = messageInfo.get("returnStatus").toString();
-			String returnMessage = messageInfo.get("returnMessage").toString().replace("\n", "<br>");
-			
-			//사용자 대화내용 로그 파일 생성
-			String dialogTime = cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis());
-			userInfoMap.put("orglMessage", returnMessage);
-			userInfoMap.put("dialogTime", dialogTime);
-			cbs.makeUserDialogFile(userInfoMap);
-			
-			session.setAttribute("dialogStatus", returnStatus);
-			session.setAttribute("dialogTime", dialogTime);
-			//화면이 뜨면서 바로 제공할 멘트를 세팅
-			resultMap.put("speecher", returnSpeecher);
-			resultMap.put("message", returnMessage);
-			resultMap.put("imgSrc", systemImgFilePath);
-			mv.addAllObjects(resultMap);
+//			Map<String, Object> messageInfo = cbss.getMessageInfo(DialogStatus.SYSTEM_ON.getStatusCd(),null);
+//			String returnSpeecher = messageInfo.get("returnSpeecher").toString();
+//			String returnStatus = messageInfo.get("returnStatus").toString();
+//			String returnMessage = messageInfo.get("returnMessage").toString().replace("\n", "<br>");
+//			String returnMessageNo = messageInfo.get("returnMessageNo").toString();
+//			
+//			//사용자 대화내용 로그 파일 생성
+//			String dialogTime = cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis());
+//			userInfoMap.put("orglMessage", returnMessage);
+//			userInfoMap.put("dialogTime", dialogTime);
+////			userDialogInfoMap.put("userSeq", userSeq);
+////    		userDialogInfoMap.put("returnSpeecher", returnSpeecher);
+////    		userDialogInfoMap.put("procMessage", procInputText);
+//			cbs.makeUserDialogFile(userInfoMap);
+//			
+//			session.setAttribute("dialogStatus", returnStatus);
+//			session.setAttribute("dialogTime", dialogTime);
+//			//화면이 뜨면서 바로 제공할 멘트를 세팅
+//			resultMap.put("speecher", returnSpeecher);
+//			resultMap.put("message", returnMessage);
+//			resultMap.put("messageNo", returnMessageNo);
+//			resultMap.put("imgSrc", systemImgFilePath);
+//			mv.addAllObjects(resultMap);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -128,7 +135,8 @@ public class ChatbotController {
         try {
             //세션에서 가장 최근의 대화정보 가져오기 
 	    		String userSeq = session.getAttribute("userSeq").toString();
-	    		String dialogStatus = session.getAttribute("dialogStatus").toString();
+//	    		String dialogStatus = session.getAttribute("dialogStatus").toString();
+	    		String statusCd = String.valueOf(param.get("statusCd"));
 	    		
 	    		//입력문 넘겨받아 메시지 생성 메소드에 넘겨줌, inputText 는 null 값이 될 수도 있다.
 	    		String inputText = String.valueOf(param.get("userText"));
@@ -137,12 +145,15 @@ public class ChatbotController {
 	    			//전처리 메소드는 preprocess안에서 다시 여러 단계로 확장될 예정
 	    			procInputText = cbns.preProcess(procInputText);
 	    		}
+	    		String messageIdx = String.valueOf(param.get("messageIdx"));
 	    		
 	    		//세션의 lastDialogStatus 값, 입력문장 등 정보를 가지고 발화자, 상태코드, 메시지 생성
-	    		Map<String, Object> messageInfo = cbss.getMessageInfo(dialogStatus,procInputText);
+	    		Map<String, Object> messageInfo = cbss.getMessageInfo(statusCd, procInputText, messageIdx);
 	    		String returnSpeecher = messageInfo.get("returnSpeecher").toString();
 	    		String returnStatus = messageInfo.get("returnStatus").toString();
 	    		String returnMessage = messageInfo.get("returnMessage").toString();
+	    		String returnMessageIdx = messageInfo.get("returnMessageIdx").toString();
+	    		
 	    		String dialogTime = cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis());
 	    		
 	    		//사용자 대화내용 로그 파일 업데이트!!
@@ -153,15 +164,19 @@ public class ChatbotController {
 	    		userDialogInfoMap.put("procMessage", procInputText);
 	    		userDialogInfoMap.put("dialogTime", dialogTime);
 	    		//아직 구현안됨 
-	    		cbs.updateUserDialogFile(userDialogInfoMap);
+	    		cbs.makeUserDialogFile(userDialogInfoMap);
 	    		
 	    		//새 상태를 세팅 
-	    		session.setAttribute("dialogStatus", returnStatus);
-	    		session.setAttribute("dialogTime", dialogTime);
+//	    		session.setAttribute("dialogStatus", returnStatus);
+//	    		session.setAttribute("dialogTime", dialogTime);
 	    		
 	    		//화면에 뿌릴 데이터 세팅 
+	    		
+	    		
 	    		resultMap.put("speecher", returnSpeecher);
 	    		resultMap.put("message", returnMessage);
+			resultMap.put("messageIdx", returnMessageIdx);
+			resultMap.put("statusCd", returnStatus);
 	    		resultMap.put("imgSrc", systemImgFilePath);
 	    		mv.addAllObjects(resultMap);
 	    		

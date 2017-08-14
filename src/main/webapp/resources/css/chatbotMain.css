@@ -46,7 +46,7 @@ ul {
     width:100%;
     list-style-type: none;
     padding:18px;
-    position:absolute;
+    /* position:absolute; */
     bottom:32px;
     display:flex;
     flex-direction: column;

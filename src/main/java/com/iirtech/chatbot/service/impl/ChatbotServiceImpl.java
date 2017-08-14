@@ -133,6 +133,10 @@ public class ChatbotServiceImpl implements ChatbotService{
 
 	}
 
+	/*
+	 * make, update 통합
+	 * @see com.iirtech.chatbot.service.ChatbotService#makeUserDialogFile(java.util.Map)
+	 */
 	@Override
 	public void makeUserDialogFile(Map<String, Object> userInfoMap) {
 		log.debug("*************************makeUserDialogFile*************************");
@@ -145,15 +149,18 @@ public class ChatbotServiceImpl implements ChatbotService{
 			String userSeq = userInfoMap.get("userSeq").toString();
 			String userDialogFileDir = userFilePath + userSeq + "/"; 
 			File targetDir = new File(userDialogFileDir);
+			
+			//File이 존재하지 않을 경우 만들고 "topic" 문자열 쓰기
 			if (!targetDir.exists()) {
 				targetDir.mkdirs();
+				content = "topic";
+				userDialogContents.add(content);
 			}
 			String dialogTime = userInfoMap.get("dialogTime").toString();
 			String userDialogFileName = dialogTime + "_dialog.txt";
 			
 			String orglMessage = userInfoMap.get("orglMessage").toString();
-			content = "topic";
-			userDialogContents.add(content);
+			
 			content = dialogTime + systemDelimeter + botName + systemDelimeter + orglMessage + systemDelimeter + orglMessage;
 			
 			userDialogContents.add(content);
@@ -165,12 +172,12 @@ public class ChatbotServiceImpl implements ChatbotService{
 
 	}
 
-	@Override
-	public void updateUserDialogFile(Map<String, Object> param) {
-		log.debug("*************************updateUserDialogFile*************************");
-		//line0: topic
-		//line1: time|speacker|orgnl_content|prcssd_content
-		//read 하고 마지막에 add해서 write!
-	}
+//	@Override
+//	public void updateUserDialogFile(Map<String, Object> param) {
+//		log.debug("*************************updateUserDialogFile*************************");
+//		//line0: topic
+//		//line1: time|speacker|orgnl_content|prcssd_content
+//		//read 하고 마지막에 add해서 write!
+//	}
 	
 }

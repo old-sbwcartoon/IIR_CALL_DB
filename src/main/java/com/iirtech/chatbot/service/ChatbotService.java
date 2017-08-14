@@ -18,6 +18,6 @@ public interface ChatbotService {
 
 	void makeUserDialogFile(Map<String, Object> userInfoMap);
 
-	void updateUserDialogFile(Map<String, Object> param);
+//	void updateUserDialogFile(Map<String, Object> param);
 
 }
