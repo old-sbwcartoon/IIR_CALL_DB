@@ -2,7 +2,7 @@
 
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd" >
 <properties>
-	<comment>system common properties, you should customize the values of entry</comment>
+	<comment>시스템 공통 변수들과 그 값들을 설정하는 xml</comment>
 	<entry key="imgfilepath">/resources/img/</entry>
 	<entry key="filepath">/Users/rnder_004/dev/workspace-sts-3.9.0.RELEASE/CALL/src/main/webapp/resources/file/</entry>
 	<entry key="systemfilepath">/Users/rnder_004/dev/workspace-sts-3.9.0.RELEASE/CALL/src/main/webapp/resources/file/systemfile/</entry>

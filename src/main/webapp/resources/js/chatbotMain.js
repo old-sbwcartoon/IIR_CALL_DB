@@ -34,7 +34,9 @@ function insertChat(who, text, imgfilepath){
                                 '<p><small>'+date+'</small></p>' +
                             '</div>' +
                         '</div>' +
-                    '</li>';                    
+                    '</li>';              
+        
+        
     }else{
         control = '<li style="width:100%;">' +
                         '<div class="msj-rta macro">' +

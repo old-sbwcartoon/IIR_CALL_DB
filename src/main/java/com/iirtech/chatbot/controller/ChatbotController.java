@@ -59,7 +59,7 @@ public class ChatbotController {
 	 * @작성자     : choikino
 	 * @explain : 로그인 후 사용자 정보 조회 및 파일 생성하여 채팅페이지로 이동 
 	 * @param  id, password
-	 * @return userSeq, name(nullable), exTopic(nullable)
+	 * @return session(userSeq, dialogStatus, dialogTime), resultmap(speecher, message, imgsrc)
 	 */
 	@Value("#{systemProp['imgfilepath']}") 
 	String systemImgFilePath;
@@ -110,8 +110,8 @@ public class ChatbotController {
 	 * @작성일     : 2017. 8. 13. 
 	 * @작성자     : choikino
 	 * @explain : 실제로 봇과 사용자의 대화가 진행되는 메인 메소드 
-	 * @param userSeq, name(nullable), exTopic(nullable)
-	 * @return
+	 * @param session(userSeq, dialogStatus, dialogTime), param(userText)
+	 * @return session(userSeq, dialogStatus, dialogTime), resultmap(speecher, message, imgsrc)
 	 */
 	@RequestMapping(value = "messageInput.json")
 	public ModelAndView inputPreprocess(@RequestParam Map<String, Object> param, HttpSession session) {

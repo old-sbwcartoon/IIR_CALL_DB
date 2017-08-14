@@ -25,10 +25,13 @@
 </body>
 
 <script type="text/javascript">
-resetChat();
-var speecher = $('#speecher').val();
-var message = $('#message').val();
-var imgSrc = $('#imgSrc').val();
-insertChat(speecher,message,imgSrc);
+	resetChat();
+	var speecher = $('#speecher').val();
+	var message = $('#message').val();
+	var imgSrc = $('#imgSrc').val();
+	insertChat(speecher,message,imgSrc);
+	$(".speecher").val('');
+	$(".message").val('');
+	$(".imgSrc").val('');
 </script>
 </html>
