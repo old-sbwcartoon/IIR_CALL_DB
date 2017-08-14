@@ -59,7 +59,7 @@ public class ChatbotController {
 	 * @작성자     : choikino
 	 * @explain : 로그인 후 사용자 정보 조회 및 파일 생성하여 채팅페이지로 이동 
 	 * @param  id, password
-	 * @return session(userSeq, dialogStatus, dialogTime), resultmap(speecher, message, imgsrc)
+	 * @return session(userSeq, isOldUserYN, dialogStatus, dialogTime), resultmap(speecher, message, imgsrc)
 	 */
 	@Value("#{systemProp['imgfilepath']}") 
 	String systemImgFilePath;
@@ -77,13 +77,15 @@ public class ChatbotController {
 			
 			//Session에 기억할 정보들(userSeq,userHistFile,userDialogFile) 저장!
 			String userSeq = String.valueOf(userInfoMap.get("userSeq"));
+			String isOldUserYN = String.valueOf(userInfoMap.get("isOldUserYN"));
 			session.setAttribute("userSeq", userSeq);
+			session.setAttribute("isOldUserYN", isOldUserYN);
 			
 			//세션의 lastDialogStatus 값, 입력문장 등 정보를 가지고 발화자, 상태코드, 메시지 생성
 			Map<String, Object> messageInfo = cbss.getMessageInfo(DialogStatus.SYSTEM_ON.getStatusCd(),null);
 			String returnSpeecher = messageInfo.get("returnSpeecher").toString();
 			String returnStatus = messageInfo.get("returnStatus").toString();
-			String returnMessage = messageInfo.get("returnMessage").toString().replace("\n", "<br>");
+			String returnMessage = messageInfo.get("returnMessage").toString();
 			
 			//사용자 대화내용 로그 파일 생성
 			String dialogTime = cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis());
@@ -110,8 +112,8 @@ public class ChatbotController {
 	 * @작성일     : 2017. 8. 13. 
 	 * @작성자     : choikino
 	 * @explain : 실제로 봇과 사용자의 대화가 진행되는 메인 메소드 
-	 * @param session(userSeq, dialogStatus, dialogTime), param(userText)
-	 * @return session(userSeq, dialogStatus, dialogTime), resultmap(speecher, message, imgsrc)
+	 * @param session(userSeq,isOldUserYN, dialogStatus, dialogTime), param(userText)
+	 * @return session(userSeq, isOldUserYN, dialogStatus, dialogTime), resultmap(speecher, message, imgsrc)
 	 */
 	@RequestMapping(value = "messageInput.json")
 	public ModelAndView inputPreprocess(@RequestParam Map<String, Object> param, HttpSession session) {

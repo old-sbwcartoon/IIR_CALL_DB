@@ -41,7 +41,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			//스텝별로 발화자, 다음상태, 발화문을 결정하는 판별식이 다르게 적용되어야 함 
 			String returnStatus = DialogStatus.START_DIALOG.getStatusCd();
 			//지금은 하드코딩인데 스크립트 파일에서 찾아오는 로직 구현해야함 
-			String returnMessage = "CALL 시스템에 오신것을 환영합니다.\n**한문장씩 쓰세요.\n**문장 끝에 . ? 를 써 주세요.";
+			String returnMessage = "CALL 시스템에 오신것을 환영합니다.<br>**한문장씩 쓰세요.<br>**문장 끝에 . ? 를 써 주세요.";
 			
 			resultMap.put("returnSpeecher", "bot"); //첫발화는 bot으로 발화자 고정 
 			resultMap.put("returnStatus", returnStatus);
