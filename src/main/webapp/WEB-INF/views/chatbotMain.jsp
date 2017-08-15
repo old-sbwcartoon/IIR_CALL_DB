@@ -29,15 +29,8 @@
 			</li>
 	    </ul>
 	</div>        
-	<%-- <input type="hidden" id="speecher" value="${speecher}">
-	<input type="hidden" id="message" value="${message}"> --%>
 	<input type="hidden" id="imgSrc" value="/resources/img/">
 	<input type="hidden" id="statusCd" value="${statusCd}">
 	<input type="hidden" id="messageIdx" value="${messageIdx}">
 </body>
-
-<!-- <script type="text/javascript">
-	/* resetChat(); */
-	
-</script> -->
 </html>

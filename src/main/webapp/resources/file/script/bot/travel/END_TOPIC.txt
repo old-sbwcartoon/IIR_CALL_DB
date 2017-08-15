@@ -1,1 +1,0 @@
-{IF|isPositive|잘됐어요. 오늘 배운 내용을 복습합시다.}{IF|isNegative|그러면 계속 연습합시다.}

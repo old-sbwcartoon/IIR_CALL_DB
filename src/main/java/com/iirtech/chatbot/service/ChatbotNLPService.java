@@ -1,5 +1,7 @@
 package com.iirtech.chatbot.service;
 
+import java.util.Map;
+
 /**
  * @Package   : com.iirtech.chatbot.service.impl
  * @FileName  : ChatbotNLPService.java
@@ -9,6 +11,6 @@ package com.iirtech.chatbot.service;
  */
 public interface ChatbotNLPService {
 
-	String preProcess(String procInputText);
+	Map<String,Object> preProcess(String procInputText);
 
 }

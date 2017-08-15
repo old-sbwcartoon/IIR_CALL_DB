@@ -1,5 +1,6 @@
 package com.iirtech.chatbot.service;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -11,6 +12,9 @@ import java.util.Map;
  */
 public interface ChatbotScriptService {
 
-	Map<String, Object> getMessageInfo(String statusCd, String inputText, String messageIdx);
+	Map<String, Object> getMessageInfo(String statusCd, String inputText, String messageIdx, Map<String,Object> conditionInfoMap);
 
+	List<String> findAllOperationStrings(String message);
+	
+	String optmzMessage(String message, Map<String, Object> conditionInfos);
 }

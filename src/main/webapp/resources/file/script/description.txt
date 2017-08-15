@@ -1,15 +1,19 @@
 ** 한 발화 내에서의 개행은 \n으로 표시, 나중에 일괄 <br>로 고쳐야됨
+** 같은 발화턴의 여러문장을 구분할때는 두개의 파이프라인을 사용한다. ||
+** {} 는 시스템 명령을 표시하는 특수문자이므로 일반 문장에는 사용을 금한다.
+** 절대로 한개의 문장에 문자열이 완전히 일치하는 시스템 명령어를 사용하면 안됨 
+   >> {VAR|topic}을 배웠으니 {VAR|topic}을 배울까요? (X)
 
 1. 고유명사의 경우 {NNP|Type|word} 표시 
    >> {NNP|location|헬싱키}
    
 2. 조건에 따라 제거되거나 추가되는 문장은 {IF|condition|sentence} 으로 표현 
    >> {IF|oldUser|또 왔네?}
-   >> IF의 조건들 : oldUser/newUser , isPositive/isNegative, isAsking, hasName, isCorrect/isWrong
+   >> IF의 조건들 : isOldUser/isNewUser , isPositive/isNegative, isAsking, hasName, isCorrect/isWrong
    
 3. 시스템 변수를 넣어줄 부분은 {VAR|Target} 으로 표현 
    >> 어제는 {VAR|topic} 주제를 배웠어요. >> 변수대체 후 >> 어제는 여행 주제를 배웠어요.
-   >> VAR 종류들 : name, location, correctAnswer
+   >> VAR 종류들 : topic, name, location, correctAnswer
    
 4. 이미지 파일은 파일명을 적는다. 파일경로는 시스템 변수에 저장됨
    >> {IMG|imgName} >> 변수대체 후 >> <img src="시스템이미지파일경로//imgName" height="300" width="300"/>

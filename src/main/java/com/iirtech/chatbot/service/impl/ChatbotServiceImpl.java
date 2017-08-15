@@ -60,7 +60,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 			String password = String.valueOf(param.get("password"));		
 			//비밀번호 암호화 
 			String encPassword = cbu.encryptPwd(password);
-			String isOldUserYN = "N";
+			String userType = "newUser";
 			
 			// userInfos : ["userSeq|id|pwd", "userSeq|id|pwd" ...]
 			List<String> userInfos = cbu.ReadFileByLine(systemFilePath, userSeqFileName);
@@ -83,12 +83,12 @@ public class ChatbotServiceImpl implements ChatbotService{
 					log.debug(fileUserId+":"+id);
 					log.debug(fileUserPassword+":"+encPassword);
 					if((fileUserId.equals(id)) && (fileUserPassword.equals(encPassword))) {
-						isOldUserYN = "Y";
+						userType = "oldUser";
 						userSeq = fileUserSeq;
 					}
 				}
 				//없는 회원이므로 추가
-				if(isOldUserYN.equals("N")) {
+				if(userType.equals("newUser")) {
 					userSeq = UUID.randomUUID().toString().replace("-", "").replace(systemDelimeter, "");
 					//시스템 파일 폴더의 userSeq.txt 에 정보추가 
 					String content = ""; 
@@ -100,7 +100,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 			resultMap.put("id", id);
 			resultMap.put("password", encPassword);
 			resultMap.put("userSeq", userSeq);
-			resultMap.put("isOldUserYN", isOldUserYN);
+			resultMap.put("userType", userType);
 			resultMap.put("loginTime", cbu.getYYYYMMDDhhmmssTime(	System.currentTimeMillis()));
 		} catch (Exception e) {
 			e.printStackTrace();		

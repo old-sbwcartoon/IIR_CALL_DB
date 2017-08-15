@@ -69,7 +69,7 @@ function formatAMPM(date) {
 function insertBot(text, imgfilepath){
     var control = "";
     var date = formatAMPM(new Date());
-//    sleep(text.length * 100); //사용자 입력과 동시에 나오지 않도록 잠시 정지. 글자 수에 따라 정지 시간 길어짐. 버벅댐.
+    		//sleep(text.length * 100); //사용자 입력과 동시에 나오지 않도록 잠시 정지. 글자 수에 따라 정지 시간 길어짐. 버벅댐.
         control = '<li style="width:100%">' +
                         '<div class="msj macro">' +
                         '<div class="avatar"><img class="img-circle" style="width:100%;" src="'+ imgfilepath + bot.avatar +'" /></div>' +
@@ -159,10 +159,10 @@ function doInput(statusCd, messageIdx){
 			   } else {
 				   messageArr[0] = message;
 			   }
-
 			   //message 갯수만큼 뿌리기
 			   for (var i= 0; i < messageArr.length; i++) {
 				   insertBot(messageArr[i], jsonObj.imgSrc);  
+				   //너무 곧바로 대답하니 부자연스러움 
 			   }
 		   	}
 		});
@@ -181,4 +181,4 @@ function btnEvent() {
 function sleep(ms){
 	  ts1 = new Date().getTime() + ms;
 	  do ts2 = new Date().getTime(); while (ts2<ts1);
-	}
+}

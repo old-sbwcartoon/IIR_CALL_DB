@@ -1,5 +1,11 @@
 package com.iirtech.chatbot.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import com.iirtech.chatbot.service.ChatbotNLPService;
@@ -14,10 +20,23 @@ import com.iirtech.chatbot.service.ChatbotNLPService;
 @Service
 public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 
+	private Logger log = Logger.getLogger(this.getClass());
+	
 	@Override
-	public String preProcess(String procInputText) {
-		// TODO Auto-generated method stub
-		return procInputText;
+	public Map<String,Object> preProcess(String procInputText) {
+		log.debug("*************************preProcess*************************");
+		Map<String,Object> resultMap = new HashMap<String, Object>();
+		String procText = procInputText;
+		//전처리 ~
+		
+		List<String> textTypes = new ArrayList<String>();
+		//문장정보 파악~ isPositive/isNegative/isAsking
+		textTypes.add("isPositive");//일단 긍정으로 하드코딩 
+		
+		//전처리된 문장과 전처리 후 파악된 문장정보를 맵객체에 담아서 리턴
+		resultMap.put("procText", procText);
+		resultMap.put("textTypes", textTypes);
+		return resultMap;
 	}
 
 }

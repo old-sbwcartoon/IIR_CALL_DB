@@ -6,8 +6,19 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Value;
+
 import com.iirtech.common.enums.DialogStatus;
 
+/**
+ * @Package   : com.iirtech.chatbot.dto
+ * @FileName  : MessageInfo.java
+ * @작성일       : 2017. 8. 15. 
+ * @작성자       : seo.bo.won
+ * @explain : 챗봇이 발화할 내용을 상태코드를 통해 스크립트 파일에서 읽어와 세팅하는 클래스
+ */
 public class MessageInfo {
 
 	private String statusCd;
@@ -16,10 +27,10 @@ public class MessageInfo {
 	private int statusSize;
 	private String nextStatusCd;
 	
-	public MessageInfo(String statusCd) {
+	public MessageInfo(String statusCd, String scriptfilePath) {
 		
 		setStatusCd(statusCd);
-		setFilePath(statusCd);
+		setFilePath(statusCd, scriptfilePath);//시스템프로퍼티즈 파일의 경로를 받음
 		setMessages(getFilePath());
 		setStatusSize(getMessages().length-1); //마지막 줄에는 next statusCd 입력됐다고 가정함. 따라서 대화 시퀀스 개수는 length-1
 		setNextStatusCd(statusCd);
@@ -36,21 +47,22 @@ public class MessageInfo {
 		return filePath;
 	}
 
-	private void setFilePath(String statusCd) {
+	private void setFilePath(String statusCd, String scriptfilePath) {
 		String fileName = DialogStatus.get(statusCd).toString()+".txt";
-		String path = "/Users/rnder_007/git/IIR_CALL/src/main/webapp/resources/file/script/bot/" + fileName;
-		this.filePath = path;
+		//bot 발화를 위한 파일경로 지정이므로 /bot/으로 고정시킴
+		scriptfilePath += "/bot/" + fileName;
+		this.filePath = scriptfilePath;
 	}
 	public String[] getMessages() {
 		return messages;
 	}
-	private void setMessages(String filePath) {
+	private void setMessages(String scriptfilePath) {
 		
 		BufferedReader br = null;
 		//message 저장할 배열
 		ArrayList<String> messagesArr = new ArrayList<String>();
 		try {
-			br = new BufferedReader(new FileReader(filePath));
+			br = new BufferedReader(new FileReader(scriptfilePath));
 
 			String str = "";
 			while ((str=br.readLine()) != null) {
@@ -80,9 +92,6 @@ public class MessageInfo {
 		this.nextStatusCd = getMessages()[getMessages().length-1];
 	}
 
-	
-	/************************************************************ util ************************************************************/
-	
 	/*
 	 * index로 statusCd 속 메시지를 찾는다
 	 * @param	statusCd 속 row index
