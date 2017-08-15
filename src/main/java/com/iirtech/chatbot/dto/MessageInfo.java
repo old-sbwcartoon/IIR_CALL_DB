@@ -98,7 +98,7 @@ public class MessageInfo {
 	 * @return	찾았을때: String[]: 토막글 하나일 경우 String.length=1, 토막글 여러개일 경우 "|"로 분리된 String 어레이
 	 * 			못찾았을 때: null
 	 */
-	public String getMessagesByIdx(int idx) {
+	public String getMessageByIdx(int idx) {
 		
 		//index는 0부터 시작, statusSize는 1부터 시작이므로 statusSize-1 == idx
 		//index가 해당 status의 최대 index보다 크다면

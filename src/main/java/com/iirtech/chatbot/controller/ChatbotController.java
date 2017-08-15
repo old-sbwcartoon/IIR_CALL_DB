@@ -85,8 +85,9 @@ public class ChatbotController {
 			session.setAttribute("conditionInfoMap", conditionInfoMap);
 			
 			MessageInfo info = new MessageInfo("0000",scriptFilePath);
-			String initInfo = info.getMessagesByIdx(0).replace("\\n", "<br>");
+			String initInfo = info.getMessageByIdx(0).replace("\\n", "<br>");
 			mv.addObject("initInfo", initInfo);
+			mv.addObject("imgSrc", systemImgFilePath);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -135,9 +136,9 @@ public class ChatbotController {
 	    		//세션의 lastDialogStatus 값, 입력문장 등 정보를 가지고 발화자, 상태코드, 메시지 생성
 	    		//conditionInfoMap 에는 String userType, List textTypes 이 들어있음.
 	    		Map<String, Object> messageInfo = cbss.getMessageInfo(statusCd, procText, messageIdx, conditionInfoMap);
-	    		String returnStatus = messageInfo.get("returnStatus").toString();
-	    		String returnMessage = messageInfo.get("returnMessage").toString();
-	    		String returnMessageIdx = messageInfo.get("returnMessageIdx").toString();
+//	    		String returnStatus = messageInfo.get("returnStatus").toString();
+//	    		String returnMessage = messageInfo.get("returnMessage").toString();
+//	    		String returnMessageIdx = messageInfo.get("returnMessageIdx").toString();
 	    		
 	    		String dialogTime = cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis());
 	    		
@@ -152,9 +153,10 @@ public class ChatbotController {
 	    		cbs.makeUserDialogFile(userDialogInfoMap);
 	    		
 	    		//화면에 뿌릴 데이터 세팅 
-	    		resultMap.put("message", returnMessage);
-			resultMap.put("messageIdx", returnMessageIdx);
-			resultMap.put("statusCd", returnStatus);
+//	    		resultMap.put("message", returnMessage);
+//			resultMap.put("messageIdx", returnMessageIdx);
+//			resultMap.put("statusCd", returnStatus);
+	    		resultMap = messageInfo;
 	    		resultMap.put("imgSrc", systemImgFilePath);
 	    		mv.addAllObjects(resultMap);
 

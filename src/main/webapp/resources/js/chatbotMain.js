@@ -153,17 +153,17 @@ function doInput(statusCd, messageIdx){
 			   
 			   //message 약속된 기호로 나누기
 			   var message = jsonObj.message;
-			   var messageArr = new Array();
-			   if (message.includes("|")) {
-				   messageArr = message.split("|");
-			   } else {
-				   messageArr[0] = message;
-			   }
-			   //message 갯수만큼 뿌리기
-			   for (var i= 0; i < messageArr.length; i++) {
-				   insertBot(messageArr[i], jsonObj.imgSrc);  
+//			   var messageArr = new Array();
+//			   if (message.includes("|")) {
+//				   messageArr = message.split("|");
+//			   } else {
+//				   messageArr[0] = message;
+//			   }
+//			   //message 갯수만큼 뿌리기
+//			   for (var i= 0; i < messageArr.length; i++) {
+				   insertBot(message, jsonObj.imgSrc);  
 				   //너무 곧바로 대답하니 부자연스러움 
-			   }
+//			   }
 		   	}
 		});
 }

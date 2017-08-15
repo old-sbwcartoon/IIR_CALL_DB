@@ -57,7 +57,7 @@ public enum Operation { //VAR 에 대한 처리를 고민중...
 			operationString = operationString.substring(1, operationString.length()-1);
 			String[] operationVals = operationString.split("\\|");
 			String result = "";
-			result = "<img src=\""+imgPath + operationVals[1] +"\" height=\"300\" width=\"300\"";
+			result = "<img src=\""+imgPath + operationVals[1] +"\" height=\"300\" width=\"300\"/>";
 			return result;
 		}
 	},

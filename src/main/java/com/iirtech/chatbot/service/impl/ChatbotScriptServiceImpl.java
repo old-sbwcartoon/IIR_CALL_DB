@@ -53,7 +53,8 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			MessageInfo info = new MessageInfo(statusCd, scriptFilePath);
 			
 			int nextIdx = Integer.parseInt(messageIdx) + 1; //한 파일(statusCd) 내부에서의 index=한 줄
-			String nextMessages = info.getMessagesByIdx(nextIdx);
+			String nextMessages = info.getMessageByIdx(nextIdx);
+			String optmzMessage = "";
 			String nextMessage = "";
 			if (nextMessages == null) {
 				//index 해당 문장이 없다면 (해당 statusCd의 봇 발화 모두 진행했다면)
@@ -61,18 +62,19 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 				info = new MessageInfo(info.getNextStatusCd(), scriptFilePath);
 				
 				//이거 뭐지??? 여기서 nextMessages 가 null 이네 
-				nextMessages = info.getMessagesByIdx(0);
+				nextMessages = info.getMessageByIdx(0);
 				nextIdx = 0;
 			}
 			//현재 nextMessages 는 | 가 붙은 상태임. 따라서 optimize할때는 짤라내고 루프돌면서 한개씩 처리
 			//인자값으로 conditionInfoMap(oldUser, newUser , isPositive/isNegative/isAsking)등의 정보들을 넣어줌 
-			nextMessage = this.optmzMessage(nextMessages, conditionInfoMap);
+			optmzMessage = this.optmzMessage(nextMessages, conditionInfoMap);
+			nextMessage = this.parseForHtml(optmzMessage);
 			log.debug("statusCd>>>>>>>>>"+statusCd);
 			log.debug("optimizedMsg>>>>>>>>>"+nextMessage);
 			
-			resultMap.put("returnStatus", info.getStatusCd());
-			resultMap.put("returnMessage", nextMessage);
-			resultMap.put("returnMessageIdx", nextIdx);
+			resultMap.put("statusCd", info.getStatusCd());
+			resultMap.put("message", nextMessage);
+			resultMap.put("messageIdx", nextIdx);
 		} else {
 			//마지막일 때
 		}		
@@ -81,11 +83,11 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 
 	//메시지의 시스템 명령어들을 operation enum을 사용해 파싱하고 한개의 문장만을 골라서 리턴함 
 	@Override
-	public String optmzMessage(String nextMessages, Map<String, Object> conditionInfoMap) {
+	public String optmzMessage(String nextMessage, Map<String, Object> conditionInfoMap) {
 		log.debug("*************************optmzMessage*************************");
 		String result = "";
 		//현재 nextMessages 는 | 가 붙은 상태임. 따라서 optimize할때는 짤라내고 루프돌면서 한개씩 처리
-		String[] nextMessagesArr = nextMessages.split("\\|\\|");
+		String[] nextMessagesArr = nextMessage.split("\\|\\|");
 		//후보 문장들을 담아둘 리스트 객체: 나중에 이중에서 한개만 랜덤하게 추출 
 		List<String> candidateNextMessages = new ArrayList<String>();
 		for(int i=0; i<nextMessagesArr.length; i++) {
@@ -93,37 +95,45 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			String candidateMessage = nextMessagesArr[i];
 			List<String> sysOprts = this.findAllOperationStrings(candidateMessage);
 			//원래 찾아낸 operation String 과 parsing 완료된 String 의 key:value 셑
-			Map<String,Object> oprtStrParsStrSet = new HashMap<String, Object>(); 
+			Map<String,Object> oprtStrParsStrSet = new HashMap<String, Object>();
+			
+			int keyIdx = 0; //같은 operation, parser가 겹칠 경우 덮어쓰지 않도록 하는 보조 index
 			if(!sysOprts.isEmpty()) {//시스템 명령어가 존재하지 않는 문장은 그대로 nextMessagesArr[i]가 입력되어있음
 				for (String operationString : sysOprts) {
 					//enum매칭할 키워드 추출
 					String tempStr = operationString.substring(1, operationString.length()-1);
 					String key = tempStr.split("\\"+systemDelimeter)[0];
+					
+					String operrationStringWithKeyIdx = "operationString" + keyIdx;
+					String parserStringWithKeyIdx = "parserString" + keyIdx;
 					// operationString = {NNP|location|헬싱키} , parserString = __헬싱키(location)__
-					oprtStrParsStrSet.put("operationString", operationString);
+					oprtStrParsStrSet.put(operrationStringWithKeyIdx, operationString);
 					switch (Operation.get(key)) {
 					case NNP:
-						oprtStrParsStrSet.put("parserString",Operation.NNP.doParse(operationString,null,null));
+						oprtStrParsStrSet.put(parserStringWithKeyIdx,Operation.NNP.doParse(operationString,null,null));
 						break;
 					case IF:
 						//conditionInfoMap 에는 String userType, List textTypes 이 들어있음.
-						oprtStrParsStrSet.put("parserString",Operation.IF.doParse(operationString,null,conditionInfoMap));
+						oprtStrParsStrSet.put(parserStringWithKeyIdx,Operation.IF.doParse(operationString,null,conditionInfoMap));
 						break;
 					case IMG:
-						oprtStrParsStrSet.put("parserString",Operation.IMG.doParse(operationString,systemImgFilePath,null));
+						oprtStrParsStrSet.put(parserStringWithKeyIdx,Operation.IMG.doParse(operationString,systemImgFilePath,null));
 						break;
 					case STYL:
-						oprtStrParsStrSet.put("parserString",Operation.STYL.doParse(operationString,null,null));
+						oprtStrParsStrSet.put(parserStringWithKeyIdx,Operation.STYL.doParse(operationString,null,null));
 						break;
 					default:
 						//현재까지 시스템 명령어 목록에 없는 내용. 업데이트 내용이 누락되거나 오타일 가능성 체크 
 						break;
 					}//switch_case
+					keyIdx++;
 				}//switch-case 도는 for문 
 				//파싱결과를 적용 
 				candidateMessage = this.applyParserString(candidateMessage,oprtStrParsStrSet);
 			}
-			candidateNextMessages.add(candidateMessage);
+			if (!candidateMessage.equals(" ")) {
+				candidateNextMessages.add(candidateMessage);
+			}
 		}// |으로 자른 문장 수 만큼 도는 for문 
 		//candidateNextMessages 값이 1이상일 경우 랜덤하게 한문장을 초이스하여 리턴 
 		result = this.selectOneNextMessage(candidateNextMessages);
@@ -147,10 +157,20 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	//파싱결과를 적용 
 	private String applyParserString(String candidateMessage, Map<String, Object> oprtStrParsStrSet) {
 		String result = "";
+		
 		//key : operationString parserString , value : {IF|oldUser|또왔네요.} 또왔네요.
-		String targetStr = (String)oprtStrParsStrSet.get("operationString");
-		String parsingStr = (String)oprtStrParsStrSet.get("parserString");
-		result = candidateMessage.replace(targetStr, parsingStr);
+		String chgMessage = candidateMessage;
+		String targetStr  = "";
+		String parsingStr = "";
+		for (int i = 0; i < oprtStrParsStrSet.size() / 2; i++) {
+			targetStr  = (String)oprtStrParsStrSet.get("operationString"+i);
+			parsingStr = (String)oprtStrParsStrSet.get("parserString"+i);
+			chgMessage = chgMessage.replace(targetStr, parsingStr);
+		}
+		result = chgMessage;
+//		String targetStr = (String)oprtStrParsStrSet.get("operationString");
+//		String parsingStr = (String)oprtStrParsStrSet.get("parserString");
+//		result = candidateMessage.replace(targetStr, parsingStr);
 
 		return result;
 	}
@@ -167,5 +187,20 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 		}
 		return operations;
 	}
+	
+	/*
+	 * java 문법 기호를 html 문법 기호로 변환
+	 */
+	public String parseForHtml(String message) {
+		String result = "";
+		String chgMessage = message;
+		String[] java = {"\\n"};
+		String[] html = {"<br>"};
+		for (int i = 0; i < java.length; i++) {
+			chgMessage = chgMessage.replace(java[i], html[i]);
+		}
+		result = chgMessage;
 
+		return result;
+	}
 }

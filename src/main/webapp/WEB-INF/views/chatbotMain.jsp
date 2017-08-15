@@ -29,7 +29,7 @@
 			</li>
 	    </ul>
 	</div>        
-	<input type="hidden" id="imgSrc" value="/resources/img/">
+	<input type="hidden" id="imgSrc" value="${imgSrc}">
 	<input type="hidden" id="statusCd" value="${statusCd}">
 	<input type="hidden" id="messageIdx" value="${messageIdx}">
 </body>

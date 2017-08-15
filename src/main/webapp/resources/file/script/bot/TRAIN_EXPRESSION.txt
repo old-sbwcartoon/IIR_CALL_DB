@@ -1,1 +1,2 @@
 이제 사진에 있는 음식을 주문해 보세요.\n음식(menu): {STYL|blue|된장 찌개}, 단위(unit): {STYL|green|인분}, 수량(num): {STYL|red|2}\n{IMG|된장찌개.png}
+S024
