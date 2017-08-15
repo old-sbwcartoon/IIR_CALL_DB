@@ -1,7 +1,8 @@
 $(document).ready(function() {
-	
+
+	$('.img-circle').attr("src", $('#imgSrc').val()+bot.avatar);
 	//init SYSTEM_ON
-	doInput("0000");
+	doInput("0000", 0);
 	
 	btnEvent();
 	
@@ -30,12 +31,45 @@ function formatAMPM(date) {
     return strTime;
 }            
 
-function insertChat(who, text, imgfilepath){
+//function insertChat(who, text, imgfilepath){
+//    var control = "";
+//    var date = formatAMPM(new Date());
+//    
+//    if (who == "bot"){
+//        
+//        control = '<li style="width:100%">' +
+//                        '<div class="msj macro">' +
+//                        '<div class="avatar"><img class="img-circle" style="width:100%;" src="'+ imgfilepath + bot.avatar +'" /></div>' +
+//                            '<div class="text text-l">' +
+//                                '<p>'+ text +'</p>' +
+//                                '<p><small>'+date+'</small></p>' +
+//                            '</div>' +
+//                        '</div>' +
+//                    '</li>';              
+//        
+//        
+//    }else{
+//        control = '<li style="width:100%;">' +
+//                        '<div class="msj-rta macro">' +
+//                            '<div class="text text-r">' +
+//                                '<p>'+text+'</p>' +
+//                                '<p><small>'+date+'</small></p>' +
+//                            '</div>' +
+//                        '<div class="avatar" style="padding:0px 0px 0px 10px !important"><img class="img-circle" style="width:100%;" src="'+ imgfilepath + usr.avatar+'" /></div>' +                                
+//                  '</li>'; 
+//    }
+//    setTimeout(
+//        function(){                        
+//            $(".dialog-ul").append(control);
+//        }
+//    );
+//    
+//}
+
+function insertBot(text, imgfilepath){
     var control = "";
     var date = formatAMPM(new Date());
-    
-    if (who == "bot"){
-        
+//    sleep(text.length * 100); //사용자 입력과 동시에 나오지 않도록 잠시 정지. 글자 수에 따라 정지 시간 길어짐. 버벅댐.
         control = '<li style="width:100%">' +
                         '<div class="msj macro">' +
                         '<div class="avatar"><img class="img-circle" style="width:100%;" src="'+ imgfilepath + bot.avatar +'" /></div>' +
@@ -44,10 +78,21 @@ function insertChat(who, text, imgfilepath){
                                 '<p><small>'+date+'</small></p>' +
                             '</div>' +
                         '</div>' +
-                    '</li>';              
+                    '</li>';
         
         
-    }else{
+    setTimeout(
+        function(){                        
+            $(".dialog-ul").append(control);
+        }
+    );
+    
+}
+
+function insertUser(text, imgfilepath){
+    var control = "";
+    var date = formatAMPM(new Date());
+    
         control = '<li style="width:100%;">' +
                         '<div class="msj-rta macro">' +
                             '<div class="text text-r">' +
@@ -55,8 +100,7 @@ function insertChat(who, text, imgfilepath){
                                 '<p><small>'+date+'</small></p>' +
                             '</div>' +
                         '<div class="avatar" style="padding:0px 0px 0px 10px !important"><img class="img-circle" style="width:100%;" src="'+ imgfilepath + usr.avatar+'" /></div>' +                                
-                  '</li>'; 
-    }
+                  '</li>';
     setTimeout(
         function(){                        
             $(".dialog-ul").append(control);
@@ -82,10 +126,10 @@ $(".mytext").on("keyup", function(e){
     }
 });
 
-function doInput(statusCd, statusCdSeq){
+function doInput(statusCd, messageIdx){
 	var userText = $('.userInput').val();
 	var statusCd = statusCd;
-	var statusCdSeq = statusCdSeq;
+	var messageIdx = messageIdx;
 	
 	$.ajax({
 		   url: 'messageInput.json'
@@ -94,7 +138,7 @@ function doInput(statusCd, statusCdSeq){
 		   ,data: {
 		     userText : userText
 		     , statusCd : statusCd
-		     , statusCdSeq : statusCdSeq
+		     , messageIdx : messageIdx
 		   }
 		   ,error: function() {
 		      $('#info').html('<p>An error has occurred</p>');
@@ -104,19 +148,37 @@ function doInput(statusCd, statusCdSeq){
 			   //-- 채팅창 대화 쓰기
 			   // read only 속성을 봇이 계속 발화해야 하는 상황이면 추가한다.
 			   var jsonObj = JSON.parse(data);
-			   $('#messageNo').val(jsonObj.messageNo);
+			   $('#statusCd').val(jsonObj.statusCd);
+			   $('#messageIdx').val(jsonObj.messageIdx);
+			   
+			   //message 약속된 기호로 나누기
+			   var message = jsonObj.message;
+			   var messageArr = new Array();
+			   if (message.includes("|")) {
+				   messageArr = message.split("|");
+			   } else {
+				   messageArr[0] = message;
+			   }
+
 			   //message 갯수만큼 뿌리기
-			   for (var i= 0; i < jsonObj.message.length; i++) {
-				   insertChat(jsonObj.speecher,jsonObj.message,jsonObj.imgSrc);  
+			   for (var i= 0; i < messageArr.length; i++) {
+				   insertBot(messageArr[i], jsonObj.imgSrc);  
 			   }
 		   	}
 		});
 }
 
 function btnEvent() {
-$('#btn-input').on('click', function() {
+	$('#btnInput').on('click',function(e) {
 		
-			doInput();
-
+		insertUser($('#userInput').val(), $('#imgSrc').val());
+		doInput($('#statusCd').val(), $('#messageIdx').val());
+	        
 	});
 }
+
+//***************************** util *****************************//
+function sleep(ms){
+	  ts1 = new Date().getTime() + ms;
+	  do ts2 = new Date().getTime(); while (ts2<ts1);
+	}

@@ -1,0 +1,2 @@
+{IF|isCorrect|맞았어요.}{IF|isWrong|틀렸어요. 이때는 {VAR|correctAnswer}이라고 하면 돼요.}
+{IF|hasName|{VAR|name} 씨 }이제 한국에서 음식을 주문 할 수 있겠죠?

@@ -1,9 +1,5 @@
 package com.iirtech.chatbot.service.impl;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,17 +39,27 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 //			
 //		}
 
-		MessageInfo info = new MessageInfo(statusCd);
-		int nextIdx = Integer.parseInt(messageIdx) + 1;
-		String[] nextMessages = info.getMessagesByIdx(nextIdx);
-		
-		if (nextMessages == null) {
-			//index 해당 문장이 없다면 (해당 statusCd의 봇 발화 모두 진행했다면)
-			//다음 statusCd 데이터 불러옴
-			info = new MessageInfo(info.getNextStatusCd());
-			nextMessages = info.getMessagesByIdx(0);
-			nextIdx = 0;
+		if (statusCd != DialogStatus.END_DIALOG.getStatusCd()) {
+			//마지막이 아닐 때
+			MessageInfo info = new MessageInfo(statusCd);
+			int nextIdx = Integer.parseInt(messageIdx) + 1; //한 파일(statusCd) 내부에서의 index=한 줄
+			String nextMessages = info.getMessagesByIdx(nextIdx);
+			
+			if (nextMessages == null) {
+				//index 해당 문장이 없다면 (해당 statusCd의 봇 발화 모두 진행했다면)
+				//다음 statusCd 데이터 불러옴
+				info = new MessageInfo(info.getNextStatusCd());
+				nextMessages = info.getMessagesByIdx(0);
+				nextIdx = 0;
+			}
+			
+			resultMap.put("returnStatus", info.getStatusCd());
+			resultMap.put("returnMessage", nextMessages);
+			resultMap.put("returnMessageIdx", nextIdx);
+		} else {
+			//마지막일 때
 		}
+		
 //		
 //		
 //		
@@ -86,11 +92,8 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 //		default:
 //			break;
 //		}
-//		
+		
 
-		resultMap.put("returnStatus", info.getStatusCd());
-		resultMap.put("returnMessage", nextMessages);
-		resultMap.put("returnMessageIdx", nextIdx);
 		
 		return resultMap;
 	}

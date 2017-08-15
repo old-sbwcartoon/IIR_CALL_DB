@@ -11,13 +11,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.iirtech.chatbot.dto.MessageInfo;
 import com.iirtech.chatbot.service.ChatbotNLPService;
 import com.iirtech.chatbot.service.ChatbotScriptService;
 import com.iirtech.chatbot.service.ChatbotService;
-import com.iirtech.common.enums.DialogStatus;
 import com.iirtech.common.utils.ChatbotUtil;
 
 
@@ -59,7 +58,7 @@ public class ChatbotController {
 	 * @작성자     : choikino
 	 * @explain : 로그인 후 사용자 정보 조회 및 파일 생성하여 채팅페이지로 이동 
 	 * @param  id, password
-	 * @return session(userSeq, dialogStatus, dialogTime), resultmap(speecher, message, imgsrc)
+	 * @return session(userSeq, isOldUserYN, dialogStatus, dialogTime), resultmap(speecher, message, imgsrc)
 	 */
 	@Value("#{systemProp['imgfilepath']}") 
 	String systemImgFilePath;
@@ -67,7 +66,7 @@ public class ChatbotController {
 	public ModelAndView chatbotMain(@RequestParam Map<String, Object> param, HttpSession session) {
 		log.debug("*************************chatbotMain.do*************************");
 		ModelAndView mv = new ModelAndView("chatbotMain");
-		Map<String,Object> resultMap = new HashMap<String, Object>();
+//		Map<String,Object> resultMap = new HashMap<String, Object>();
 		try {
 			//사용자 정보 조회 후 없으면 create 있으면 update 
 			//userInfoMap : id, password, userSeq, isOldUserYN, loginTime
@@ -77,11 +76,17 @@ public class ChatbotController {
 			
 			//Session에 기억할 정보들(userSeq,userHistFile,userDialogFile) 저장!
 			String userSeq = String.valueOf(userInfoMap.get("userSeq"));
+			String isOldUserYN = String.valueOf(userInfoMap.get("isOldUserYN"));
 			session.setAttribute("userSeq", userSeq);
+			session.setAttribute("isOldUserYN", isOldUserYN);
 			
-			
+			MessageInfo info = new MessageInfo("0000");
+			String initInfo = info.getMessagesByIdx(0).replace("\\n", "<br>");
+//			mv.addObject("imgSrc", systemImgFilePath);
+			mv.addObject("initInfo", initInfo);
 			
 			//세션의 lastDialogStatus 값, 입력문장 등 정보를 가지고 발화자, 상태코드, 메시지 생성
+
 //			Map<String, Object> messageInfo = cbss.getMessageInfo(DialogStatus.SYSTEM_ON.getStatusCd(),null);
 //			String returnSpeecher = messageInfo.get("returnSpeecher").toString();
 //			String returnStatus = messageInfo.get("returnStatus").toString();
@@ -108,7 +113,7 @@ public class ChatbotController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		mv.addObject(resultMap);
+//		mv.addObject(resultMap);
 		return mv;
 	}
 	
@@ -117,8 +122,8 @@ public class ChatbotController {
 	 * @작성일     : 2017. 8. 13. 
 	 * @작성자     : choikino
 	 * @explain : 실제로 봇과 사용자의 대화가 진행되는 메인 메소드 
-	 * @param session(userSeq, dialogStatus, dialogTime), param(userText)
-	 * @return session(userSeq, dialogStatus, dialogTime), resultmap(speecher, message, imgsrc)
+	 * @param session(userSeq,isOldUserYN, dialogStatus, dialogTime), param(userText)
+	 * @return session(userSeq, isOldUserYN, dialogStatus, dialogTime), resultmap(speecher, message, imgsrc)
 	 */
 	@RequestMapping(value = "messageInput.json")
 	public ModelAndView inputPreprocess(@RequestParam Map<String, Object> param, HttpSession session) {
@@ -149,7 +154,7 @@ public class ChatbotController {
 	    		
 	    		//세션의 lastDialogStatus 값, 입력문장 등 정보를 가지고 발화자, 상태코드, 메시지 생성
 	    		Map<String, Object> messageInfo = cbss.getMessageInfo(statusCd, procInputText, messageIdx);
-	    		String returnSpeecher = messageInfo.get("returnSpeecher").toString();
+//	    		String returnSpeecher = messageInfo.get("returnSpeecher").toString();
 	    		String returnStatus = messageInfo.get("returnStatus").toString();
 	    		String returnMessage = messageInfo.get("returnMessage").toString();
 	    		String returnMessageIdx = messageInfo.get("returnMessageIdx").toString();
@@ -160,7 +165,7 @@ public class ChatbotController {
 	    		Map<String,Object> userDialogInfoMap = new HashMap<String, Object>();
 	    		userDialogInfoMap.put("userSeq", userSeq);
 	    		userDialogInfoMap.put("orglMessage", inputText);
-	    		userDialogInfoMap.put("returnSpeecher", returnSpeecher);
+//	    		userDialogInfoMap.put("returnSpeecher", returnSpeecher);
 	    		userDialogInfoMap.put("procMessage", procInputText);
 	    		userDialogInfoMap.put("dialogTime", dialogTime);
 	    		//아직 구현안됨 
@@ -173,7 +178,7 @@ public class ChatbotController {
 	    		//화면에 뿌릴 데이터 세팅 
 	    		
 	    		
-	    		resultMap.put("speecher", returnSpeecher);
+//	    		resultMap.put("speecher", returnSpeecher);
 	    		resultMap.put("message", returnMessage);
 			resultMap.put("messageIdx", returnMessageIdx);
 			resultMap.put("statusCd", returnStatus);

@@ -13,15 +13,25 @@
 <body>
 	<div class="macro" style="background:whitesmoke">
 	대화를 입력하세요:   
-		<input class="userInput" type="text" style="width:300px;">
-		<button id="btn-input">입력</button>
+		<input id="userInput" type="text" style="width:300px;">
+		<button id="btnInput">입력</button>
 	</div>
 	<div>
-	    <ul class="dialog-ul" style="width: 600px; height: 700px; overflow: auto"></ul>
+	    <ul class="dialog-ul" style="width: 600px; height: 700px; overflow: auto">
+			<li style="width:100%">
+				<div class="msj macro">
+					<div class="avatar"><img class="img-circle" style="width:100%;" src="" /></div>
+					<div class="text text-l">
+						<p>${initInfo}</p>
+						<p></p>
+					</div>
+				</div>
+			</li>
+	    </ul>
 	</div>        
 	<%-- <input type="hidden" id="speecher" value="${speecher}">
-	<input type="hidden" id="message" value="${message}">
-	<input type="hidden" id="imgSrc" value="${imgSrc}"> --%>
+	<input type="hidden" id="message" value="${message}"> --%>
+	<input type="hidden" id="imgSrc" value="/resources/img/">
 	<input type="hidden" id="statusCd" value="${statusCd}">
 	<input type="hidden" id="messageIdx" value="${messageIdx}">
 </body>
