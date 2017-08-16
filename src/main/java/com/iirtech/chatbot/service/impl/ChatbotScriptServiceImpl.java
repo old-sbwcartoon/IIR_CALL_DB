@@ -194,10 +194,19 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	public String parseForHtml(String message) {
 		String result = "";
 		String chgMessage = message;
-		String[] java = {"\\n"};
-		String[] html = {"<br>"};
-		for (int i = 0; i < java.length; i++) {
-			chgMessage = chgMessage.replace(java[i], html[i]);
+		ArrayList<String> javaArr = new ArrayList<String>();
+		HashMap<String, String> htmlMap = new HashMap<String, String>();
+		
+		javaArr.add("\\n");
+		htmlMap.put("\\n", "<br>");
+
+		String origin   = "";
+		String replaced = "";
+		for (int i = 0; i < javaArr.size(); i++) {
+			
+			origin   = javaArr.get(i);
+			replaced = htmlMap.get(origin);
+			chgMessage = chgMessage.replace(origin, replaced);
 		}
 		result = chgMessage;
 
