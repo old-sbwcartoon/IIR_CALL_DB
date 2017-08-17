@@ -4,10 +4,8 @@
 <properties>
 	<comment>시스템 공통 변수들과 그 값들을 설정하는 xml</comment>
 	<entry key="imgfilepath">/resources/img/</entry>
-	<entry key="filepath">/Users/rnder_007/git/IIR_CALL/src/main/webapp/resources/file/</entry>
-	<entry key="systemfilepath">/Users/rnder_007/git/IIR_CALL/src/main/webapp/resources/file/systemfile/</entry>
-	<entry key="userfilepath">/Users/rnder_007/git/IIR_CALL/src/main/webapp/resources/file/userfile/</entry>
+	<entry key="filepath">/Users/rnder_004/dev/workspace-sts-3.9.0.RELEASE/CALL/src/main/webapp/resources/file/</entry>
 	<entry key="userseqfilename">userSeq.txt</entry>
 	<entry key="systemdelimeter">|</entry>
-	<entry key="botname">이르</entry>
+	<entry key="redirectpath">chatbotMain.do</entry>
 </properties>

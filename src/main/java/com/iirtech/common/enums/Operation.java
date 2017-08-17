@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * @Package : com.iirtech.common.enums
  * @FileName : Operation.java
@@ -21,6 +22,7 @@ public enum Operation { //VAR 에 대한 처리를 고민중...
 	
 	// {NNP|Type|word} >> {NNP|location|헬싱키} >> __헬싱키(location)__
 	NNP("NNP") {
+		@Override
 		public String doParse(String operationString, String y, Object z) {
 			operationString = operationString.substring(1, operationString.length()-1);
 			String[] operationVals = operationString.split("\\|");
@@ -31,6 +33,7 @@ public enum Operation { //VAR 에 대한 처리를 고민중...
 	},
 	// {IF|condition|sentence} >> {IF|oldUser|또 왔네?} >> true : 또 왔네 false : ""
 	IF("IF") {
+		@Override
 		public String doParse(String operationString, String y, Object conditionInfoMap) {
 			operationString = operationString.substring(1, operationString.length()-1);
 			String[] operationVals = operationString.split("\\|");
@@ -53,16 +56,18 @@ public enum Operation { //VAR 에 대한 처리를 고민중...
 	},
 	// {IMG|imgName} >> <img src="시스템이미지파일경로//imgName" height="300" width="300"/>
 	IMG("IMG") {
+		@Override
 		public String doParse(String operationString, String imgPath, Object z) {
 			operationString = operationString.substring(1, operationString.length()-1);
 			String[] operationVals = operationString.split("\\|");
 			String result = "";
-			result = "<img src=\""+imgPath + operationVals[1] +"\" height=\"300\" width=\"300\"/>";
+			result = "<img src=\""+imgPath + operationVals[1] +"\" height=\"150\" width=\"150\"/>";
 			return result;
 		}
 	},
 	// {STYL|green|인분} >> <font color="green">인분</font>
 	STYL("STYL") {
+		@Override
 		public String doParse(String operationString, String y, Object z) {
 			operationString = operationString.substring(1, operationString.length()-1);
 			String[] operationVals = operationString.split("\\|");
@@ -70,11 +75,22 @@ public enum Operation { //VAR 에 대한 처리를 고민중...
 			result = "<font color=\""+operationVals[1]+"\">"+operationVals[2]+"</font>";
 			return result;
 		}
+	},
+	//{CIT|TOPIC} >> 세션에 담을 플래그만들기
+	CIT("CIT"){
+		@Override
+		public Object doParse(String operationString, String y, Object z) {
+			operationString = operationString.substring(1, operationString.length()-1);
+			String[] operationVals = operationString.split("\\|");
+			String dictName = operationVals[1];
+			return dictName;
+		}
+		
 	};
 	
 	
 	//enum 내부 연산관련 메소드
-	public abstract String doParse(String x, String y, Object z);
+	public abstract Object doParse(String x, String y, Object z);
 	
 	//enum 생성자  
 	private final String operationString;

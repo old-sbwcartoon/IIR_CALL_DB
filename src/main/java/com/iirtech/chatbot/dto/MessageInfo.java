@@ -50,7 +50,7 @@ public class MessageInfo {
 	private void setFilePath(String statusCd, String scriptfilePath) {
 		String fileName = DialogStatus.get(statusCd).toString()+".txt";
 		//bot 발화를 위한 파일경로 지정이므로 /bot/으로 고정시킴
-		scriptfilePath += "/bot/" + fileName;
+		scriptfilePath += fileName;
 		this.filePath = scriptfilePath;
 	}
 	public String[] getMessages() {

@@ -39,35 +39,55 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	String systemDelimeter;
 	@Value("#{systemProp['imgfilepath']}") 
 	String systemImgFilePath;
-	@Value("#{systemProp['scriptfilepath']}") 
-	String scriptFilePath;
+	@Value("#{systemProp['filepath']}") 
+	String filePath;
 	
 	@Override
 	public Map<String, Object> getMessageInfo(String statusCd, String procInputText
 			, String messageIdx, Map<String,Object> conditionInfoMap) {
 		log.debug("*************************getMessageInfo*************************");
-		
+		//컨트롤러로 리턴할 리턴 값들을 담는 맵객체 
 		Map<String, Object> resultMap = new HashMap<String, Object>();
+		String scriptFilePath = filePath + "script/bot/";
 		if (statusCd != DialogStatus.END_DIALOG.getStatusCd()) {//마지막이 아닐 때
 			//여기서 스크립트 파일 읽어옴 
+			//APPROACH_TOPIC에서 TOPIC이 정해진 후 해당 스크립트를 다 탄 시점부터 topic경로 적용
+			//이 정해졌을 때 트리거를 받아 스크립트 경로를 토픽으로 변환해주기 
+			scriptFilePath = this.addTopicScriptPath(statusCd, scriptFilePath, conditionInfoMap);
 			MessageInfo info = new MessageInfo(statusCd, scriptFilePath);
 			
 			int nextIdx = Integer.parseInt(messageIdx) + 1; //한 파일(statusCd) 내부에서의 index=한 줄
 			String nextMessages = info.getMessageByIdx(nextIdx);
-			String optmzMessage = "";
+			Map<String,Object> applySysOprtResultMap = null;
 			String nextMessage = "";
-			if (nextMessages == null) {
+			
+			if (nextMessages == null ) {
 				//index 해당 문장이 없다면 (해당 statusCd의 봇 발화 모두 진행했다면)
 				//다음 statusCd 데이터 불러옴
+				//APPROACH_TOPIC 주제 진입 스크립트의 마지막줄일때만 스크립트 파일경로에 주제경로 구하기 
+				if(statusCd.equals(DialogStatus.APPROACH_TOPIC.getStatusCd())) {
+					scriptFilePath = this.addTopicScriptPath(info.getNextStatusCd(), scriptFilePath, conditionInfoMap);
+				}
+				//END_TOPIC 주제 종료 스크립트의 마지막줄일때만 스크립트 파일경로의 주제경로 제거
+				if(statusCd.equals(DialogStatus.REMIND.getStatusCd())) {
+					scriptFilePath = filePath + "script/bot/";
+					//컨트롤러 세션에서 CIT TOPIC 값 제거할 트리거 담아줌
+					//CITDelete/deleteType TOPIC이면 세션에서 CIT
+					resultMap.put("CITDelete", "TOPIC");
+				}
 				info = new MessageInfo(info.getNextStatusCd(), scriptFilePath);
-				
-				//이거 뭐지??? 여기서 nextMessages 가 null 이네 
 				nextMessages = info.getMessageByIdx(0);
 				nextIdx = 0;
 			}
 			//현재 nextMessages 는 | 가 붙은 상태임. 따라서 optimize할때는 짤라내고 루프돌면서 한개씩 처리
 			//인자값으로 conditionInfoMap(oldUser, newUser , isPositive/isNegative/isAsking)등의 정보들을 넣어줌 
-			optmzMessage = this.optmzMessage(nextMessages, conditionInfoMap);
+			applySysOprtResultMap = (Map<String, Object>) this.applySysOprt(nextMessages, conditionInfoMap);
+			//applySysOprtResultMap 안에는 optmzMessage-not null 와 CIT(keywordType) -nullable
+			String optmzMessage = (String) applySysOprtResultMap.get("optmzMessage");
+			if(applySysOprtResultMap.get("CIT")!=null) {
+				String CIT = (String)applySysOprtResultMap.get("CIT");
+				resultMap.put("CIT", CIT);//TOPIC
+			}
 			nextMessage = this.parseForHtml(optmzMessage);
 			log.debug("statusCd>>>>>>>>>"+statusCd);
 			log.debug("optimizedMsg>>>>>>>>>"+nextMessage);
@@ -75,17 +95,30 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			resultMap.put("statusCd", info.getStatusCd());
 			resultMap.put("message", nextMessage);
 			resultMap.put("messageIdx", nextIdx);
-		} else {
-			//마지막일 때
-		}		
+		}
 		return resultMap;
 	}
 
+	private String addTopicScriptPath(String statusCd, String scriptFilePath,Map<String, Object>conditionInfoMap) {
+		if(conditionInfoMap.get("CITKeyword")!=null) {
+			String CITKeyword = (String) conditionInfoMap.get("CITKeyword");
+			String[] CITs = CITKeyword.split("\\"+systemDelimeter);
+			String CITValue = CITs[0]; //dict에서 여행에 매핑되는 값인 travel
+			String keywordType = CITs[1]; //TOPIC
+			//만약 키워드타입이 TOPIC이면 파일경로를 /CITValue/ 만큼 depth를 더 파고듦  
+			if(keywordType.equals("TOPIC") && !statusCd.equals(DialogStatus.APPROACH_TOPIC.getStatusCd())) {
+				scriptFilePath += CITValue + "/";
+				log.debug("CITKeywordPath>>>>>>>>>>>"+scriptFilePath);
+			}
+		}
+		return scriptFilePath;
+	}
+	
 	//메시지의 시스템 명령어들을 operation enum을 사용해 파싱하고 한개의 문장만을 골라서 리턴함 
 	@Override
-	public String optmzMessage(String nextMessage, Map<String, Object> conditionInfoMap) {
+	public Object applySysOprt(String nextMessage, Map<String, Object> conditionInfoMap) {
 		log.debug("*************************optmzMessage*************************");
-		String result = "";
+		Map<String, Object> resultMap = new HashMap<String, Object>();
 		//현재 nextMessages 는 | 가 붙은 상태임. 따라서 optimize할때는 짤라내고 루프돌면서 한개씩 처리
 		String[] nextMessagesArr = nextMessage.split("\\|\\|");
 		//후보 문장들을 담아둘 리스트 객체: 나중에 이중에서 한개만 랜덤하게 추출 
@@ -122,6 +155,12 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 					case STYL:
 						oprtStrParsStrSet.put(parserStringWithKeyIdx,Operation.STYL.doParse(operationString,null,null));
 						break;
+					case CIT:
+						//{CIT|TOPIC} >> TOPIC.dict 사전을 찾아서 안에 있는 어휘들을 key:value set으로 만들어 리턴
+						String dictName = (String) Operation.CIT.doParse(operationString,null,null);
+						resultMap.put("CIT", dictName);
+						oprtStrParsStrSet.put(parserStringWithKeyIdx,"");//처리됐으니 시스템명령어 null string 처리해서 없앰
+						break;
 					default:
 						//현재까지 시스템 명령어 목록에 없는 내용. 업데이트 내용이 누락되거나 오타일 가능성 체크 
 						break;
@@ -131,16 +170,16 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 				//파싱결과를 적용 
 				candidateMessage = this.applyParserString(candidateMessage,oprtStrParsStrSet);
 			}
-			if (!candidateMessage.equals(" ")) {
+			//if조건에 의해 걸러져 ""이 된 값들을 걸러낸다.
+			if (!candidateMessage.equals("")&&!candidateMessage.equals(" ")) {
 				candidateNextMessages.add(candidateMessage);
 			}
 		}// |으로 자른 문장 수 만큼 도는 for문 
 		//candidateNextMessages 값이 1이상일 경우 랜덤하게 한문장을 초이스하여 리턴 
-		result = this.selectOneNextMessage(candidateNextMessages);
-		return result;
+		resultMap.put("optmzMessage", this.selectOneNextMessage(candidateNextMessages));
+		return resultMap;
 	}
 	
-	//한개 문장을 랜덤하게 선택 단, ""값들을 먼저 제거한다.
 	private String selectOneNextMessage(List<String> candidateNextMessages) {
 		String result = "";
 		if(!candidateNextMessages.isEmpty()) {
@@ -168,9 +207,6 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			chgMessage = chgMessage.replace(targetStr, parsingStr);
 		}
 		result = chgMessage;
-//		String targetStr = (String)oprtStrParsStrSet.get("operationString");
-//		String parsingStr = (String)oprtStrParsStrSet.get("parserString");
-//		result = candidateMessage.replace(targetStr, parsingStr);
 
 		return result;
 	}

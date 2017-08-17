@@ -16,5 +16,5 @@ public interface ChatbotScriptService {
 
 	List<String> findAllOperationStrings(String message);
 	
-	String optmzMessage(String message, Map<String, Object> conditionInfos);
+	Object applySysOprt(String message, Map<String, Object> conditionInfos);
 }

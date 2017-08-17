@@ -1,6 +1,11 @@
 ** 한 발화 내에서의 개행은 \n으로 표시, 나중에 일괄 <br>로 고쳐야됨
 ** 같은 발화턴의 여러문장을 구분할때는 두개의 파이프라인을 사용한다. ||
 ** {} 는 시스템 명령을 표시하는 특수문자이므로 일반 문장에는 사용을 금한다.
+** {CIT|KeywordType} 
+   >> CIT(Check Input Text) 시스템 명령어는 사용자 인풋문에서 키워드를 찾아 활용해야 함을 미리 시스템에 인지시킴
+   >> {CIT|TOPIC}의 경우에 사용자의 입력문장에 주제키워드가 담길것임을 인지시킴.
+   >> 사용자 입력문이 "~여행~"라고 하면 주제사전(topic.dict)에서 조회하여 일치하는 영단어를 시스템에 리턴
+   >> 스크립트파일 경로도 토픽이 정해지는 시점부터 {scriptpath}/{topic}/scriptfile.txt 이런식으로 바뀌게 됨
 ** 절대로 한개의 문장에 문자열이 완전히 일치하는 시스템 명령어를 사용하면 안됨 
    >> {VAR|topic}을 배웠으니 {VAR|topic}을 배울까요? (X)
 
@@ -16,7 +21,7 @@
    >> VAR 종류들 : topic, name, location, correctAnswer
    
 4. 이미지 파일은 파일명을 적는다. 파일경로는 시스템 변수에 저장됨
-   >> {IMG|imgName} >> 변수대체 후 >> <img src="시스템이미지파일경로//imgName" height="300" width="300"/>
+   >> {IMG|imgName} >> 변수대체 후 >> <img src="시스템이미지파일경로//imgName" height="150" width="150"/>
    
 5. 글씨에 스타일을 입히려는 경우 {STYL|color|word} 
    >> {STYL|red|순두부} >> 변수대체 후 >> <font color="red">순두부</font>

@@ -1,6 +1,7 @@
 package com.iirtech.chatbot.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
@@ -17,6 +18,7 @@ import com.iirtech.chatbot.dto.MessageInfo;
 import com.iirtech.chatbot.service.ChatbotNLPService;
 import com.iirtech.chatbot.service.ChatbotScriptService;
 import com.iirtech.chatbot.service.ChatbotService;
+import com.iirtech.common.enums.DialogStatus;
 import com.iirtech.common.utils.ChatbotUtil;
 
 
@@ -48,7 +50,7 @@ public class ChatbotController {
 	 * @explain : 로그인 하는 시작페이지로 리다이렉트
 	 */
 	@RequestMapping(value = "index.do")
-	public void Index() {
+	public void index() {
 		log.debug("*************************index.do*************************");
 	}
 	
@@ -62,8 +64,10 @@ public class ChatbotController {
 	 */
 	@Value("#{systemProp['imgfilepath']}") 
 	String systemImgFilePath;
-	@Value("#{systemProp['scriptfilepath']}") 
-	String scriptFilePath;
+	@Value("#{systemProp['filepath']}") 
+	String filePath;
+	@Value("#{systemProp['redirectpath']}") 
+	String redirectPath;
 	@RequestMapping(value = "chatbotMain.do")
 	public ModelAndView chatbotMain(@RequestParam Map<String, Object> param, HttpSession session) {
 		log.debug("*************************chatbotMain.do*************************");
@@ -84,6 +88,7 @@ public class ChatbotController {
 			conditionInfoMap.put("userType", userType);//사용자 타입 세팅 : oldUser, newUser
 			session.setAttribute("conditionInfoMap", conditionInfoMap);
 			
+			String scriptFilePath = filePath + "script/bot/";
 			MessageInfo info = new MessageInfo("0000",scriptFilePath);
 			String initInfo = info.getMessageByIdx(0).replace("\\n", "<br>");
 			mv.addObject("initInfo", initInfo);
@@ -121,6 +126,11 @@ public class ChatbotController {
 	    		String statusCd = String.valueOf(param.get("statusCd"));
 	    		Map<String,Object> conditionInfoMap = (Map<String, Object>) session.getAttribute("conditionInfoMap");
 	    		String userType = String.valueOf(conditionInfoMap.get("userType"));
+
+	    		//대화가 끝난경우 현재는 채팅페이지로 리다이렉트 시킴
+	    		if(statusCd.equals(DialogStatus.END_DIALOG.getStatusCd())) {
+	    			return (ModelAndView)new ModelAndView("redirect:/" + redirectPath );
+	    		}
 	    		
 	    		//입력문 넘겨받아 메시지 생성 메소드에 넘겨줌, inputText 는 null 값이 될 수도 있다.
 	    		String inputText = String.valueOf(param.get("userText"));
@@ -128,18 +138,38 @@ public class ChatbotController {
 	    		if(procText != null && procText != "") {
 	    			//전처리 메소드는 preprocess안에서 다시 여러 단계로 확장될 예정
 	    			conditionInfoMap = cbns.preProcess(procText);//List textTypes, String procText
+	    			//CIT값(사용자 인풋텍스트에서 체크해야되는 키워드keywordType)가 있다면 판별 후 추출
+	    			if(session.getAttribute("CIT")!=null) {
+	    				String keywordType = session.getAttribute("CIT").toString();
+	    				String keyword = cbns.selectKeyword(keywordType, conditionInfoMap);
+	    				conditionInfoMap.put("CITKeyword", keyword);
+	    			}
 	    			conditionInfoMap.put("userType", userType);
 	    			procText = String.valueOf(conditionInfoMap.get("procText"));
 	    		}
 	    		String messageIdx = String.valueOf(param.get("messageIdx"));
 	    		
 	    		//세션의 lastDialogStatus 값, 입력문장 등 정보를 가지고 발화자, 상태코드, 메시지 생성
-	    		//conditionInfoMap 에는 String userType, List textTypes 이 들어있음.
+	    		//conditionInfoMap 에는 String userType, List textTypes, List CITKeywords(사용자인풋텍스트에서 추출된 키워드)
+	    		//statusCd,message,messageIdx(string)-not null, CIT(map)-nullable 이 들어있음
 	    		Map<String, Object> messageInfo = cbss.getMessageInfo(statusCd, procText, messageIdx, conditionInfoMap);
-//	    		String returnStatus = messageInfo.get("returnStatus").toString();
-//	    		String returnMessage = messageInfo.get("returnMessage").toString();
-//	    		String returnMessageIdx = messageInfo.get("returnMessageIdx").toString();
 	    		
+	    		
+	    		
+	    		//세션에 저장된 시스템 변수값을 제거해야하는 경우인지 체크
+	    		if(messageInfo.get("CITDelete")!=null && session.getAttribute("CIT")!=null) {
+	    			String deleteType = messageInfo.get("CITDelete").toString();
+	    			String sessionType = session.getAttribute("CIT").toString();
+	    			if (deleteType.equals("TOPIC") && sessionType.equals("TOPIC")) {
+	    				//topic을 지워야하는 경우 세션에서 제거
+	    				session.removeAttribute("CIT");
+				}
+	    		}
+	    		
+	    		//CIT가 있으면 세션에 값넣기 CIT:type으로 넣고 사용자 input 처리하는 부분에서 항상 체크하여 처리 
+	    		if(messageInfo.get("CIT") != null) {
+	    			session.setAttribute("CIT", messageInfo.get("CIT"));
+	    		}
 	    		String dialogTime = cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis());
 	    		
 	    		//사용자 대화내용 로그 파일 업데이트!!
@@ -153,9 +183,6 @@ public class ChatbotController {
 	    		cbs.makeUserDialogFile(userDialogInfoMap);
 	    		
 	    		//화면에 뿌릴 데이터 세팅 
-//	    		resultMap.put("message", returnMessage);
-//			resultMap.put("messageIdx", returnMessageIdx);
-//			resultMap.put("statusCd", returnStatus);
 	    		resultMap = messageInfo;
 	    		resultMap.put("imgSrc", systemImgFilePath);
 	    		mv.addAllObjects(resultMap);
@@ -166,5 +193,5 @@ public class ChatbotController {
         
 	    return mv;
 	}
-	
+
 }

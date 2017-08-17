@@ -1,5 +1,6 @@
 package com.iirtech.chatbot.service;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,5 +13,7 @@ import java.util.Map;
 public interface ChatbotNLPService {
 
 	Map<String,Object> preProcess(String procInputText);
+
+	String selectKeyword(String keywordType, Map<String, Object> conditionInfoMap);
 
 }

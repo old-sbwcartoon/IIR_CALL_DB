@@ -40,16 +40,12 @@ public class ChatbotServiceImpl implements ChatbotService{
 	 * userFilePath: 사용자별 파일 저장경로 
 	 * userSeqFileName: 사용자 id pwd 별 seq 정보 저장파일명  
 	 */
-	@Value("#{systemProp['systemfilepath']}") 
-	String systemFilePath;
-	@Value("#{systemProp['userfilepath']}") 
-	String userFilePath;
+	@Value("#{systemProp['filepath']}") 
+	String filePath;
 	@Value("#{systemProp['userseqfilename']}") 
 	String userSeqFileName;
 	@Value("#{systemProp['systemdelimeter']}") 
 	String systemDelimeter;
-	@Value("#{systemProp['botname']}") 
-	String botName;
 
 	@Override
 	public Map<String, Object> mergeSystemFile(Map<String, Object> param) {
@@ -63,6 +59,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 			String userType = "newUser";
 			
 			// userInfos : ["userSeq|id|pwd", "userSeq|id|pwd" ...]
+			String systemFilePath = filePath + "systemfile/";
 			List<String> userInfos = cbu.ReadFileByLine(systemFilePath, userSeqFileName);
 			String userSeq = "";
 			if(userInfos.isEmpty()) {
@@ -117,6 +114,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 		try {
 			String userSeq = userInfoMap.get("userSeq").toString();
 			String userHistFileName = userSeq + "_hist.txt";
+			String userFilePath = filePath + "userfile/";
 			List<String> userHistInfos = cbu.ReadFileByLine(userFilePath, userHistFileName);
 			
 			String content = ""; 
@@ -147,6 +145,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 		String content = ""; 
 		try {
 			String userSeq = userInfoMap.get("userSeq").toString();
+			String userFilePath = filePath + "userfile/";
 			String userDialogFileDir = userFilePath + userSeq + "/"; 
 			File targetDir = new File(userDialogFileDir);
 			
@@ -161,7 +160,8 @@ public class ChatbotServiceImpl implements ChatbotService{
 			
 			String orglMessage = userInfoMap.get("orglMessage").toString();
 			
-			content = dialogTime + systemDelimeter + botName + systemDelimeter + orglMessage + systemDelimeter + orglMessage;
+			String speecher = "";
+			content = dialogTime + systemDelimeter + speecher + systemDelimeter + orglMessage + systemDelimeter + orglMessage;
 			
 			userDialogContents.add(content);
 			cbu.WriteFile(userDialogFileDir, userDialogFileName, userDialogContents);

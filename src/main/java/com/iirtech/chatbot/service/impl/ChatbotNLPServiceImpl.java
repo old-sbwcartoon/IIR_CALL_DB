@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.iirtech.chatbot.service.ChatbotNLPService;
+import com.iirtech.common.utils.ChatbotUtil;
 
 /**
  * @Package   : com.iirtech.chatbot.service.impl
@@ -22,6 +25,13 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 
 	private Logger log = Logger.getLogger(this.getClass());
 	
+	@Autowired
+	ChatbotUtil cbu;
+	
+	@Value("#{systemProp['filepath']}") 
+	String filePath;
+	@Value("#{systemProp['systemdelimeter']}") 
+	String systemDelimeter;
 	@Override
 	public Map<String,Object> preProcess(String procInputText) {
 		log.debug("*************************preProcess*************************");
@@ -38,6 +48,37 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 		resultMap.put("procText", procText);
 		resultMap.put("textTypes", textTypes);
 		return resultMap;
+	}
+
+	@Override
+	public String selectKeyword(String keywordType, Map<String, Object> conditionInfoMap) {
+		String result = "";
+		//1.keywordType을 가지고 dict파일에서 뒤져서 키워드 판단-구현
+		String dictFilePath = filePath + "dictionary/";
+		String fileName = keywordType + ".dict"; //TOPIC.dict
+		String procText = conditionInfoMap.get("procText").toString();
+		//사전파일읽음 
+		List<String> lines = cbu.ReadFileByLine(dictFilePath, fileName);
+		List<String> keywordCandidates = new ArrayList<String>();
+		for (String line : lines) {
+			//line >> 여행|travel
+			String[] lineArr = line.split("\\"+systemDelimeter);
+			String CITKey = lineArr[0]; //여행
+			String CITValue = lineArr[1]; //travel
+			if(line.contains(CITKey) && !keywordCandidates.contains(CITValue)) {
+				keywordCandidates.add(CITValue);
+			}
+		}
+		
+		//2.전처리 정보를 가지고 판별식을 통해 키워드 판단-미구현 
+		
+		
+		//3.추출된 키워드가 한개 이상일 경우 한개만 선택하기(사용자가 고의로 여러개 입력-에러)로 봄
+		//예외처리이므로 미구현
+		
+		//일단 임시로 첫번째 것만 리턴하는거로 string "travel|TOPIC"
+		result = keywordCandidates.get(0) + systemDelimeter + keywordType;
+		return result;
 	}
 
 }
