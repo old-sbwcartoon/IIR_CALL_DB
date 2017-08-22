@@ -29,7 +29,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 	ChatbotUtil cbu;
 	
 	@Value("#{systemProp['filepath']}") 
-	String filePath;
+	String urlFilePath;
 	@Value("#{systemProp['systemdelimeter']}") 
 	String systemDelimeter;
 	@Override
@@ -54,7 +54,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 	public String selectKeyword(String keywordType, Map<String, Object> conditionInfoMap) {
 		String result = "";
 		//1.keywordType을 가지고 dict파일에서 뒤져서 키워드 판단-구현
-		String dictFilePath = filePath + "dictionary/";
+		String dictFilePath = urlFilePath + "dictionary/";
 		String fileName = keywordType + ".dict"; //TOPIC.dict
 		String procText = conditionInfoMap.get("procText").toString();
 		//사전파일읽음 

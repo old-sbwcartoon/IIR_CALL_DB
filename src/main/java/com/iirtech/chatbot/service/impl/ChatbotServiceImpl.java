@@ -5,7 +5,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,15 +44,15 @@ public class ChatbotServiceImpl implements ChatbotService{
 	 * userFilePath: 사용자별 파일 저장경로 
 	 * userSeqFileName: 사용자 id pwd 별 seq 정보 저장파일명  
 	 */
-	@Value("#{systemProp['filepath']}") 
-	String filePath;
+//	@Value("#{systemProp['filepath']}") 
+//	String urlFilePath;
 	@Value("#{systemProp['userseqfilename']}") 
 	String userSeqFileName;
 	@Value("#{systemProp['systemdelimeter']}") 
 	String systemDelimeter;
 
 	@Override
-	public Map<String, Object> mergeSystemFile(Map<String, Object> param) {
+	public Map<String, Object> mergeSystemFile(Map<String, Object> param, HttpSession session) {
 		log.debug("***********************mergeUserFile**********************");
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		try {
@@ -57,10 +61,12 @@ public class ChatbotServiceImpl implements ChatbotService{
 			//비밀번호 암호화 
 			String encPassword = cbu.encryptPwd(password);
 			String userType = "newUser";
-			
 			// userInfos : ["userSeq|id|pwd", "userSeq|id|pwd" ...]
-			String systemFilePath = filePath + "systemfile/";
+//			String systemFilePath = filePath + "systemfile/";
+			String systemFilePath = session.getServletContext().getRealPath("resources/file/systemfile");
 			List<String> userInfos = cbu.ReadFileByLine(systemFilePath, userSeqFileName);
+//			String ss = session.getServletContext().getRealPath("resources/file/");
+
 			String userSeq = "";
 			if(userInfos.isEmpty()) {
 				//unique한 유저시퀀스생성 
@@ -107,16 +113,17 @@ public class ChatbotServiceImpl implements ChatbotService{
 	}
 
 	@Override
-	public void mergeUserHistFile(Map<String, Object> userInfoMap) {
+	public void mergeUserHistFile(Map<String, Object> userInfoMap, HttpSession session) {
 		log.debug("*************************mergeUserHistFile*************************");
 		//사용자 파일 폴더의 {userSeq}_hist.txt 파일 생성하고 정보추가 
 		//line0: logintime|logouttime|usingtime
 		try {
 			String userSeq = userInfoMap.get("userSeq").toString();
 			String userHistFileName = userSeq + "_hist.txt";
-			String userFilePath = filePath + "userfile/";
+//			String userFilePath = filePath + "userfile/";
+			String userFilePath = session.getServletContext().getRealPath("resources/file/userfile");
 			List<String> userHistInfos = cbu.ReadFileByLine(userFilePath, userHistFileName);
-			
+
 			String content = ""; 
 			Long loginTime = Long.valueOf(userInfoMap.get("loginTime").toString());
 			Long logoutTime = Long.valueOf(cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis()));
@@ -136,7 +143,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 	 * @see com.iirtech.chatbot.service.ChatbotService#makeUserDialogFile(java.util.Map)
 	 */
 	@Override
-	public void makeUserDialogFile(Map<String, Object> userInfoMap) {
+	public void makeUserDialogFile(Map<String, Object> userInfoMap, HttpSession session) {
 		log.debug("*************************makeUserDialogFile*************************");
 		//사용자 파일 폴더의 {currentTimeMillis}_dialog.txt 파일 생성하고 정보추가 
 		//line0: topic
@@ -145,16 +152,17 @@ public class ChatbotServiceImpl implements ChatbotService{
 		String content = ""; 
 		try {
 			String userSeq = userInfoMap.get("userSeq").toString();
-			String userFilePath = filePath + "userfile/";
-			String userDialogFileDir = userFilePath + userSeq + "/"; 
-			File targetDir = new File(userDialogFileDir);
+//			String userFilePath = filePath + "userfile/";
+			String userFilePath = session.getServletContext().getRealPath("resources/file/userfile");
+			String userDialogFileDir = userFilePath + userSeq + "/";
+//			File targetDir = new File(userDialogFileDir);
 			
 			//File이 존재하지 않을 경우 만들고 "topic" 문자열 쓰기
-			if (!targetDir.exists()) {
-				targetDir.mkdirs();
-				content = "topic";
-				userDialogContents.add(content);
-			}
+//			if (!targetDir.exists()) {
+//				targetDir.mkdirs();
+//				content = "topic";
+//				userDialogContents.add(content);
+//			}
 			String dialogTime = userInfoMap.get("dialogTime").toString();
 			String userDialogFileName = dialogTime + "_dialog.txt";
 			

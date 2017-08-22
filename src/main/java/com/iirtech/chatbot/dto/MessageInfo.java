@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 
 import javax.annotation.Resource;
@@ -59,13 +62,18 @@ public class MessageInfo {
 	private void setMessages(String scriptfilePath) {
 		
 		BufferedReader br = null;
+		URL url = null;
 		//message 저장할 배열
 		ArrayList<String> messagesArr = new ArrayList<String>();
 		try {
-			br = new BufferedReader(new FileReader(scriptfilePath));
-
+			url = new URL(scriptfilePath);
+//			br = new BufferedReader(new FileReader(scriptfilePath));
+			URLConnection connection = url.openConnection();
+			br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//			br = new BufferedReader(new FileReader(url.toString()));
 			String str = "";
 			while ((str=br.readLine()) != null) {
+			
 				messagesArr.add(str);
 			}
 		} catch (FileNotFoundException e) {

@@ -38,17 +38,18 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	@Value("#{systemProp['systemdelimeter']}") 
 	String systemDelimeter;
 	@Value("#{systemProp['imgfilepath']}") 
-	String systemImgFilePath;
+	String urlSystemImgFilePath;
 	@Value("#{systemProp['filepath']}") 
-	String filePath;
+	String urlFilePath;
 	
 	@Override
 	public Map<String, Object> getMessageInfo(String statusCd, String procInputText
 			, String messageIdx, Map<String,Object> conditionInfoMap) {
 		log.debug("*************************getMessageInfo*************************");
+		
 		//컨트롤러로 리턴할 리턴 값들을 담는 맵객체 
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String scriptFilePath = filePath + "script/bot/";
+		String scriptFilePath = urlFilePath + "script/bot/";
 		if (statusCd != DialogStatus.END_DIALOG.getStatusCd()) {//마지막이 아닐 때
 			//여기서 스크립트 파일 읽어옴 
 			//APPROACH_TOPIC에서 TOPIC이 정해진 후 해당 스크립트를 다 탄 시점부터 topic경로 적용
@@ -70,7 +71,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 				}
 				//END_TOPIC 주제 종료 스크립트의 마지막줄일때만 스크립트 파일경로의 주제경로 제거
 				if(statusCd.equals(DialogStatus.REMIND.getStatusCd())) {
-					scriptFilePath = filePath + "script/bot/";
+					scriptFilePath = urlFilePath + "script/bot/";
 					//컨트롤러 세션에서 CIT TOPIC 값 제거할 트리거 담아줌
 					//CITDelete/deleteType TOPIC이면 세션에서 CIT
 					resultMap.put("CITDelete", "TOPIC");
@@ -150,7 +151,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 						oprtStrParsStrSet.put(parserStringWithKeyIdx,Operation.IF.doParse(operationString,null,conditionInfoMap));
 						break;
 					case IMG:
-						oprtStrParsStrSet.put(parserStringWithKeyIdx,Operation.IMG.doParse(operationString,systemImgFilePath,null));
+						oprtStrParsStrSet.put(parserStringWithKeyIdx,Operation.IMG.doParse(operationString,urlSystemImgFilePath,null));
 						break;
 					case STYL:
 						oprtStrParsStrSet.put(parserStringWithKeyIdx,Operation.STYL.doParse(operationString,null,null));

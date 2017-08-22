@@ -2,6 +2,8 @@ package com.iirtech.chatbot.service;
 
 import java.util.Map;
 
+import javax.servlet.http.HttpSession;
+
 
 /**
  * @Package   : com.iirtech.chatbot.service
@@ -12,11 +14,11 @@ import java.util.Map;
  */
 public interface ChatbotService {
 
-	Map<String, Object> mergeSystemFile(Map<String, Object> param);
+	Map<String, Object> mergeSystemFile(Map<String, Object> param, HttpSession session);
 
-	void mergeUserHistFile(Map<String, Object> param);
+	void mergeUserHistFile(Map<String, Object> param, HttpSession session);
 
-	void makeUserDialogFile(Map<String, Object> userInfoMap);
+	void makeUserDialogFile(Map<String, Object> userInfoMap, HttpSession session);
 
 //	void updateUserDialogFile(Map<String, Object> param);
 

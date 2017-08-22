@@ -1,5 +1,7 @@
 package com.iirtech.chatbot.controller;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,9 +65,9 @@ public class ChatbotController {
 	 * @return session(userSeq, userType, dialogStatus, dialogTime), resultmap(speecher, message, imgsrc)
 	 */
 	@Value("#{systemProp['imgfilepath']}") 
-	String systemImgFilePath;
-	@Value("#{systemProp['filepath']}") 
-	String filePath;
+	String urlSystemImgFilePath;
+	@Value("#{systemProp['filepath']}")
+	String urlFilePath;
 	@Value("#{systemProp['redirectpath']}") 
 	String redirectPath;
 	@RequestMapping(value = "chatbotMain.do")
@@ -75,10 +77,9 @@ public class ChatbotController {
 		try {
 			//사용자 정보 조회 후 없으면 create 있으면 update 
 			//userInfoMap : id, password, userSeq, isOldUserYN, loginTime
-			Map<String, Object> userInfoMap = cbs.mergeSystemFile(param);
+			Map<String, Object> userInfoMap = cbs.mergeSystemFile(param, session);
 			//사용자 대화접속 이력 파일 생성 
-			cbs.mergeUserHistFile(userInfoMap);
-			
+			cbs.mergeUserHistFile(userInfoMap, session);
 			//Session에 기억할 정보들(userSeq,userHistFile,userDialogFile) 저장!
 			String userSeq = String.valueOf(userInfoMap.get("userSeq"));
 			String userType = String.valueOf(userInfoMap.get("userType"));
@@ -87,12 +88,12 @@ public class ChatbotController {
 			Map<String,Object> conditionInfoMap = new HashMap<String, Object>();
 			conditionInfoMap.put("userType", userType);//사용자 타입 세팅 : oldUser, newUser
 			session.setAttribute("conditionInfoMap", conditionInfoMap);
-			
-			String scriptFilePath = filePath + "script/bot/";
+
+			String scriptFilePath = urlFilePath + "script/bot/";
 			MessageInfo info = new MessageInfo("0000",scriptFilePath);
 			String initInfo = info.getMessageByIdx(0).replace("\\n", "<br>");
 			mv.addObject("initInfo", initInfo);
-			mv.addObject("imgSrc", systemImgFilePath);
+			mv.addObject("imgSrc", urlSystemImgFilePath);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -180,11 +181,11 @@ public class ChatbotController {
 	    		userDialogInfoMap.put("dialogTime", dialogTime);
 	    		
 	    		// 상태체크해서 최초 시스템 시작이 아닌경우에는 updateUserDialogFile 실행 
-	    		cbs.makeUserDialogFile(userDialogInfoMap);
+	    		cbs.makeUserDialogFile(userDialogInfoMap, session);
 	    		
 	    		//화면에 뿌릴 데이터 세팅 
 	    		resultMap = messageInfo;
-	    		resultMap.put("imgSrc", systemImgFilePath);
+	    		resultMap.put("imgSrc", urlSystemImgFilePath);
 	    		mv.addAllObjects(resultMap);
 
 		} catch (Exception e) {

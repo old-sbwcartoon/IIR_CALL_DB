@@ -3,8 +3,8 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd" >
 <properties>
 	<comment>시스템 공통 변수들과 그 값들을 설정하는 xml</comment>
-	<entry key="imgfilepath">/resources/img/</entry>
-	<entry key="filepath">/Users/rnder_004/dev/workspace-sts-3.9.0.RELEASE/CALL/src/main/webapp/resources/file/</entry>
+	<entry key="imgfilepath">http://106.255.230.162:61114/chatbot/img/</entry>
+	<entry key="filepath">http://106.255.230.162:61114/chatbot/file/</entry>
 	<entry key="userseqfilename">userSeq.txt</entry>
 	<entry key="systemdelimeter">|</entry>
 	<entry key="redirectpath">chatbotMain.do</entry>

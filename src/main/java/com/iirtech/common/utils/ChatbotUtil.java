@@ -7,6 +7,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -79,8 +84,13 @@ public class ChatbotUtil {
 			//아무 처리도 하지 않고 null을 리턴함 
 		}else {
 			BufferedReader br = null;
+			URL url = null;
 			try {
+//				url = new URL(filePath+fileName);
+//				URLConnection connection = url.openConnection();
+				
 				br = new BufferedReader(new FileReader(targetFile));
+//				br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 				String line;
 				while ((line = br.readLine()) != null) {
 					contents.add(line);
@@ -106,10 +116,16 @@ public class ChatbotUtil {
 		if(!targetDir.exists()) {
 			targetDir.mkdirs();
 		}
-		
+
 		File targetFile = new File(filePath,fileName);
+//		URL url = null;
 		BufferedWriter bw = null;
         try {
+//        		url = new URL(filePath+fileName);
+//			URLConnection connection = url.openConnection();
+//			connection.setDoOutput(true);
+
+//			bw = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
             bw = new BufferedWriter(new FileWriter(targetFile));
             //list 형태의 자료를 루프돌면서 write
             for (String content : contents) {
