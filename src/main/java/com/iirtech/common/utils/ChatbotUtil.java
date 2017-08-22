@@ -78,35 +78,50 @@ public class ChatbotUtil {
 	//4. file read write
 	/////////////////////////////////////
 	public List<String> ReadFileByLine(String filePath, String fileName) {
-		File targetFile = new File(filePath, fileName);
 		List<String> contents = new ArrayList<String>();
-		if(!targetFile.exists()) {
-			//아무 처리도 하지 않고 null을 리턴함 
-		}else {
-			BufferedReader br = null;
-			URL url = null;
-			try {
-//				url = new URL(filePath+fileName);
-//				URLConnection connection = url.openConnection();
+		
+		//filePath가 url이냐 local dir이냐에 따라 로직 달라짐
+		boolean isUrlPath;
+		if (filePath.contains("://")) {
+			isUrlPath = true;
+		} else {
+			isUrlPath = false;
+		}
+		
+		BufferedReader br = null;
+		try {
+			if (isUrlPath) {
 				
-				br = new BufferedReader(new FileReader(targetFile));
-//				br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-				String line;
-				while ((line = br.readLine()) != null) {
-					contents.add(line);
+				URL url = new URL(filePath+fileName);
+				URLConnection connection = url.openConnection();
+				br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+				
+			} else {
+				
+				File targetFile = new File(filePath, fileName);
+				if(!targetFile.exists()) {
+					return null;
+				} else {
+					br = new BufferedReader(new FileReader(targetFile));
 				}
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();	
-			} finally {
-				if (br != null)
-					try {
-						br.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+				
 			}
+			
+			String line = null;
+			while ((line = br.readLine()) != null) {
+				contents.add(line);
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();	
+		} finally {
+			if (br != null)
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 		}
 		return contents;
 	}
