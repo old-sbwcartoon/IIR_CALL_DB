@@ -100,7 +100,7 @@ public class ChatbotUtil {
 				
 				File targetFile = new File(filePath, fileName);
 				if(!targetFile.exists()) {
-					return null;
+					return contents;
 				} else {
 					br = new BufferedReader(new FileReader(targetFile));
 				}
@@ -108,9 +108,14 @@ public class ChatbotUtil {
 			}
 			
 			String line = null;
-			while ((line = br.readLine()) != null) {
-				contents.add(line);
-			}
+			do {
+				line = br.readLine();
+				if (line != null) {
+					line = new String( line.getBytes("utf-8"));
+					contents.add(line);
+				}
+			} while (line != null);
+			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
