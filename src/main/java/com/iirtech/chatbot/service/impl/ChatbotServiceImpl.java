@@ -1,14 +1,11 @@
 package com.iirtech.chatbot.service.impl;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
@@ -65,7 +62,6 @@ public class ChatbotServiceImpl implements ChatbotService{
 //			String systemFilePath = filePath + "systemfile/";
 			String systemFilePath = session.getServletContext().getRealPath("resources/file/systemfile");
 			List<String> userInfos = cbu.ReadFileByLine(systemFilePath, userSeqFileName);
-//			String ss = session.getServletContext().getRealPath("resources/file/");
 
 			String userSeq = "";
 			if(userInfos.isEmpty()) {
@@ -143,7 +139,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 	 * @see com.iirtech.chatbot.service.ChatbotService#makeUserDialogFile(java.util.Map)
 	 */
 	@Override
-	public void makeUserDialogFile(Map<String, Object> userInfoMap, HttpSession session) {
+	public void makeUserDialogFile(Map<String, Object> userInfoMap, String rootPath) {
 		log.debug("*************************makeUserDialogFile*************************");
 		//사용자 파일 폴더의 {currentTimeMillis}_dialog.txt 파일 생성하고 정보추가 
 		//line0: topic
@@ -153,7 +149,8 @@ public class ChatbotServiceImpl implements ChatbotService{
 		try {
 			String userSeq = userInfoMap.get("userSeq").toString();
 //			String userFilePath = filePath + "userfile/";
-			String userFilePath = session.getServletContext().getRealPath("resources/file/userfile");
+//			String userFilePath = session.getServletContext().getRealPath("resources/file/userfile");
+			String userFilePath = rootPath + "/file/userfile";
 			String userDialogFileDir = userFilePath + userSeq + "/";
 //			File targetDir = new File(userDialogFileDir);
 			

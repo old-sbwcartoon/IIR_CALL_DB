@@ -1,5 +1,6 @@
 package com.iirtech.common.enums;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,11 +41,17 @@ public enum Operation { //VAR 에 대한 처리를 고민중...
 			String result = "";
 			//conditionInfoMap 에는 String userType, List textTypes 이 들어있음.
 			Map<String,Object> tempMap = (Map<String, Object>) conditionInfoMap;
-			String userType = String.valueOf(tempMap.get("userType"));
+			
+			List<String> tempList = new ArrayList<String>();
+			String userType        = String.valueOf(tempMap.get("userType"));
 			List<String> textTypes = (List<String>) tempMap.get("textTypes");
+			
+			if (textTypes != null) {
+				tempList = textTypes;
+			}
+			tempList.add(userType); // 기존의 textTypes 에 userType까지 추가한 리스트
+
 			//userType 이든 textType이든 현재까지 누적된 조건 어느거에 하나만이라도 스크립트 상의 조건이 걸리면 true
-			List<String> tempList = textTypes;
-			tempList.add(userType); // 기존의 textTypes 에 userType까지 추가한 리스트 
 			for (String condition : tempList) {
 				if(operationVals[1].equalsIgnoreCase(condition)) {
 					//조건이 참일 때

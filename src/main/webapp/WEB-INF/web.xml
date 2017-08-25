@@ -13,6 +13,20 @@
 		<param-value>classpath*:config/spring/context-*.xml</param-value>
 	</context-param>
 	
+	<!--  JNDI NamingException 우회 -->
+	<context-param>  
+	    <param-name>spring.profiles.active</param-name>  
+	    <param-value>dev</param-value>  
+	</context-param>  
+	<context-param>  
+	    <param-name>spring.profiles.default</param-name>  
+	    <param-value>dev</param-value>  
+	</context-param>
+	<context-param>  
+	    <param-name>spring.liveBeansView.mbeanDomain</param-name>  
+	    <param-value>dev</param-value>  
+	</context-param>
+	
 	<!-- Creates the Spring Container shared by all Servlets and Filters -->
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
@@ -28,13 +42,12 @@
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-		
 	<servlet-mapping>
 		<servlet-name>action</servlet-name>
 		<url-pattern>*.do</url-pattern>
 		<url-pattern>*.json</url-pattern>
 	</servlet-mapping>
-
+	
 	<filter>
 	    <filter-name>encodingFilter</filter-name>
 		<filter-class>

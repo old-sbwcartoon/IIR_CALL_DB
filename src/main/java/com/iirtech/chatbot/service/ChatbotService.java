@@ -18,7 +18,8 @@ public interface ChatbotService {
 
 	void mergeUserHistFile(Map<String, Object> param, HttpSession session);
 
-	void makeUserDialogFile(Map<String, Object> userInfoMap, HttpSession session);
+//	void makeUserDialogFile(Map<String, Object> userInfoMap, HttpSession session);
+	void makeUserDialogFile(Map<String, Object> userInfoMap, String rootPath);
 
 //	void updateUserDialogFile(Map<String, Object> param);
 
