@@ -40,7 +40,7 @@ public class ChatbotAPIController {
 	//for test
 	//REST API
 	@ResponseBody
-	@RequestMapping(value = "/KAIST")
+	@RequestMapping(value = "/KAIST.do")
 	public String KAIST(@RequestParam String jsonStr) {
 		//jsonStr을 MAP으로 변환해 받기로 한 param명인 name의 value를 꺼내서 hi 문자열을 붙여서 리턴해준다.
 		Map<String,Object> paramMap = cbau.jsonStrToMap(jsonStr);
@@ -73,7 +73,7 @@ public class ChatbotAPIController {
 	    map.add("jsonStr", jo.toJSONString());//jsonStr={name:"KINO"}
 	    
 	    // REST API 호출: 약속된 패러미터 전달 url(http://localhost:8090/KAIST)을 호출 
-	    String jsonStrResult = restTemplate.postForObject("http://localhost:8090/KAIST", map, String.class);
+	    String jsonStrResult = restTemplate.postForObject("http://localhost:8090/KAIST.do", map, String.class);
 	    //jsonString 형식의 response param을 Map객체로 변환 후 이미 약속된 msg 변수의 값을 추출하여 result에 세팅 후 view page로 전달 
 	    Map<String,Object> tempMap = cbau.jsonStrToMap(jsonStrResult);
 	    String result = String.valueOf(tempMap.get("msg"));
