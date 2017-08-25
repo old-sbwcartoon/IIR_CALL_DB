@@ -2,8 +2,11 @@ package com.iirtech.chatbot.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -15,6 +18,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.iirtech.common.utils.ChatbotAPIUtil;
 
 
 
@@ -29,14 +34,26 @@ import org.springframework.web.servlet.ModelAndView;
 public class ChatbotAPIController {
 	
 	private Logger log = Logger.getLogger(this.getClass());
+	@Autowired
+	ChatbotAPIUtil cbau;
 	
 	//for test
 	//REST API
 	@ResponseBody
 	@RequestMapping(value = "/KAIST")
 	public String KAIST(@RequestParam String jsonStr) {
-		return "hi "+ jsonStr;
+		//jsonStr을 MAP으로 변환해 받기로 한 param명인 name의 value를 꺼내서 hi 문자열을 붙여서 리턴해준다.
+		Map<String,Object> paramMap = cbau.jsonStrToMap(jsonStr);
+		String name = String.valueOf(paramMap.get("name"));
+		String greetingMsg = "hi~~~!! "+ name;
+		
+		//json string 형식의 parameter 세팅
+	    JSONObject jo = new JSONObject();
+	    jo.put("msg", greetingMsg); //{msg:"hi~~~!! KINO"}
+		//
+	    return jo.toJSONString();
 	}
+	
 	// kaist에 request 날리고, response를 돌려받는 test용도 
 	@RequestMapping(value = "URLConnTest.do")
 	public ModelAndView URLConnTest() {
@@ -45,15 +62,22 @@ public class ChatbotAPIController {
 	    List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 	    converters.add(new FormHttpMessageConverter());
 	    converters.add(new StringHttpMessageConverter());
-	 
+	    
 	    RestTemplate restTemplate = new RestTemplate();
 	    restTemplate.setMessageConverters(converters);
-	    // parameter 세팅
+	    
+	    //json string 형식의 parameter 세팅
+	    JSONObject jo = new JSONObject();
+	    jo.put("name", "KINO"); //{name:"KINO"}
 	    MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
-	 
-	    // REST API 호출
-	    String result = restTemplate.postForObject("http://localhost:8090/KAIST", map, String.class);
-	    log.debug("------------------ TEST 결과 ------------------");
+	    map.add("jsonStr", jo.toJSONString());//jsonStr={name:"KINO"}
+	    
+	    // REST API 호출: 약속된 패러미터 전달 url(http://localhost:8090/KAIST)을 호출 
+	    String jsonStrResult = restTemplate.postForObject("http://localhost:8090/KAIST", map, String.class);
+	    //jsonString 형식의 response param을 Map객체로 변환 후 이미 약속된 msg 변수의 값을 추출하여 result에 세팅 후 view page로 전달 
+	    Map<String,Object> tempMap = cbau.jsonStrToMap(jsonStrResult);
+	    String result = String.valueOf(tempMap.get("msg"));
+	    log.debug("=======================================");
 	    log.debug(result);
 	    mav.addObject("result",result);
 

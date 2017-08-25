@@ -22,7 +22,7 @@ usr.avatar = "usr.jpeg";
 
 function socketHandler(clientMessage) {
 
-	var sock = new WebSocket("ws://localhost:7080/sockethandler.do");
+	var sock = new WebSocket("ws://localhost:8090/sockethandler.do");
 	/* server 연결시 바로 */
     sock.onopen = function() {
 		/* server 연결시 바로 message 보내기 */

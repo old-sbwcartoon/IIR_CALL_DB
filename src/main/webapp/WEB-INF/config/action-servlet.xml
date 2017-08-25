@@ -42,9 +42,12 @@
 		</websocket:handshake-interceptors>
 		<!-- <websocket:sockjs /> -->
 	</websocket:handlers>
-
+	
+	<!-- for Autowired -->
 	<bean id="cbu" class="com.iirtech.common.utils.ChatbotUtil"></bean>
-     
+	<bean id="cbau" class="com.iirtech.common.utils.ChatbotAPIUtil"></bean>
+     <!-- for Autowired -->
+
     <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
      
     <bean class="org.springframework.web.servlet.view.BeanNameViewResolver" p:order="0" />
