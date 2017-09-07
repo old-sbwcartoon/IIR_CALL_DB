@@ -22,7 +22,7 @@ usr.avatar = "usr.jpeg";
 
 function socketHandler(clientMessage) {
 
-	var sock = new WebSocket("ws://localhost:8090/sockethandler.do");
+	var sock = new WebSocket("ws://localhost:7080/sockethandler.do");
 	/* server 연결시 바로 */
     sock.onopen = function() {
 		/* server 연결시 바로 message 보내기 */
@@ -141,16 +141,6 @@ function resetChat(){
     $("#imgSrc").val('');
 }
 
-$(".mytext").on("keyup", function(e){
-    if (e.which == 13){
-        var text = $(this).val();
-        if (text !== ""){
-            insertChat("bot", text);              
-            $(this).val('');
-        }
-    }
-});
-
 function doInput(statusCd, messageIdx){
 
 	var msg = {
@@ -209,6 +199,14 @@ function btnEvent() {
 		insertUser($('#userInput').val(), $('#imgSrc').val());
 		doInput($('#statusCd').val(), $('#messageIdx').val());
 	        
+	});
+	
+	$( "#userInput" ).keypress(function( e ) {
+		  if ( e.which == 13 ) {
+			  event.preventDefault();
+			  insertUser($('#userInput').val(), $('#imgSrc').val());
+			  doInput($('#statusCd').val(), $('#messageIdx').val());
+		  }
 	});
 }
 

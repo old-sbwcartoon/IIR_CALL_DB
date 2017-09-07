@@ -84,16 +84,25 @@ public class ChatbotController {
 			//Session에 기억할 정보들(userSeq,userHistFile,userDialogFile) 저장!
 			String userSeq = String.valueOf(userInfoMap.get("userSeq"));
 			String userType = String.valueOf(userInfoMap.get("userType"));
+			String loginTime = String.valueOf(userInfoMap.get("loginTime"));
 			session.setAttribute("userSeq", userSeq);
 			//훗날 문장 최적화에 사용될 조건 정보들을 담는 객체 선언
 			Map<String,Object> conditionInfoMap = new HashMap<String, Object>();
 			conditionInfoMap.put("userType", userType);//사용자 타입 세팅 : oldUser, newUser
-//			session.setAttribute("conditionInfoMap", conditionInfoMap);
+			conditionInfoMap.put("loginTime", loginTime);
+			session.setAttribute("conditionInfoMap", conditionInfoMap);
 			mv.addObject("conditionInfoMap", new ObjectMapper().writeValueAsString(conditionInfoMap));
 			
 			String scriptFilePath = urlFilePath + "script/bot/";
 			MessageInfo info = new MessageInfo("0000",scriptFilePath);
 			String initInfo = info.getMessageByIdx(0).replace("\\n", "<br>");
+			// loginTime으로 파일 초기화
+			String rootPath = System.getProperty("user.home") + "/Documents/chatbot";
+			userInfoMap.put("orglMessage", info.getMessageByIdx(0).replace("\\n", System.getProperty("line.separator")+"\t\t")); //로그 기록하기 위해 tag 변환
+			userInfoMap.put("isUser", false);
+			userInfoMap.put("dialogTime", userInfoMap.get("loginTime"));
+			cbs.makeUserDialogFile(userInfoMap, rootPath);
+			
 			mv.addObject("initInfo", initInfo);
 			mv.addObject("imgSrc", urlSystemImgFilePath);
 		} catch (Exception e) {

@@ -150,7 +150,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 			String userSeq = userInfoMap.get("userSeq").toString();
 //			String userFilePath = filePath + "userfile/";
 //			String userFilePath = session.getServletContext().getRealPath("resources/file/userfile");
-			String userFilePath = rootPath + "/file/userfile";
+			String userFilePath = rootPath + "/file/userfile/";
 			String userDialogFileDir = userFilePath + userSeq + "/";
 //			File targetDir = new File(userDialogFileDir);
 			
@@ -160,13 +160,18 @@ public class ChatbotServiceImpl implements ChatbotService{
 //				content = "topic";
 //				userDialogContents.add(content);
 //			}
-			String dialogTime = userInfoMap.get("dialogTime").toString();
-			String userDialogFileName = dialogTime + "_dialog.txt";
+			String userDialogFileName = userInfoMap.get("loginTime").toString() + "_dialog.txt";
 			
 			String orglMessage = userInfoMap.get("orglMessage").toString();
-			
 			String speecher = "";
-			content = dialogTime + systemDelimeter + speecher + systemDelimeter + orglMessage + systemDelimeter + orglMessage;
+			if (Boolean.valueOf( String.valueOf((userInfoMap.get("isUser"))) )) {
+				speecher = userSeq;
+			} else {
+				speecher = "이르";
+			}
+
+			String dialogTime = userInfoMap.get("dialogTime").toString();
+			content = dialogTime + systemDelimeter + speecher + systemDelimeter + orglMessage;
 			
 			userDialogContents.add(content);
 			cbu.WriteFile(userDialogFileDir, userDialogFileName, userDialogContents);

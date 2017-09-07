@@ -142,7 +142,7 @@ public class ChatbotUtil {
 //			connection.setDoOutput(true);
 
 //			bw = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
-            bw = new BufferedWriter(new FileWriter(targetFile));
+            bw = new BufferedWriter(new FileWriter(targetFile, true)); //file이 있다면 이어쓴다
             //list 형태의 자료를 루프돌면서 write
             for (String content : contents) {
 	            	bw.write(content);

@@ -157,17 +157,52 @@ public class WebSocketHandler extends TextWebSocketHandler {
 //		    			httpSession.put("CIT", messageInfo.get("CIT"));
 		    			conditionInfoMap.put("CIT", messageInfo.get("CIT"));
 		    		}
+		    		
+		    		
+		    		
 		    		String dialogTime = cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis());
+		    		//사용자 대화내용 로그 파일 업데이트!! //user 로그는 SYSTEM_ON 아닐 때부터 기록
+		    		if (!statusCd.equals(DialogStatus.SYSTEM_ON.getStatusCd())) {
+		    			Map<String,Object> userDialogInfoMap = new HashMap<String, Object>();
+			    		userDialogInfoMap.put("loginTime", conditionInfoMap.get("loginTime"));
+			    		userDialogInfoMap.put("userSeq", userSeq);
+			    		userDialogInfoMap.put("isUser", true);
+			    		userDialogInfoMap.put("orglMessage", inputText);
+//				    		userDialogInfoMap.put("procMessage", procText); //현재 안쓴다
+			    		userDialogInfoMap.put("dialogTime", dialogTime);
+			    		// 상태체크해서 최초 시스템 시작이 아닌경우에는 updateUserDialogFile 실행 
+			    		cbs.makeUserDialogFile(userDialogInfoMap, rootPath);
+		    		}
 		    		
-		    		//사용자 대화내용 로그 파일 업데이트!!
-		    		Map<String,Object> userDialogInfoMap = new HashMap<String, Object>();
-		    		userDialogInfoMap.put("userSeq", userSeq);
-		    		userDialogInfoMap.put("orglMessage", inputText);
-		    		userDialogInfoMap.put("procMessage", procText);
-		    		userDialogInfoMap.put("dialogTime", dialogTime);
+		    		//챗봇 메시지 로그 파일 업데이트!!
+				Map<String, Object> botDialogInfoMap = new HashMap<String, Object>();
+				String botMessage = String.valueOf(messageInfo.get("message"));
+				botMessage = botMessage.replaceAll("<br>", System.getProperty("line.separator")+"\t\t"); //로그 기록하기 위해 tag 변환
+				String tmpMsg = botMessage;
+				String tmp = "";
+				String rep = "";
+				while (tmpMsg.contains("<")) {
+					tmp = tmpMsg.substring(botMessage.indexOf("<"), botMessage.indexOf(">")+1);
+					rep = "";
+					//tag가 img일 경우 이미지 파일이름 기록
+					if (tmp.contains("<img")) { // tmp = <img src="http://106.255.230.162:61114/chatbot/img/tofu.png" height="150" width="150"/>
+						String imgSrc = tmp.substring(tmp.indexOf("src=\"")+5); // imgSrc = http://106.255.230.162:61114/chatbot/img/tofu.png" height="150" width="150"/>
+						imgSrc = imgSrc.substring(0, imgSrc.indexOf("\"")); // imgSrc = http://106.255.230.162:61114/chatbot/img/tofu.png
+						imgSrc = imgSrc.substring(imgSrc.lastIndexOf("/")+1); // imgSrc = http://106.255.230.162:61114/chatbot/img/tofu.png
+						rep = "<img:"+imgSrc+">"; // imgSrc = tofu.png
+					}
+					tmpMsg = botMessage.replace(tmp, "");
+					botMessage = botMessage.replace(tmp, rep);
+				}
+				
+				botDialogInfoMap.put("loginTime", conditionInfoMap.get("loginTime"));
+				botDialogInfoMap.put("userSeq", userSeq); //session.id
+				botDialogInfoMap.put("isUser", false);
+				botDialogInfoMap.put("orglMessage", botMessage);
+				botDialogInfoMap.put("dialogTime", dialogTime);
+				cbs.makeUserDialogFile(botDialogInfoMap, rootPath);
+				
 		    		
-		    		// 상태체크해서 최초 시스템 시작이 아닌경우에는 updateUserDialogFile 실행 
-		    		cbs.makeUserDialogFile(userDialogInfoMap, rootPath);
 		    		
 		    		//화면에 뿌릴 데이터 세팅 
 		    		resultMap = messageInfo;

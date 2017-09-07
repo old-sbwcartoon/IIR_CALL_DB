@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.iirtech.chatbot.dto.MessageInfo;
 import com.iirtech.chatbot.service.ChatbotScriptService;
+import com.iirtech.chatbot.service.ChatbotService;
 import com.iirtech.common.enums.DialogStatus;
 import com.iirtech.common.enums.Operation;
 import com.iirtech.common.utils.ChatbotUtil;
@@ -34,7 +35,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	
 	@Autowired
 	ChatbotUtil cbu;
-
+	
 	@Value("#{systemProp['systemdelimeter']}") 
 	String systemDelimeter;
 	@Value("#{systemProp['imgfilepath']}") 
@@ -90,6 +91,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 				resultMap.put("CIT", CIT);//TOPIC
 			}
 			nextMessage = this.parseForHtml(optmzMessage);
+			
 			log.debug("statusCd>>>>>>>>>"+statusCd);
 			log.debug("optimizedMsg>>>>>>>>>"+nextMessage);
 			
