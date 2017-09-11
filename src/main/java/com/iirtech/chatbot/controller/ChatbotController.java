@@ -54,7 +54,7 @@ public class ChatbotController {
 	 */
 	@RequestMapping(value = "index.do")
 	public void index() {
-		log.debug("*************************index.do*************************");
+		log.debug("************************index.do*************************");
 	}
 	
 	/**
