@@ -24,7 +24,8 @@ usr.avatar = "usr.jpeg";
 
 function socketHandler(clientMessage) {
 
-	var sock = new WebSocket("ws://106.255.230.162:1148/sockethandler.do");
+	//var sock = new WebSocket("ws://106.255.230.162:1148/sockethandler.do");
+	var sock = new WebSocket("ws://localhost:8090/sockethandler.do");
 	/* server 연결시 바로 */
     sock.onopen = function() {
 		/* server 연결시 바로 message 보내기 */
@@ -34,7 +35,7 @@ function socketHandler(clientMessage) {
 	/* message 받아옴 */
 	sock.onmessage = function(serverMessage) {
 		var data = JSON.parse(serverMessage.data);
-		var statusCd = $('#statusCd').val();
+		var statusCd = $('#statusCd').val();//위치 바꾸면 안된다!
 		$('#statusCd').val(data.statusCd);
 		$('#messageIdx').val(data.messageIdx);
 		$('#conditionInfos').val(data.conditionInfoMap);
@@ -42,6 +43,9 @@ function socketHandler(clientMessage) {
 		$('#scriptPath').val(data.scriptFilePath);
 		insertBot(data.message, data.imgSrc, data.messageIdx, statusCd);
 		
+		//시각화 부분 
+		$('#dialogShowBoxText').remove();		
+		$('#dialogShowBox').append(data.dialogLogStr);
 	};
 
 	/* server 연결 단절 */
@@ -258,7 +262,12 @@ function doFixText(seq, statusCd, messageIdx, scriptPath){
 		   }
 		   ,dataType: 'text'
 		   ,success: function(data) {
-			   alert(data.result);
+			   var jsonObj = JSON.parse(data)
+			   alert(jsonObj.result);
+			   
+			   //시각화 부분 
+			   $('#dialogShowBoxText').remove();
+			   $('#dialogShowBox').append(jsonObj.dialogLogStr);
 		   	}
 		});
 	}

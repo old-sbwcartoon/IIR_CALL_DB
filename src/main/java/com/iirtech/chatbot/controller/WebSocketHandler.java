@@ -179,7 +179,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		    		//챗봇 메시지 로그 파일 업데이트!!
 				Map<String, Object> botDialogInfoMap = new HashMap<String, Object>();
 				String botMessage = String.valueOf(messageInfo.get("message"));
-				botMessage = botMessage.replaceAll("<br>", System.getProperty("line.separator")+"\t"); //로그 기록하기 위해 tag 변환
+				botMessage = botMessage.replaceAll("<br>", System.getProperty("line.separator")); //로그 기록하기 위해 tag 변환
 				String tmpMsg = botMessage;
 				String tmp = "";
 				String rep = "";
@@ -206,11 +206,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
 				botDialogInfoMap.put("messageIdx", messageIdx);
 				cbs.makeUserDialogFile(botDialogInfoMap, rootPath);
 				
-		    		
+		    		String dialogLogStr = cbs.makeDialogLogString(botDialogInfoMap,rootPath);
 		    		
 		    		//화면에 뿌릴 데이터 세팅 
 		    		resultMap = messageInfo;
 		    		resultMap.put("imgSrc", urlSystemImgFilePath);
+		    		resultMap.put("dialogLogStr", dialogLogStr);
 		    		resultMap.put("conditionInfoMap", jacksonMapper.writeValueAsString(conditionInfoMap));
 
 	    		}

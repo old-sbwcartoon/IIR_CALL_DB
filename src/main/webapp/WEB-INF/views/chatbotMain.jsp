@@ -8,7 +8,7 @@
 	<link href="/resources/css/chatbotMain.css?ver=1" rel="stylesheet" type="text/css">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <script src="/resources/js/jquery-1.10.2.min.js"></script>
-    <script type="text/javascript" charset="utf-8" src="/resources/js/chatbotMain.js?ver=1"></script>
+    <script type="text/javascript" charset="utf-8" src="/resources/js/chatbotMain.js?ver=3"></script>
 </head>
 <body>
 	<div class="dialog-div" style="width: 50%; float: left;">
@@ -37,6 +37,9 @@
 			<button id="btnInput">입력</button>
 		</div>
 	</div>  
+	<div class="dialog-div" id="dialogShowBox" style="width: 50%; float: left; overflow: auto;">
+	${dialogLogStr}
+	</div>
 	<input type="hidden" id="imgSrc" value='${imgSrc}'>
 	<input type="hidden" id="statusCd" value='${statusCd}'>
 	<input type="hidden" id="messageIdx" value='${messageIdx}'>

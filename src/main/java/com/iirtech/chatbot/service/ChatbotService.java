@@ -23,6 +23,8 @@ public interface ChatbotService {
 
 	void addFixedTextToDialogFile(Map<String, Object> param, String rootPath);
 
+	String makeDialogLogString(Map<String, Object> userInfoMap, String rootPath);
+
 //	void updateUserDialogFile(Map<String, Object> param);
 
 }

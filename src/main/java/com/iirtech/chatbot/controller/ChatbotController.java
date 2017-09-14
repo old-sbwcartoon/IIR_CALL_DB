@@ -101,18 +101,23 @@ public class ChatbotController {
 			// loginTime으로 파일 초기화
 			String rootPath = System.getProperty("user.home") + "/Documents/chatbot";
 			log.debug("rootPath>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+rootPath);
-			userInfoMap.put("orglMessage", info.getMessageByIdx(Integer.parseInt(initMsgIdx)).replace("\\n","<br>"+"\t")); //로그 기록하기 위해 tag 변환
+			userInfoMap.put("orglMessage", info.getMessageByIdx(Integer.parseInt(initMsgIdx)).replace("\\n","<br>")); //로그 기록하기 위해 tag 변환
 			userInfoMap.put("isUser", false);
 			userInfoMap.put("dialogTime", userInfoMap.get("loginTime"));
 			userInfoMap.put("statusCd", initStatusCd);
 			userInfoMap.put("messageIdx", initMsgIdx);
 			cbs.makeUserDialogFile(userInfoMap, rootPath);
 			
+			//시각화 
+			String dialogLogStr = cbs.makeDialogLogString(userInfoMap,rootPath);
+			
 			mv.addObject("statusCd", initStatusCd);
 			mv.addObject("messageIdx", initMsgIdx);
 			mv.addObject("initInfo", initInfo);
 			mv.addObject("imgSrc", urlSystemImgFilePath);
 			mv.addObject("loginTime", loginTime);
+			mv.addObject("dialogLogStr", dialogLogStr);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -228,21 +233,12 @@ public class ChatbotController {
 		param.put("userSeq", userSeq);
 		String rootPath = System.getProperty("user.home") + "/Documents/chatbot";
 		cbs.addFixedTextToDialogFile(param, rootPath);
-		mv.addObject("result", "success");
-		return mv;
-	}
-	
-	//대화로그 시각화하는 로직
-	@RequestMapping(value = "showScriptFile.do")
-	public ModelAndView showScriptFile(@RequestParam Map<String, Object> param, HttpSession session) {
-		log.debug("*************************showScriptFile.do*************************");
-		ModelAndView mv = new ModelAndView("jsonView");
-		//스크립트 파일을 읽어서 적절한 형태로 편집하여 화면에 뿌릴 string으로 보냄 
-		//statusCd|msgIdx|Bot|BotText|time|seq
-		//statusCd|msgIdx|Fix|fixedText|time|seq
-		//statusCd|msgIdx|User|UserText|time|seq
-		//현재는 편집없이 그냥 읽어서 뿌려줌
 		
+		//시각화 
+		String dialogLogStr = cbs.makeDialogLogString(param,rootPath);
+		
+		mv.addObject("result", "success");
+		mv.addObject("dialogLogStr", dialogLogStr);
 		return mv;
 	}
 
