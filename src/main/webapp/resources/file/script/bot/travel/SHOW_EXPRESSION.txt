@@ -1,2 +1,0 @@
-음식(menu): {STYL|blue|순두부 찌개}, 단위(unit): {STYL|green|인분}, 수량(num): {STYL|red|1}\n{IMG|tofu.png}\n따라해 보세요. "{STYL|blue|순두부 찌개} {STYL|red|일} {STYL|green|인분} 주세요."
-S023

@@ -1,11 +1,13 @@
-$(document).ready(function() {
+var idSeq = 1;
 
+$(document).ready(function() {
+	resetChat();
+	
 	$('.img-circle').attr("src", $('#imgSrc').val()+bot.avatar);
 	//init SYSTEM_ON
 	doInput("0000", 0);
 	
 	btnEvent();
-	
 });
 
 
@@ -22,7 +24,7 @@ usr.avatar = "usr.jpeg";
 
 function socketHandler(clientMessage) {
 
-	var sock = new WebSocket("ws://localhost:7080/sockethandler.do");
+	var sock = new WebSocket("ws://localhost:8090/sockethandler.do");
 	/* server 연결시 바로 */
     sock.onopen = function() {
 		/* server 연결시 바로 message 보내기 */
@@ -35,7 +37,9 @@ function socketHandler(clientMessage) {
 		$('#statusCd').val(data.statusCd);
 		$('#messageIdx').val(data.messageIdx);
 		$('#conditionInfos').val(data.conditionInfoMap);
-		insertBot(data.message, data.imgSrc);
+		//script path hidden 기록
+		$('#scriptPath').val(data.scriptFilePath);
+		insertBot(data.message, data.imgSrc, data.messageIdx);
 		
 	};
 
@@ -91,20 +95,29 @@ function formatAMPM(date) {
 //    
 //}
 
+
 function insertBot(text, imgfilepath){
     var control = "";
     var date = formatAMPM(new Date());
+    var seq = idSeq;
+	var statusCd = $('#statusCd').val();
+	var messageIdx = $('#messageIdx').val();
+	
     		//sleep(text.length * 100); //사용자 입력과 동시에 나오지 않도록 잠시 정지. 글자 수에 따라 정지 시간 길어짐. 버벅댐.
         control = '<li style="width:100%">' +
                         '<div class="msj macro">' +
                         '<div class="avatar"><img class="img-circle" style="width:100%;" src="'+ imgfilepath + bot.avatar +'" /></div>' +
                             '<div class="text text-l">' +
-                                '<p>'+ text +'</p>' +
+                                '<p>'+ text +'<button onclick="activeFixBox('+seq+')" class="btnFix">수정</button></p>' +
+                                '<div class="fixBox" style="display:none">' + 
+                                '<textarea class="fixText" rows="3" cols="30"></textarea><br>' +
+                                '<button onclick="doFixText('+seq+',\''+statusCd+'\',\''+messageIdx+'\')" class="btnFixInput">입력</button>'+
+                                '<button onclick="cancleFixText('+seq+')" class="cancleFixInput">취소</button>' +
+                                '</div>' +
                                 '<p><small>'+date+'</small></p>' +
                             '</div>' +
                         '</div>' +
                     '</li>';
-        
         
     setTimeout(
         function(){                        
@@ -112,6 +125,7 @@ function insertBot(text, imgfilepath){
         }
     );
     
+    idSeq++;
 }
 
 function insertUser(text, imgfilepath){
@@ -135,10 +149,11 @@ function insertUser(text, imgfilepath){
 }
 
 function resetChat(){
-    $(".dialog-ul").empty();
+    //$(".dialog-ul").empty();
     $("#speecher").val('');
     $("#message").val('');
-    $("#imgSrc").val('');
+    //$("#imgSrc").val('');
+    idSeq = 1;
 }
 
 function doInput(statusCd, messageIdx){
@@ -195,19 +210,68 @@ function doInput(statusCd, messageIdx){
 
 function btnEvent() {
 	$('#btnInput').on('click',function(e) {
-		
 		insertUser($('#userInput').val(), $('#imgSrc').val());
 		doInput($('#statusCd').val(), $('#messageIdx').val());
-	        
+		$('#userInput').val('');
+		//스크롤바 focusing
+		$("html, body").animate({scrollTop:'+=400'},'slow');
+		$(".dialog-ul").animate({scrollTop:'+=400'},'slow');
 	});
 	
-	$( "#userInput" ).keypress(function( e ) {
-		  if ( e.which == 13 ) {
-			  event.preventDefault();
-			  insertUser($('#userInput').val(), $('#imgSrc').val());
-			  doInput($('#statusCd').val(), $('#messageIdx').val());
-		  }
+	$('#userInput').keypress(function(e) {
+		if ( e.which == 13 ) {
+			event.preventDefault();
+			insertUser($('#userInput').val(), $('#imgSrc').val());
+			doInput($('#statusCd').val(), $('#messageIdx').val());
+			$('#userInput').val('');
+			//스크롤바 focusing
+			$("html, body").animate({scrollTop:'+=400'},'slow');
+			$(".dialog-ul").animate({scrollTop:'+=400'},'slow');
+		}
 	});
+}
+
+function activeFixBox(seq){
+	myFunction(seq);
+	$('.fixText').eq(seq).focus();
+}
+
+function doFixText(seq, statusCd, messageIdx, scriptPath){
+	var fixedText = $('.fixText').eq(seq).val();
+	var loginTime = $('#loginTime').val();
+	if(fixedText == null || fixedText == ""){
+		alert("수정할 문장을 입력하세요!");
+		return;
+	}else{
+		$.ajax({
+		   url: 'createNewScriptFile.do'
+		   ,async: false
+		   ,type: 'POST'
+		   ,data: {
+			   fixedText : fixedText
+		     , messageIdx : messageIdx
+		     , statusCd : statusCd
+		     , loginTime : loginTime
+		   }
+		   ,error: function() {
+		      $('#info').html('<p>An error has occurred</p>');
+		   }
+		   ,dataType: 'text'
+		   ,success: function(data) {
+			   alert(data.result);
+		   	}
+		});
+	}
+	myFunction(seq);
+}
+
+function cancleFixText(seq){
+	myFunction(seq);
+}
+
+
+function myFunction(seq) {
+	$(".fixBox").eq(seq).toggle();
 }
 
 //***************************** util *****************************//

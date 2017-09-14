@@ -98,6 +98,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			resultMap.put("statusCd", info.getStatusCd());
 			resultMap.put("message", nextMessage);
 			resultMap.put("messageIdx", nextIdx);
+			resultMap.put("scriptFilePath", scriptFilePath);
 		}
 		return resultMap;
 	}

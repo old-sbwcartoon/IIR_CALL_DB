@@ -21,6 +21,8 @@ public interface ChatbotService {
 //	void makeUserDialogFile(Map<String, Object> userInfoMap, HttpSession session);
 	void makeUserDialogFile(Map<String, Object> userInfoMap, String rootPath);
 
+	void addFixedTextToDialogFile(Map<String, Object> param, String rootPath);
+
 //	void updateUserDialogFile(Map<String, Object> param);
 
 }

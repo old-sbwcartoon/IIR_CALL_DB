@@ -94,17 +94,25 @@ public class ChatbotController {
 			mv.addObject("conditionInfoMap", new ObjectMapper().writeValueAsString(conditionInfoMap));
 			
 			String scriptFilePath = urlFilePath + "script/bot/";
-			MessageInfo info = new MessageInfo("0000",scriptFilePath);
+			String initStatusCd = "0000";
+			String initMsgIdx = "0";
+			MessageInfo info = new MessageInfo(initStatusCd,scriptFilePath);
 			String initInfo = info.getMessageByIdx(0).replace("\\n", "<br>");
 			// loginTime으로 파일 초기화
 			String rootPath = System.getProperty("user.home") + "/Documents/chatbot";
+			log.debug("rootPath>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+rootPath);
 			userInfoMap.put("orglMessage", info.getMessageByIdx(0).replace("\\n", System.getProperty("line.separator")+"\t\t")); //로그 기록하기 위해 tag 변환
 			userInfoMap.put("isUser", false);
 			userInfoMap.put("dialogTime", userInfoMap.get("loginTime"));
+			userInfoMap.put("statusCd", initStatusCd);
+			userInfoMap.put("messageIdx", initMsgIdx);
 			cbs.makeUserDialogFile(userInfoMap, rootPath);
 			
+			mv.addObject("statusCd", initStatusCd);
+			mv.addObject("messageIdx", initMsgIdx);
 			mv.addObject("initInfo", initInfo);
 			mv.addObject("imgSrc", urlSystemImgFilePath);
+			mv.addObject("loginTime", loginTime);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -206,5 +214,36 @@ public class ChatbotController {
 ////	    return mv;
 //        return resultMap;
 //	}
+	
+	//봇발화 수정하는 경우 대화로그 파일 수정로직  fixedText  messageIdx  statusCd
+	@RequestMapping(value = "createNewScriptFile.do")
+	public ModelAndView createNewScriptFile(@RequestParam Map<String, Object> param, HttpSession session) {
+		log.debug("*************************createNewScriptFile.do*************************");
+		ModelAndView mv = new ModelAndView("jsonView");
+		//본래 저장된 파일을 읽어서 수정하여 저장
+		//statusCd|msgIdx|Bot|BotText|time|seq
+		//statusCd|msgIdx|Fix|fixedText|time|seq
+		//statusCd|msgIdx|User|UserText|time|seq
+		String userSeq = session.getAttribute("userSeq").toString();
+		param.put("userSeq", userSeq);
+		String rootPath = System.getProperty("user.home") + "/Documents/chatbot";
+		cbs.addFixedTextToDialogFile(param, rootPath);
+		mv.addObject("result", "success");
+		return mv;
+	}
+	
+	//대화로그 시각화하는 로직
+	@RequestMapping(value = "showScriptFile.do")
+	public ModelAndView showScriptFile(@RequestParam Map<String, Object> param, HttpSession session) {
+		log.debug("*************************showScriptFile.do*************************");
+		ModelAndView mv = new ModelAndView("jsonView");
+		//스크립트 파일을 읽어서 적절한 형태로 편집하여 화면에 뿌릴 string으로 보냄 
+		//statusCd|msgIdx|Bot|BotText|time|seq
+		//statusCd|msgIdx|Fix|fixedText|time|seq
+		//statusCd|msgIdx|User|UserText|time|seq
+		//현재는 편집없이 그냥 읽어서 뿌려줌
+		
+		return mv;
+	}
 
 }

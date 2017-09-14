@@ -36,7 +36,6 @@
 .frame{
     background:#e0e0de;
     height:450px;
-    overflow:hidden;
     padding:0;
 }
 .frame > div:last-of-type{
@@ -45,7 +44,6 @@
 ul {
     width:100%;
     list-style-type: none;
-    padding:18px;
     /* position:absolute; */
     bottom:32px;
     display:flex;

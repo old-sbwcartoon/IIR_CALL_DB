@@ -170,6 +170,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			    		userDialogInfoMap.put("orglMessage", inputText);
 //				    		userDialogInfoMap.put("procMessage", procText); //현재 안쓴다
 			    		userDialogInfoMap.put("dialogTime", dialogTime);
+			    		userDialogInfoMap.put("statusCd", statusCd);
+			    		userDialogInfoMap.put("messageIdx", messageIdx);
 			    		// 상태체크해서 최초 시스템 시작이 아닌경우에는 updateUserDialogFile 실행 
 			    		cbs.makeUserDialogFile(userDialogInfoMap, rootPath);
 		    		}
@@ -200,6 +202,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 				botDialogInfoMap.put("isUser", false);
 				botDialogInfoMap.put("orglMessage", botMessage);
 				botDialogInfoMap.put("dialogTime", dialogTime);
+				botDialogInfoMap.put("statusCd", statusCd);
+				botDialogInfoMap.put("messageIdx", messageIdx);
 				cbs.makeUserDialogFile(botDialogInfoMap, rootPath);
 				
 		    		

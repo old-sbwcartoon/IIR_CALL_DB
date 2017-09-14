@@ -41,8 +41,8 @@ public class ChatbotServiceImpl implements ChatbotService{
 	 * userFilePath: 사용자별 파일 저장경로 
 	 * userSeqFileName: 사용자 id pwd 별 seq 정보 저장파일명  
 	 */
-//	@Value("#{systemProp['filepath']}") 
-//	String urlFilePath;
+	@Value("#{systemProp['filepath']}") 
+	String filePath;
 	@Value("#{systemProp['userseqfilename']}") 
 	String userSeqFileName;
 	@Value("#{systemProp['systemdelimeter']}") 
@@ -59,8 +59,10 @@ public class ChatbotServiceImpl implements ChatbotService{
 			String encPassword = cbu.encryptPwd(password);
 			String userType = "newUser";
 			// userInfos : ["userSeq|id|pwd", "userSeq|id|pwd" ...]
-//			String systemFilePath = filePath + "systemfile/";
-			String systemFilePath = session.getServletContext().getRealPath("resources/file/systemfile");
+			
+			String systemFilePath = System.getProperty("user.home") + "/Documents/chatbot/systemfile/";
+//			String systemFilePath = session.getServletContext().getRealPath("resources/file/systemfile");
+			log.debug("path>>>"+systemFilePath);
 			List<String> userInfos = cbu.ReadFileByLine(systemFilePath, userSeqFileName);
 
 			String userSeq = "";
@@ -162,16 +164,33 @@ public class ChatbotServiceImpl implements ChatbotService{
 //			}
 			String userDialogFileName = userInfoMap.get("loginTime").toString() + "_dialog.txt";
 			
-			String orglMessage = userInfoMap.get("orglMessage").toString();
+			String orglMessage = userInfoMap.get("orglMessage").toString().replaceAll("\n", "<br>");
 			String speecher = "";
 			if (Boolean.valueOf( String.valueOf((userInfoMap.get("isUser"))) )) {
-				speecher = userSeq;
+				speecher = "User";
 			} else {
-				speecher = "이르";
+				speecher = "Bot";
 			}
 
+			//파일내용은 하기와 같이 쓰여져야한다.
+			//statusCd|msgIdx|Bot|BotText|time|seq
+			//statusCd|msgIdx|Fix|fixedText|time|seq
+			//statusCd|msgIdx|User|UserText|time|seq
 			String dialogTime = userInfoMap.get("dialogTime").toString();
-			content = dialogTime + systemDelimeter + speecher + systemDelimeter + orglMessage;
+			String statusCd = userInfoMap.get("statusCd").toString();
+			String messageIdx = userInfoMap.get("messageIdx").toString();
+			
+			//파일의 마지막 라인에서 seq값 읽어오기 
+			List<String> dialogs = cbu.ReadFileByLine(userDialogFileDir,userDialogFileName);
+			int dialogSeq = 0;//초기값 
+			if(!dialogs.isEmpty()) {
+				String lastDialogLine = dialogs.get(dialogs.size()-1);
+				dialogSeq = Integer.parseInt(lastDialogLine.split("\\|")[5]) + 1;
+			}
+			
+			content = statusCd + systemDelimeter + messageIdx + systemDelimeter + speecher 
+					+ systemDelimeter + orglMessage + systemDelimeter + dialogTime 
+					+ systemDelimeter + dialogSeq;
 			
 			userDialogContents.add(content);
 			cbu.WriteFile(userDialogFileDir, userDialogFileName, userDialogContents);
@@ -180,6 +199,57 @@ public class ChatbotServiceImpl implements ChatbotService{
 			e.printStackTrace();		
 		}
 
+	}
+
+	@Override
+	public void addFixedTextToDialogFile(Map<String, Object> param, String rootPath) {
+		//1. 기존 대화로그파일 읽어비교 
+		String userFilePath = rootPath + "/file/userfile/";
+		String userDialogFileDir = userFilePath + param.get("userSeq").toString() + "/";
+		String userDialogFileName = param.get("loginTime").toString() + "_dialog.txt";
+		String statusCd = param.get("statusCd").toString();
+		String messageIdx = param.get("messageIdx").toString();
+		List<String> dialogs = cbu.ReadFileByLine(userDialogFileDir, userDialogFileName);
+		//삽입할 위치 구하기 //정규표현식 사용 (S000[|]0[|]Bot[|].*)
+		String botMatchingStr = statusCd + "[|]" + messageIdx + "[|]Bot[|]";
+		String fixMatchingStr = statusCd + "[|]" + messageIdx + "[|]Fix[|]";
+		int insertPoint = 0;
+		boolean isChangeFix = false;
+		for (int i = 0; i < dialogs.size(); i++) {
+			String dialog = dialogs.get(i);
+			if(dialog.matches("("+ botMatchingStr +".*)")) {
+				insertPoint = i + 1;
+			}else if(dialog.matches("("+ fixMatchingStr +".*)")) {
+				insertPoint = i;
+				isChangeFix = true;
+			}
+		}
+		//삽입할 문자열 만들어서 삽입위치에 삽입
+		String speecher = "Fix";
+		String fixedText = param.get("fixedText").toString().replaceAll("\n", "<br>");
+		String dialogTime = cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis());
+		String content = statusCd + systemDelimeter + messageIdx + systemDelimeter + speecher 
+				+ systemDelimeter + fixedText + systemDelimeter + dialogTime 
+				+ systemDelimeter + insertPoint;
+		if(!isChangeFix) {
+			dialogs.add(insertPoint, content);//추가 
+		}else {
+			dialogs.set(insertPoint, content);//교체 
+		}
+		
+		//루프돌면서 dialogSeq 재 정렬시키기
+		List<String> newDialogs = new ArrayList<String>();
+		for (int i = 0; i < dialogs.size(); i++) {
+			String dialog = dialogs.get(i);
+			String[] elmnts = dialog.split("\\|");
+			//statusCd|msgIdx|Bot|BotText|time|seq
+			String newDialog = elmnts[0] + systemDelimeter + elmnts[1] + systemDelimeter + elmnts[2] + systemDelimeter + elmnts[3]
+					 + systemDelimeter + elmnts[4] + systemDelimeter + i;
+			newDialogs.add(newDialog);
+		}
+		//기존 파일 지우고 새로 쓰기 
+		cbu.DeleteFile(userDialogFileDir, userDialogFileName);
+		cbu.WriteFile(userDialogFileDir, userDialogFileName, newDialogs);
 	}
 
 //	@Override

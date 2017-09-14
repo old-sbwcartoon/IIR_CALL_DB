@@ -127,6 +127,18 @@ public class ChatbotUtil {
 		return contents;
 	}
 	
+	
+	public void DeleteFile(String filePath, String fileName) {
+        
+		File file = new File(filePath,fileName);
+        try {
+			file.delete();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 	public void WriteFile(String filePath, String fileName, List<String> contents) {
 		File targetDir = new File(filePath);
 		if(!targetDir.exists()) {
