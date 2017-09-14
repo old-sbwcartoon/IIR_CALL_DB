@@ -24,7 +24,7 @@ usr.avatar = "usr.jpeg";
 
 function socketHandler(clientMessage) {
 
-	var sock = new WebSocket("ws://localhost:8090/sockethandler.do");
+	var sock = new WebSocket("ws://106.255.230.162:1148/sockethandler.do");
 	/* server 연결시 바로 */
     sock.onopen = function() {
 		/* server 연결시 바로 message 보내기 */
@@ -34,12 +34,13 @@ function socketHandler(clientMessage) {
 	/* message 받아옴 */
 	sock.onmessage = function(serverMessage) {
 		var data = JSON.parse(serverMessage.data);
+		var statusCd = $('#statusCd').val();
 		$('#statusCd').val(data.statusCd);
 		$('#messageIdx').val(data.messageIdx);
 		$('#conditionInfos').val(data.conditionInfoMap);
 		//script path hidden 기록
 		$('#scriptPath').val(data.scriptFilePath);
-		insertBot(data.message, data.imgSrc, data.messageIdx);
+		insertBot(data.message, data.imgSrc, data.messageIdx, statusCd);
 		
 	};
 
@@ -96,11 +97,10 @@ function formatAMPM(date) {
 //}
 
 
-function insertBot(text, imgfilepath){
+function insertBot(text, imgfilepath, messageIdx, statusCd){
     var control = "";
     var date = formatAMPM(new Date());
     var seq = idSeq;
-	var statusCd = $('#statusCd').val();
 	var messageIdx = $('#messageIdx').val();
 	
     		//sleep(text.length * 100); //사용자 입력과 동시에 나오지 않도록 잠시 정지. 글자 수에 따라 정지 시간 길어짐. 버벅댐.
