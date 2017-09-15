@@ -3,12 +3,12 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd" >
 <properties>
 	<comment>시스템 공통 변수들과 그 값들을 설정하는 xml</comment>
-<!--  	<entry key="imgfilepath">http://192.168.0.143:6111/chatbot/img/</entry>
+  	<entry key="imgfilepath">http://192.168.0.143:6111/chatbot/img/</entry>
 	<entry key="filepath">http://192.168.0.143:6111/chatbot/file/</entry>
- 	<entry key="imgfilepath">http://192.168.0.3:6111/chatbot/img/</entry>
+<!-- 	<entry key="imgfilepath">http://192.168.0.3:6111/chatbot/img/</entry>
 	<entry key="filepath">http://192.168.0.3:6111/chatbot/file/</entry> -->
-  	<entry key="imgfilepath">http://106.255.230.162:61114/chatbot/img/</entry>
-	<entry key="filepath">http://106.255.230.162:61114/chatbot/file/</entry>
+<!--   	<entry key="imgfilepath">http://106.255.230.162:61114/chatbot/img/</entry>
+	<entry key="filepath">http://106.255.230.162:61114/chatbot/file/</entry> -->
 	<entry key="userseqfilename">userSeq.txt</entry>
 	<entry key="systemdelimeter">|</entry>
 	<entry key="redirectpath">chatbotMain.do</entry>

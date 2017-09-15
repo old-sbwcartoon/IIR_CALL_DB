@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.iirtech.chatbot.dao.ChatbotDao;
 import com.iirtech.chatbot.service.ChatbotService;
+import com.iirtech.common.enums.DialogStatus;
 import com.iirtech.common.utils.ChatbotUtil;
 
 /**
@@ -265,19 +266,24 @@ public class ChatbotServiceImpl implements ChatbotService{
 		List<String> dialogs = cbu.ReadFileByLine(userDialogFileDir, userDialogFileName);
 		//현재는 <br>을 \t으로 바꿔주고 line 별로는 <br>태그 붙여준다.
 		//statusCd 가 달라지면 <br><br> 붙임 
-		String statusCd = "0000";
 		for (int i = 0; i < dialogs.size(); i++) {
 			String newLineStr = "<br>";
 			String dialog = dialogs.get(i).replaceAll("<br>", "\t");//기존 개행 표시<br>를 \t 으로 변경 
 			String[] elmnts = dialog.split("\\|");
-			String targetStatusCd = elmnts[0];
+			String statusCd = elmnts[0];
+			String targetStatusCd = statusCd;
+			if(i+1 < dialogs.size()) {
+				String nextDialog = dialogs.get(i+1).replaceAll("<br>", "\t");//기존 개행 표시<br>를 \t 으로 변경 
+				targetStatusCd = nextDialog.split("\\|")[0];
+			}
+			String msgIdx = elmnts[1];
 			if(!targetStatusCd.equals(statusCd)) {
-				statusCd = targetStatusCd;
 				newLineStr = "<br><br>";
 			}
 			//statusCd|msgIdx|Bot|BotText|time|seq
 			//[Bot]: BotText
-			result += "[" + elmnts[2] + "]: " + elmnts[3] + newLineStr;
+			String otomata = DialogStatus.get(statusCd).toString();
+			result += "[" + otomata + "(" + msgIdx + ")] " + elmnts[2] + ": " + elmnts[3] + newLineStr;
 		}
 		return result + "</p>";
 	}

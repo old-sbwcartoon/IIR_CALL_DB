@@ -22,10 +22,52 @@ var usr = {};
 //usr.avatar = "/resources/img/usr.jpeg";
 usr.avatar = "usr.jpeg";
 
+
+function btnEvent() {
+	$('#btnInput').on('click',function(e) {
+		insertUser($('#userInput').val(), $('#imgSrc').val()); //user
+		doInput($('#statusCd').val(), $('#messageIdx').val()); //bot
+		$('#userInput').val('');
+		//스크롤바 focusing
+		$("html, body").animate({scrollTop:'+=400'},'slow');
+		$(".dialog-ul").animate({scrollTop:'+=400'},'slow');
+		
+		$('#exStatusCd').val($('#statusCd').val());
+	});
+	
+	$('#userInput').keypress(function(e) {
+		if ( e.which == 13 ) {
+			event.preventDefault();
+			insertUser($('#userInput').val(), $('#imgSrc').val());
+			doInput($('#statusCd').val(), $('#messageIdx').val());
+			$('#userInput').val('');
+			//스크롤바 focusing
+			$("html, body").animate({scrollTop:'+=400'},'slow');
+			$(".dialog-ul").animate({scrollTop:'+=400'},'slow');
+			
+			$('#exStatusCd').val($('#statusCd').val());
+		}
+	});
+}
+
+
+function doInput(statusCd, messageIdx){
+	
+	var msg = {
+			userText					: $('#userInput').val()
+			, statusCd				: statusCd
+			, messageIdx				: messageIdx
+			, conditionInfoMap		: $('#conditionInfos').val()
+	}
+	
+	socketHandler(JSON.stringify(msg));
+}
+
+
 function socketHandler(clientMessage) {
 
-	var sock = new WebSocket("ws://106.255.230.162:1148/sockethandler.do");
-	//var sock = new WebSocket("ws://localhost:8090/sockethandler.do");
+	//var sock = new WebSocket("ws://106.255.230.162:1148/sockethandler.do");
+	var sock = new WebSocket("ws://localhost:8090/sockethandler.do");
 	/* server 연결시 바로 */
     sock.onopen = function() {
 		/* server 연결시 바로 message 보내기 */
@@ -35,13 +77,12 @@ function socketHandler(clientMessage) {
 	/* message 받아옴 */
 	sock.onmessage = function(serverMessage) {
 		var data = JSON.parse(serverMessage.data);
-		var statusCd = $('#statusCd').val();//위치 바꾸면 안된다!
 		$('#statusCd').val(data.statusCd);
 		$('#messageIdx').val(data.messageIdx);
 		$('#conditionInfos').val(data.conditionInfoMap);
 		//script path hidden 기록
 		$('#scriptPath').val(data.scriptFilePath);
-		insertBot(data.message, data.imgSrc, data.messageIdx, statusCd);
+		insertBot(data.message, data.imgSrc, data.messageIdx, data.statusCd);
 		
 		//시각화 부분 
 		$('#dialogShowBoxText').remove();		
@@ -160,80 +201,6 @@ function resetChat(){
     idSeq = 0;
 }
 
-function doInput(statusCd, messageIdx){
-
-	var msg = {
-		userText					: $('#userInput').val()
-		, statusCd				: statusCd
-		, messageIdx				: messageIdx
-		, conditionInfoMap		: $('#conditionInfos').val()
-	}
-	
-	socketHandler(JSON.stringify(msg));
-	
-//	var userText = $('.userInput').val();
-//	var statusCd = statusCd;
-//	var messageIdx = messageIdx;
-//	
-//	$.ajax({
-//		   url: 'messageInput.json'
-//		   ,async: false
-//		   ,type: 'POST'
-//		   ,data: {
-//		     userText : userText
-//		     , statusCd : statusCd
-//		     , messageIdx : messageIdx
-//		   }
-//		   ,error: function() {
-//		      $('#info').html('<p>An error has occurred</p>');
-//		   }
-//		   ,dataType: 'text'
-//		   ,success: function(data) {
-//			   //-- 채팅창 대화 쓰기
-//			   // read only 속성을 봇이 계속 발화해야 하는 상황이면 추가한다.
-//			   var jsonObj = JSON.parse(data);
-//			   $('#statusCd').val(jsonObj.statusCd);
-//			   $('#messageIdx').val(jsonObj.messageIdx);
-//			   
-//			   //message 약속된 기호로 나누기
-//			   var message = jsonObj.message;
-////			   var messageArr = new Array();
-////			   if (message.includes("|")) {
-////				   messageArr = message.split("|");
-////			   } else {
-////				   messageArr[0] = message;
-////			   }
-////			   //message 갯수만큼 뿌리기
-////			   for (var i= 0; i < messageArr.length; i++) {
-//				   insertBot(message, jsonObj.imgSrc);
-//				   //너무 곧바로 대답하니 부자연스러움 
-////			   }
-//		   	}
-//		});
-}
-
-function btnEvent() {
-	$('#btnInput').on('click',function(e) {
-		insertUser($('#userInput').val(), $('#imgSrc').val());
-		doInput($('#statusCd').val(), $('#messageIdx').val());
-		$('#userInput').val('');
-		//스크롤바 focusing
-		$("html, body").animate({scrollTop:'+=400'},'slow');
-		$(".dialog-ul").animate({scrollTop:'+=400'},'slow');
-	});
-	
-	$('#userInput').keypress(function(e) {
-		if ( e.which == 13 ) {
-			event.preventDefault();
-			insertUser($('#userInput').val(), $('#imgSrc').val());
-			doInput($('#statusCd').val(), $('#messageIdx').val());
-			$('#userInput').val('');
-			//스크롤바 focusing
-			$("html, body").animate({scrollTop:'+=400'},'slow');
-			$(".dialog-ul").animate({scrollTop:'+=400'},'slow');
-		}
-	});
-}
 
 function activeFixBox(seq){
 	myFunction(seq);
@@ -243,7 +210,6 @@ function activeFixBox(seq){
 function doFixText(seq, statusCd, messageIdx, scriptPath){
 	var fixedText = $('.fixText').eq(seq).val();
 	var loginTime = $('#loginTime').val();
-	alert(statusCd + '_' + messageIdx);
 	if(fixedText == null || fixedText == ""){
 		alert("수정할 문장을 입력하세요!");
 		return;

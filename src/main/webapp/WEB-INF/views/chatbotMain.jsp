@@ -36,6 +36,7 @@
 	</div>
 	<input type="hidden" id="imgSrc" value='${imgSrc}'>
 	<input type="hidden" id="statusCd" value='${statusCd}'>
+	<input type="hidden" id="exStatusCd" value='${statusCd}'>
 	<input type="hidden" id="messageIdx" value='${messageIdx}'>
 	<input type="hidden" id="conditionInfos" value='${conditionInfoMap}'>
 	<input type="hidden" id="loginTime" value='${loginTime}'>

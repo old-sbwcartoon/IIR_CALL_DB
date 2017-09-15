@@ -202,8 +202,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 				botDialogInfoMap.put("isUser", false);
 				botDialogInfoMap.put("orglMessage", botMessage);
 				botDialogInfoMap.put("dialogTime", dialogTime);
-				botDialogInfoMap.put("statusCd", statusCd);
-				botDialogInfoMap.put("messageIdx", messageIdx);
+				botDialogInfoMap.put("statusCd", messageInfo.get("statusCd"));
+				botDialogInfoMap.put("messageIdx", messageInfo.get("messageIdx"));
 				cbs.makeUserDialogFile(botDialogInfoMap, rootPath);
 				
 		    		String dialogLogStr = cbs.makeDialogLogString(botDialogInfoMap,rootPath);
