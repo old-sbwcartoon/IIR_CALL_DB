@@ -179,7 +179,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		    		//챗봇 메시지 로그 파일 업데이트!!
 				Map<String, Object> botDialogInfoMap = new HashMap<String, Object>();
 				String botMessage = String.valueOf(messageInfo.get("message"));
-				botMessage = botMessage.replaceAll("<br>", System.getProperty("line.separator")); //로그 기록하기 위해 tag 변환
+				botMessage = botMessage.replaceAll("<br>", "\n"); //로그 기록하기 위해 tag 변환 system.lineseperator 쓰면 윈도우랑 다르게 생겨짐
 				String tmpMsg = botMessage;
 				String tmp = "";
 				String rep = "";

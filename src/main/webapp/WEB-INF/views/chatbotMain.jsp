@@ -18,14 +18,8 @@
 					<div class="avatar"><img class="img-circle" style="width:100%;" src="" /></div>
 					<div class="text text-l">
 						<p>
-						${initInfo} <button id="btnFix" onclick="activeFixBox(0)">수정</button>
+						${initInfo}
 						</p>
-						<div class="fixBox" style="display:none">
-						<textarea class="fixText" rows="3" cols="30"></textarea>
-						<br>
-						<button class="btnFixInput" onclick="doFixText(0,'${statusCd}','${messageIdx}')">입력</button>
-						<button class="cancleFixInput" onclick="cancleFixText(0)">취소</button>
-						</div>
 						<p></p>
 					</div>
 				</div>

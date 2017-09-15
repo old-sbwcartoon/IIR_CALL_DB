@@ -228,7 +228,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 		}
 		//삽입할 문자열 만들어서 삽입위치에 삽입
 		String speecher = "Fix";
-		String fixedText = param.get("fixedText").toString().replaceAll("\n", "<br>");
+		String fixedText = param.get("fixedText").toString().replaceAll("\r\n", "<br>").replaceAll("\n", "<br>");
 		String dialogTime = cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis());
 		String content = statusCd + systemDelimeter + messageIdx + systemDelimeter + speecher 
 				+ systemDelimeter + fixedText + systemDelimeter + dialogTime 

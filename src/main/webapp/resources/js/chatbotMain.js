@@ -1,4 +1,4 @@
-var idSeq = 1;
+var idSeq = 0;
 
 $(document).ready(function() {
 	resetChat();
@@ -24,8 +24,8 @@ usr.avatar = "usr.jpeg";
 
 function socketHandler(clientMessage) {
 
-	//var sock = new WebSocket("ws://106.255.230.162:1148/sockethandler.do");
-	var sock = new WebSocket("ws://localhost:8090/sockethandler.do");
+	var sock = new WebSocket("ws://106.255.230.162:1148/sockethandler.do");
+	//var sock = new WebSocket("ws://localhost:8090/sockethandler.do");
 	/* server 연결시 바로 */
     sock.onopen = function() {
 		/* server 연결시 바로 message 보내기 */
@@ -157,7 +157,7 @@ function resetChat(){
     $("#speecher").val('');
     $("#message").val('');
     //$("#imgSrc").val('');
-    idSeq = 1;
+    idSeq = 0;
 }
 
 function doInput(statusCd, messageIdx){
@@ -243,6 +243,7 @@ function activeFixBox(seq){
 function doFixText(seq, statusCd, messageIdx, scriptPath){
 	var fixedText = $('.fixText').eq(seq).val();
 	var loginTime = $('#loginTime').val();
+	alert(statusCd + '_' + messageIdx);
 	if(fixedText == null || fixedText == ""){
 		alert("수정할 문장을 입력하세요!");
 		return;
