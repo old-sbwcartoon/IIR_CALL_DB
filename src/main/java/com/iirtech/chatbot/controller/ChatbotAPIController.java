@@ -75,7 +75,7 @@ public class ChatbotAPIController {
 	    map.add("jsonStr", jo.toJSONString());//jsonStr={"name":"KINO"}
 	    
 	    // REST API 호출: 약속된 패러미터 전달 url(http://localhost:8090/KAIST)을 호출 
-	    String jsonStrResult = restTemplate.postForObject("http://localhost:8090/IIR.do", map, String.class);
+	    String jsonStrResult = restTemplate.postForObject("http://localhost:7080/IIR.do", map, String.class);
 	    String oopsResult = restTemplate.getForObject("http://chatbotaip.azurewebsites.net/api/morph",String.class, map);	    
 	    //jsonString 형식의 response param을 Map객체로 변환 후 이미 약속된 msg 변수의 값을 추출하여 result에 세팅 후 view page로 전달 
 	    Map<String,Object> tempMap = cbau.jsonStrToMap(jsonStrResult);

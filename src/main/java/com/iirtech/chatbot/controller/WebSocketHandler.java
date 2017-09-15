@@ -105,7 +105,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 	    		String userType = String.valueOf(conditionInfoMap.get("userType"));
 
 	    		//대화가 끝난경우 현재는 채팅페이지로 리다이렉트 시킴
-	    		if(statusCd.equals(DialogStatus.END_DIALOG.getStatusCd())) {
+	    		if(statusCd.equals(DialogStatus.CLOSE.getStatusCd())) {
 //			    	return (ModelAndView)new ModelAndView("redirect:/" + redirectPath );
 	    			resultMap = null;
 //	    			session.close(); //session 종료
@@ -184,7 +184,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 				String tmp = "";
 				String rep = "";
 				while (tmpMsg.contains("<")) {
-					tmp = tmpMsg.substring(botMessage.indexOf("<"), botMessage.indexOf(">")+1);
+					tmp = tmpMsg.substring(tmpMsg.indexOf("<"), tmpMsg.indexOf(">")+1);
 					rep = "";
 					//tag가 img일 경우 이미지 파일이름 기록
 					if (tmp.contains("<img")) { // tmp = <img src="http://106.255.230.162:61114/chatbot/img/tofu.png" height="150" width="150"/>
@@ -193,7 +193,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 						imgSrc = imgSrc.substring(imgSrc.lastIndexOf("/")+1); // imgSrc = http://106.255.230.162:61114/chatbot/img/tofu.png
 						rep = "<img:"+imgSrc+">"; // imgSrc = tofu.png
 					}
-					tmpMsg = botMessage.replace(tmp, "");
+					tmpMsg = tmpMsg.replace(tmp, "");
 					botMessage = botMessage.replace(tmp, rep);
 				}
 				

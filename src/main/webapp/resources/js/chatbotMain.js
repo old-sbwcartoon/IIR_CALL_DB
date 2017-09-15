@@ -67,7 +67,7 @@ function doInput(statusCd, messageIdx){
 function socketHandler(clientMessage) {
 
 	//var sock = new WebSocket("ws://106.255.230.162:1148/sockethandler.do");
-	var sock = new WebSocket("ws://localhost:8090/sockethandler.do");
+	var sock = new WebSocket("ws://localhost:7080/sockethandler.do");
 	/* server 연결시 바로 */
     sock.onopen = function() {
 		/* server 연결시 바로 message 보내기 */

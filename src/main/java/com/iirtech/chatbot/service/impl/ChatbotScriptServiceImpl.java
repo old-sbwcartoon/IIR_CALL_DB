@@ -51,7 +51,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 		//컨트롤러로 리턴할 리턴 값들을 담는 맵객체 
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		String scriptFilePath = urlFilePath + "script/bot/";
-		if (statusCd != DialogStatus.END_DIALOG.getStatusCd()) {//마지막이 아닐 때
+		if (statusCd != DialogStatus.CLOSE.getStatusCd()) {//마지막이 아닐 때
 			//여기서 스크립트 파일 읽어옴 
 			//APPROACH_TOPIC에서 TOPIC이 정해진 후 해당 스크립트를 다 탄 시점부터 topic경로 적용
 			//이 정해졌을 때 트리거를 받아 스크립트 경로를 토픽으로 변환해주기 
@@ -132,58 +132,94 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 		for(int i=0; i<nextMessagesArr.length; i++) {
 			//정규표현식으로 한개 문장안의 모든 시스템명령문구를 찾음 
 			String candidateMessage = nextMessagesArr[i];
+			
+			
 			List<String> sysOprts = this.findAllOperationStrings(candidateMessage);
 			//원래 찾아낸 operation String 과 parsing 완료된 String 의 key:value 셑
 			Map<String,Object> oprtStrParsStrSet = new HashMap<String, Object>();
 			
 			int keyIdx = 0; //같은 operation, parser가 겹칠 경우 덮어쓰지 않도록 하는 보조 index
 			if(!sysOprts.isEmpty()) {//시스템 명령어가 존재하지 않는 문장은 그대로 nextMessagesArr[i]가 입력되어있음
+				
 				for (String operationString : sysOprts) {
-					//enum매칭할 키워드 추출
-					String tempStr = operationString.substring(1, operationString.length()-1);
-					String key = tempStr.split("\\"+systemDelimeter)[0];
 					
-					String operrationStringWithKeyIdx = "operationString" + keyIdx;
-					String parserStringWithKeyIdx = "parserString" + keyIdx;
-					// operationString = {NNP|location|헬싱키} , parserString = __헬싱키(location)__
-					oprtStrParsStrSet.put(operrationStringWithKeyIdx, operationString);
-					switch (Operation.get(key)) {
-					case NNP:
-						oprtStrParsStrSet.put(parserStringWithKeyIdx,Operation.NNP.doParse(operationString,null,null));
-						break;
-					case IF:
-						//conditionInfoMap 에는 String userType, List textTypes 이 들어있음.
-						oprtStrParsStrSet.put(parserStringWithKeyIdx,Operation.IF.doParse(operationString,null,conditionInfoMap));
-						break;
-					case IMG:
-						oprtStrParsStrSet.put(parserStringWithKeyIdx,Operation.IMG.doParse(operationString,urlSystemImgFilePath,null));
-						break;
-					case STYL:
-						oprtStrParsStrSet.put(parserStringWithKeyIdx,Operation.STYL.doParse(operationString,null,null));
-						break;
-					case CIT:
-						//{CIT|TOPIC} >> TOPIC.dict 사전을 찾아서 안에 있는 어휘들을 key:value set으로 만들어 리턴
-						String dictName = (String) Operation.CIT.doParse(operationString,null,null);
-						resultMap.put("CIT", dictName);
-						oprtStrParsStrSet.put(parserStringWithKeyIdx,"");//처리됐으니 시스템명령어 null string 처리해서 없앰
-						break;
-					default:
-						//현재까지 시스템 명령어 목록에 없는 내용. 업데이트 내용이 누락되거나 오타일 가능성 체크 
-						break;
-					}//switch_case
-					keyIdx++;
-				}//switch-case 도는 for문 
-				//파싱결과를 적용 
-				candidateMessage = this.applyParserString(candidateMessage,oprtStrParsStrSet);
+						//enum매칭할 키워드 추출
+						String tempStr = operationString.substring(1, operationString.length()-1);
+						String key = tempStr.split("\\"+systemDelimeter)[0];
+	
+						
+						//중첩 중괄호 parser 위한 반복문 작업
+						
+						String operrationStringWithKeyIdx = "operationString" + keyIdx;
+						String parserStringWithKeyIdx = "parserString" + keyIdx;
+						if (!key.contains("NNP") && !key.contains("IF") && !key.contains("IMG") && !key.contains("STYL") && !key.contains("CIT")) {
+							// do nothing
+						} else {
+
+							// operationString = {NNP|location|헬싱키} , parserString = __헬싱키(location)__
+							oprtStrParsStrSet.put(operrationStringWithKeyIdx, operationString);
+							
+							switch (Operation.get(key)) {
+								case NNP:	operationString = String.valueOf(Operation.NNP.doParse(operationString,null,null));					break;
+								case IF:		operationString = String.valueOf(Operation.IF.doParse(operationString,null,conditionInfoMap));			break; //conditionInfoMap 에는 String userType, List textTypes 이 들어있음.
+								case IMG:	operationString = String.valueOf(Operation.IMG.doParse(operationString,urlSystemImgFilePath,null));	break;
+								case STYL:	operationString = String.valueOf(Operation.STYL.doParse(operationString,null,null));					break;
+								case CIT:	//{CIT|TOPIC} >> TOPIC.dict 사전을 찾아서 안에 있는 어휘들을 key:value set으로 만들어 리턴
+									String dictName = (String) Operation.CIT.doParse(operationString,null,null);
+									resultMap.put("CIT", dictName);
+									//처리됐으니 시스템명령어 null string 처리해서 없앰
+									operationString = "";																						break;
+								default:																											break; //현재까지 시스템 명령어 목록에 없는 내용. 업데이트 내용이 누락되거나 오타일 가능성 체크
+							}//switch_case
+							int keyIdxInner = 0;
+							Map<String,Object> oprtStrParsStrSetInner = new HashMap<String, Object>();
+							List<String> sysOprtsInner = this.findAllOperationStrings(tempStr);
+							for (String operationStringInner : sysOprtsInner) {
+								String tempStrInner = operationStringInner.substring(1, operationStringInner.length()-1);
+								String keyInner = tempStrInner.split("\\"+systemDelimeter)[0];
+			
+								
+								//중첩 중괄호 parser 위한 반복문 작업
+								
+								String operrationStringWithKeyIdxInner = "operationString" + keyIdx;
+								String parserStringWithKeyIdxInner = "parserString" + keyIdx;
+								if (!keyInner.contains("NNP") && !keyInner.contains("IF") && !keyInner.contains("IMG") && !keyInner.contains("STYL") && !keyInner.contains("CIT")) {
+									// do nothing
+								} else {
+
+									// operationString = {NNP|location|헬싱키} , parserString = __헬싱키(location)__
+									oprtStrParsStrSetInner.put(operrationStringWithKeyIdxInner, operationStringInner);
+									
+									switch (Operation.get(keyInner)) {
+										case NNP:	operationStringInner = String.valueOf(Operation.NNP.doParse(operationStringInner,null,null));					break;
+										case IF:		operationStringInner = String.valueOf(Operation.IF.doParse(operationStringInner,null,conditionInfoMap));			break; //conditionInfoMap 에는 String userType, List textTypes 이 들어있음.
+										case IMG:	operationStringInner = String.valueOf(Operation.IMG.doParse(operationStringInner,urlSystemImgFilePath,null));	break;
+										case STYL:	operationStringInner = String.valueOf(Operation.STYL.doParse(operationStringInner,null,null));					break;
+										case CIT:	//{CIT|TOPIC} >> TOPIC.dict 사전을 찾아서 안에 있는 어휘들을 key:value set으로 만들어 리턴
+											String dictName = (String) Operation.CIT.doParse(operationStringInner,null,null);
+											resultMap.put("CIT", dictName);
+											//처리됐으니 시스템명령어 null string 처리해서 없앰
+											operationStringInner = "";																						break;
+										default:																											break; //현재까지 시스템 명령어 목록에 없는 내용. 업데이트 내용이 누락되거나 오타일 가능성 체크
+									}//switch_case
+								}
+								oprtStrParsStrSetInner.put(parserStringWithKeyIdxInner,operationStringInner);
+								keyIdxInner++;
+							}
+						}
+						//파싱결과를 적용 
+						candidateMessage = this.applyParserString(candidateMessage,oprtStrParsStrSet);
+			
+						//if조건에 의해 걸러져 ""이 된 값들을 걸러낸다.
+						if (!candidateMessage.equals("")&&!candidateMessage.equals(" ")) {
+							candidateNextMessages.add(candidateMessage);
+						}
+					}// |으로 자른 문장 수 만큼 도는 for문 
+					//candidateNextMessages 값이 1이상일 경우 랜덤하게 한문장을 초이스하여 리턴 
+					resultMap.put("optmzMessage", this.selectOneNextMessage(candidateNextMessages));
 			}
-			//if조건에 의해 걸러져 ""이 된 값들을 걸러낸다.
-			if (!candidateMessage.equals("")&&!candidateMessage.equals(" ")) {
-				candidateNextMessages.add(candidateMessage);
-			}
-		}// |으로 자른 문장 수 만큼 도는 for문 
-		//candidateNextMessages 값이 1이상일 경우 랜덤하게 한문장을 초이스하여 리턴 
-		resultMap.put("optmzMessage", this.selectOneNextMessage(candidateNextMessages));
-		return resultMap;
+		}
+					return resultMap;
 	}
 	
 	private String selectOneNextMessage(List<String> candidateNextMessages) {
@@ -221,12 +257,44 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	@Override
 	public List<String> findAllOperationStrings(String message) {
 		List<String> operations = new ArrayList<String>();
-		String regex = "\\{(.*?)\\}";
-		Pattern pattern = Pattern.compile(regex);
-		Matcher matcher = pattern.matcher(message);
-		while (matcher.find()) {
-			operations.add(matcher.group());
+//		String regex = "\\{(.*?)\\}";
+//		Pattern pattern = Pattern.compile(regex);
+//		Matcher matcher = pattern.matcher(message);
+		
+		int bracketOpenCnt  = 0;
+		int bracketCloseCnt = 0;
+		String tmpStrSlice  = message;
+		String tmpStrStart  = message;
+		int sliceEndIdx     = 0;
+		
+		while (tmpStrSlice.contains("{")) {
+			bracketOpenCnt++;
+			tmpStrStart = tmpStrSlice.substring(tmpStrSlice.indexOf("{"), tmpStrSlice.length());
+			tmpStrSlice = tmpStrStart.substring(1);
+			while (bracketOpenCnt != bracketCloseCnt) {
+				
+				if (tmpStrSlice.contains("{") && tmpStrSlice.indexOf("{") < tmpStrSlice.indexOf("}")) {
+					tmpStrSlice = tmpStrSlice.substring(tmpStrSlice.indexOf("{"), tmpStrSlice.length());
+					bracketOpenCnt++;
+				}
+				if (tmpStrSlice.contains("}")) {
+					tmpStrSlice = tmpStrSlice.substring(tmpStrSlice.indexOf("}")+1, tmpStrSlice.length());
+					bracketCloseCnt++;
+				}
+			}
+			
+			if (!tmpStrSlice.isEmpty()) {
+				sliceEndIdx = message.indexOf(tmpStrSlice);
+			} else {
+				sliceEndIdx = message.lastIndexOf("}") + 1;
+			}
+			operations.add(message.substring(message.indexOf(tmpStrStart), sliceEndIdx));
+			bracketOpenCnt  = 0;
+			bracketCloseCnt = 0;
 		}
+//		while (matcher.find()) {
+//			operations.add(matcher.group());
+//		}
 		return operations;
 	}
 	

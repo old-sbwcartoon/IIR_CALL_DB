@@ -55,7 +55,7 @@ public enum Operation { //VAR 에 대한 처리를 고민중...
 			for (String condition : tempList) {
 				if(operationVals[1].equalsIgnoreCase(condition)) {
 					//조건이 참일 때
-					result = operationVals[2];
+					result = operationString.substring(operationString.indexOf(operationVals[2]));
 				}
 			}
 			return result;
