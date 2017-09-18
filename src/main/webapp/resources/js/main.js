@@ -80,8 +80,9 @@
 	};
 
 
-	var offcanvasMenu = function() {
+	/*var offcanvasMenu = function() {
 
+		
 		$('body').prepend('<div id="gtco-offcanvas" />');
 		$('body').prepend('<a href="#" class="js-gtco-nav-toggle gtco-nav-toggle"><i></i></a>');
 		var clone1 = $('.menu-1 > ul').clone();
@@ -121,8 +122,8 @@
 				
 	    	}
 		});
-	};
-
+	}; 
+*/
 
 	// Reflect scrolling in navigation
 	var navActive = function(section) {
@@ -323,7 +324,7 @@
 		mobileMenuOutsideClick();
 		header();
 		navigation();
-		offcanvasMenu();
+		//ßoffcanvasMenu();
 		burgerMenu();
 		navigationSection();
 		contentWayPoint();

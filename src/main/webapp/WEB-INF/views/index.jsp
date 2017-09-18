@@ -6,10 +6,10 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<meta name="viewport"content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
 	<title>CALL SYSTEM</title>
-	<link   href="/resources/css/index.css" rel="stylesheet" type="text/css">
-    <script  src="/resources/js/jquery-1.10.2.min.js"></script>
+	<link   href="resources/css/index.css" rel="stylesheet" type="text/css">
+    <script  src="resources/js/jquery-1.10.2.min.js"></script>
     <!-- <script  src="/resources/js/sockjs.min.js"></script> socket -->
-    <script type="text/javascript" charset="utf-8" src="/resources/js/index.js"></script>
+    <script type="text/javascript" charset="utf-8" src="resources/js/index.js"></script>
 
     <!-- Animate.css -->
 	<link rel="stylesheet" href="resources/css/animate.css">
