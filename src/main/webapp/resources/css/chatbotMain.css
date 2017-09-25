@@ -4,12 +4,15 @@
 .text{
     width:75%;display:flex;flex-direction:column;
 }
-.text > p:first-of-type{
-    width:100%;margin-top:0;margin-bottom:auto;line-height: 13px;font-size: 12px;
+.text > p {
+    width:100%;margin-top:0;margin-bottom:auto;line-height: 13px;line-height: 17px;font-size: 12px;
+}
+/* .text > p:first-of-type{
+    width:100%;margin-top:0;margin-bottom:auto;line-height: 13px;line-height: 17px;font-size: 12px;
 }
 .text > p:last-of-type{
     width:100%;text-align:right;color:silver;margin-bottom:-7px;margin-top:auto;
-}
+} */
 .text-l{
     float:left;padding-right:10px;
 }        
@@ -20,21 +23,39 @@
     display:flex;
     justify-content:center;
     align-items:center;
-    width:25%;
+    width:27%;
     float:left;
     padding-right:10px;
 }
+.date{
+	font-size:65%; color:silver; font-weight:/* bold */; text-align:right;
+}
 .macro{
-    margin-top:5px;width:85%;border-radius:5px;padding:5px;display:flex;
+    /* margin-top:5px; */margin-top:15px; width:85%; border-radius:5px;/* padding:5px; */padding:20px; display:flex;
 }
 .msj-rta{
-    float:right;background:whitesmoke;
+    float:right;background:whitesmoke; padding-right:0px;
 }
 .msj{
-    float:left;background:white;
+    float:left;background:white;border:1px solid whitesmoke; padding-left:0px;
 }
+.btnSmall{
+	margin:10px; border-radius:5px; border:1px solid #ccc; background:#e0e0e0; font-size:12px;
+}
+
+#userInput{
+	border-radius:5px 0px 0px 5px;
+	border:1px solid #ccc;
+}
+#btnInput{
+	border-radius:0px 5px 5px 0px;
+	border:1px solid #ccc;
+	background:#e0e0e0;
+	margin-left: -1px;
+}
+
 .frame{
-    background:#e0e0de;
+    background:#e0e0e0;
     height:450px;
     padding:0;
 }

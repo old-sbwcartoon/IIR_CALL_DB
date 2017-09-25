@@ -3,7 +3,8 @@ var idSeq = 0;
 $(document).ready(function() {
 	resetChat();
 	
-	$('.img-circle').attr("src", $('#imgSrc').val()+bot.avatar);
+//	$('.img-circle').attr("src", $('#imgSrc').val()+bot.avatar);
+	$('#img-bot').attr("src", $('#imgSrc').val()+bot.avatar);
 	//init SYSTEM_ON
 	doInput("0000", 0);
 	
@@ -85,8 +86,9 @@ function socketHandler(clientMessage) {
 		insertBot(data.message, data.imgSrc, data.messageIdx, data.statusCd);
 		
 		//시각화 부분 
-		$('#dialogShowBoxText').remove();		
-		$('#dialogShowBox').append(data.dialogLogStr);
+//		$('#dialogShowBoxText').remove();
+		$('#dialogShowBox').html(data.dialogLogStr);
+		$('#dialogShowBox1').html(data.dialogLogStr);
 	};
 
 	/* server 연결 단절 */
@@ -151,15 +153,16 @@ function insertBot(text, imgfilepath, messageIdx, statusCd){
     		//sleep(text.length * 100); //사용자 입력과 동시에 나오지 않도록 잠시 정지. 글자 수에 따라 정지 시간 길어짐. 버벅댐.
         control = '<li>' +
                         '<div class="msj macro">' +
-                        '<div class="avatar"><img class="img-circle" style="width:100%;" src="'+ imgfilepath + bot.avatar +'" /></div>' +
+//                        '<div class="avatar"><img class="img-circle" style="width:100%;" src="'+ imgfilepath + bot.avatar +'" /></div>' +
+                        '<div class="avatar"><img style="width:46%;" src="'+ imgfilepath + bot.avatar +'" /></div>' +
                             '<div class="text text-l">' +
-                                '<p>'+ text +'<button onclick="activeFixBox('+seq+')" class="btnFix">수정</button></p>' +
+                                '<p>'+ text +'<button onclick="activeFixBox('+seq+')" class="btnFix btnSmall">수정</button></p>' +
                                 '<div class="fixBox" style="display:none">' + 
                                 '<textarea class="fixText" rows="3" cols="30"></textarea><br>' +
-                                '<button onclick="doFixText('+seq+',\''+statusCd+'\',\''+messageIdx+'\')" class="btnFixInput">입력</button>'+
-                                '<button onclick="cancleFixText('+seq+')" class="cancleFixInput">취소</button>' +
+                                '<button onclick="doFixText('+seq+',\''+statusCd+'\',\''+messageIdx+'\')" class="btnFixInput btnSmall">입력</button>'+
+                                '<button onclick="cancleFixText('+seq+')" class="cancleFixInput btnSmall" style="margin-left:0px">취소</button>' +
                                 '</div>' +
-                                '<p><small>'+date+'</small></p>' +
+                                '<p><div class="date">'+date+'</div></p>' +
                             '</div>' +
                         '</div>' +
                     '</li>';
@@ -181,9 +184,10 @@ function insertUser(text, imgfilepath){
                         '<div class="msj-rta macro">' +
                             '<div class="text text-r" style="text-align: left;">' +
                                 '<p>'+text+'</p>' +
-                                '<p><small>'+date+'</small></p>' +
+                                '<p><div class="date">'+date+'</div></p>' +
                             '</div>' +
-                        '<div class="avatar" style="padding:0px 0px 0px 10px !important"><img class="img-circle" style="width:100%;" src="'+ imgfilepath + usr.avatar+'" /></div>' +                                
+//                        '<div class="avatar" style="padding:0px 0px 0px 10px !important"><img class="img-circle" style="width:100%;" src="'+ imgfilepath + usr.avatar+'" /></div>' +
+                            '<div class="avatar" style="padding:0px 0px 0px 10px !important"><img style="width:46%;" src="'+ imgfilepath + usr.avatar+'" /></div>' +
                   '</li>';
     setTimeout(
         function(){                        
@@ -233,8 +237,10 @@ function doFixText(seq, statusCd, messageIdx, scriptPath){
 			   alert(jsonObj.result);
 			   
 			   //시각화 부분 
-			   $('#dialogShowBoxText').remove();
-			   $('#dialogShowBox').append(jsonObj.dialogLogStr);
+//			   $('#dialogShowBoxText').remove();
+			   $('#dialogShowBox').html(jsonObj.dialogLogStr);
+//			   $('#dialogShowBox1 #dialogShowBoxText').remove();
+			   $('#dialogShowBox1').html(jsonObj.dialogLogStr);
 		   	}
 		});
 	}

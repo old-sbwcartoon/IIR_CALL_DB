@@ -53,14 +53,14 @@
 							</div>
 							<div class="form-group">
 								<center>
-									<input type="button" value="입장" class="btnLogin btn btn-primary">
+									<input type="button" value="입장" class="btnLogin btn btn-primary" style=>
 								</center>
 							</div>
 						</form>
 					</div>
 					
 					<div id="tab-body-signup" style="display:none">
-						<form method="post" id="formSignup">
+						<!-- <form method="post" id="formSignup"> -->
 							<div class="form-group">
 								<input type="text" id="signupId" name="id" class="userName form-control" placeholder="가입 아이디(ID)">
 							</div>
@@ -73,7 +73,7 @@
 									<input type="button" value="회원 가입" class="btnSignup btn btn-primary" style="display:none;">
 								</center>
 							</div>
-						</form>
+						<!-- </form> -->
 					</div>
 				</div>
 			</div>
