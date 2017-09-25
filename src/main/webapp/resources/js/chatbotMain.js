@@ -26,6 +26,13 @@ usr.avatar = "usr.jpeg";
 
 function btnEvent() {
 	$('#btnInput').on('click',function(e) {
+		
+		var inputMsg = $('#btnInput').val()
+		if(inputMsg == null || inputMsg == ""){
+			alert("문장을 입력하세요!");
+			return;
+		}
+		
 		insertUser($('#userInput').val(), $('#imgSrc').val()); //user
 		doInput($('#statusCd').val(), $('#messageIdx').val()); //bot
 		$('#userInput').val('');
@@ -68,7 +75,8 @@ function doInput(statusCd, messageIdx){
 function socketHandler(clientMessage) {
 
 	//var sock = new WebSocket("ws://106.255.230.162:1148/sockethandler.do");
-	var sock = new WebSocket("ws://localhost:7080/sockethandler.do");
+	//var sock = new WebSocket("ws://localhost:7080/sockethandler.do");
+	var sock = new WebSocket("ws://localhost:8090/sockethandler.do");
 	/* server 연결시 바로 */
     sock.onopen = function() {
 		/* server 연결시 바로 message 보내기 */
@@ -156,10 +164,10 @@ function insertBot(text, imgfilepath, messageIdx, statusCd){
 //                        '<div class="avatar"><img class="img-circle" style="width:100%;" src="'+ imgfilepath + bot.avatar +'" /></div>' +
                         '<div class="avatar"><img style="width:46%;" src="'+ imgfilepath + bot.avatar +'" /></div>' +
                             '<div class="text text-l">' +
-                                '<p>'+ text +'<button onclick="activeFixBox('+seq+')" class="btnFix btnSmall">수정</button></p>' +
+                                '<p>'+ text +'<button onclick="activeFixBox('+seq+')" class="btnFix btnSmall">추가</button></p>' +
                                 '<div class="fixBox" style="display:none">' + 
                                 '<textarea class="fixText" rows="3" cols="30"></textarea><br>' +
-                                '<button onclick="doFixText('+seq+',\''+statusCd+'\',\''+messageIdx+'\')" class="btnFixInput btnSmall">입력</button>'+
+                                '<button onclick="addFixText('+seq+',\''+statusCd+'\',\''+messageIdx+'\',\'ADD\',\'0\')" class="btnFixInput btnSmall">입력</button>'+
                                 '<button onclick="cancleFixText('+seq+')" class="cancleFixInput btnSmall" style="margin-left:0px">취소</button>' +
                                 '</div>' +
                                 '<p><div class="date">'+date+'</div></p>' +
@@ -211,10 +219,18 @@ function activeFixBox(seq){
 	$('.fixText').eq(seq).focus();
 }
 
-function doFixText(seq, statusCd, messageIdx, scriptPath){
+function activeFixFixedBox(statusCd,messageIdx,fixedTextIdx){
+	var seq = statusCd+messageIdx+fixedTextIdx;
+	alert(seq);
+	myFunction2(seq);
+	$('.fixFixedText').eq(seq).focus();
+}
+
+function addFixText(seq, statusCd, messageIdx, workType, fixedTextIdx){
 	var fixedText = $('.fixText').eq(seq).val();
-	var loginTime = $('#loginTime').val();
-	if(fixedText == null || fixedText == ""){
+	var loginTime = $('#loginTime').val();	
+	
+	if((fixedText == null || fixedText == "") && workType != "DELETE"){
 		alert("수정할 문장을 입력하세요!");
 		return;
 	}else{
@@ -224,6 +240,8 @@ function doFixText(seq, statusCd, messageIdx, scriptPath){
 		   ,type: 'POST'
 		   ,data: {
 			   fixedText : fixedText
+			 , workType : workType  
+			 , fixedTextIdx : fixedTextIdx
 		     , messageIdx : messageIdx
 		     , statusCd : statusCd
 		     , loginTime : loginTime
@@ -235,7 +253,7 @@ function doFixText(seq, statusCd, messageIdx, scriptPath){
 		   ,success: function(data) {
 			   var jsonObj = JSON.parse(data)
 			   alert(jsonObj.result);
-			   
+			   $('.fixText').val('');
 			   //시각화 부분 
 //			   $('#dialogShowBoxText').remove();
 			   $('#dialogShowBox').html(jsonObj.dialogLogStr);
@@ -250,10 +268,18 @@ function doFixText(seq, statusCd, messageIdx, scriptPath){
 function cancleFixText(seq){
 	myFunction(seq);
 }
+function cancleFixFixedText(statusCd,messageIdx,fixedTextIdx){
+	var seq = statusCd+messageIdx+fixedTextIdx;
+	alert(seq);
+	myFunction2(seq);
+}
 
 
 function myFunction(seq) {
 	$(".fixBox").eq(seq).toggle();
+}
+function myFunction2(seq) {
+	$(".fixFixedBox").eq(seq).toggle();
 }
 
 //***************************** util *****************************//

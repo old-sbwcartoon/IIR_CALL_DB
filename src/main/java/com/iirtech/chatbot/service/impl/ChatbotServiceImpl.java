@@ -211,39 +211,81 @@ public class ChatbotServiceImpl implements ChatbotService{
 	public void addFixedTextToDialogFile(Map<String, Object> param, String rootPath) {
 		//1. 기존 대화로그파일 읽어비교 
 		String userFilePath = rootPath + "/file/userfile/";
-//		String userDialogFileDir = userFilePath + param.get("userSeq").toString() + "/";
 		String userDialogFileDir = userFilePath + param.get("id").toString() + "/";
 		String userDialogFileName = param.get("loginTime").toString() + "_dialog.txt";
 		String statusCd = param.get("statusCd").toString();
 		String messageIdx = param.get("messageIdx").toString();
+		String workType = param.get("workType").toString();//ADD, MODIFY, DELETE
+		String fixedTextIdx = param.get("fixedTextIdx").toString();
+
+		
 		List<String> dialogs = cbu.readFileByLine(userDialogFileDir, userDialogFileName);
 		//삽입할 위치 구하기 //정규표현식 사용 (S000[|]0[|]Bot[|].*)
 		String botMatchingStr = statusCd + "[|]" + messageIdx + "[|]Bot[|]";
 		String fixMatchingStr = statusCd + "[|]" + messageIdx + "[|]Fix[|]";
-		int insertPoint = 0;
-		boolean isChangeFix = false;
-		for (int i = 0; i < dialogs.size(); i++) {
-			String dialog = dialogs.get(i);
-			if(dialog.matches("("+ botMatchingStr +".*)")) {
-				insertPoint = i + 1;
-			}else if(dialog.matches("("+ fixMatchingStr +".*)")) {
-				insertPoint = i;
-				isChangeFix = true;
+
+		if(workType.equals("ADD")) {
+			
+			int insertPoint = 0;
+			int fixedTextCnt = 0;
+			for (int i = 0; i < dialogs.size(); i++) {
+				String dialog = dialogs.get(i);
+				if(dialog.matches("("+ botMatchingStr +".*)")) {//첫 수정문 추가 
+					insertPoint = i + 1;
+					fixedTextIdx = String.valueOf(fixedTextCnt);
+				}else if(dialog.matches("("+ fixMatchingStr +".*)")) {//이미 수정문이 있는 상태에서 추가
+					insertPoint = i + 1;
+					fixedTextCnt++;
+					fixedTextIdx = String.valueOf(fixedTextCnt + 1);
+				}
 			}
-		}
-		//삽입할 문자열 만들어서 삽입위치에 삽입
-		String speecher = "Fix";
-		String fixedText = param.get("fixedText").toString().replaceAll("\r\n", "<br>").replaceAll("\n", "<br>");
-		String dialogTime = cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis());
-		String content = statusCd + systemDelimeter + messageIdx + systemDelimeter + speecher 
-				+ systemDelimeter + fixedText + systemDelimeter + dialogTime 
-				+ systemDelimeter + insertPoint;
-		if(!isChangeFix) {
-			dialogs.add(insertPoint, content);//추가 
-		}else {
-			dialogs.set(insertPoint, content);//교체 
-		}
+			
+			//삽입할 문자열 만들어서 삽입위치에 삽입
+			String fixedText = param.get("fixedText").toString().replaceAll("\r\n", "<br>").replaceAll("\n", "<br>");
+			String speecher = "Fix";
+			String dialogTime = cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis());
+			String content = statusCd + systemDelimeter + messageIdx + systemDelimeter + speecher 
+					+ systemDelimeter + fixedText + systemDelimeter + dialogTime 
+					+ systemDelimeter + insertPoint + systemDelimeter + fixedTextIdx;
+			
+			dialogs.add(insertPoint, content);//추가
+			
+		}else if(workType.equals("MODIFY")){
+			
+			int modifyPoint = 0;
+			int fixedTextCnt = 0;
+			for (int i = 0; i < dialogs.size(); i++) {
+				String dialog = dialogs.get(i);
+				if(dialog.matches("("+ fixMatchingStr +".*[|]"+fixedTextIdx+")")) {//이미 수정문이 있는 상태에서 추가
+					modifyPoint = i;
+					fixedTextIdx = String.valueOf(fixedTextCnt);
+				}
+			}
 		
+			//삽입할 문자열 만들어서 삽입위치에 삽입
+			String fixedText = param.get("fixedText").toString().replaceAll("\r\n", "<br>").replaceAll("\n", "<br>");
+			String speecher = "Fix";
+			String dialogTime = cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis());
+			String content = statusCd + systemDelimeter + messageIdx + systemDelimeter + speecher 
+					+ systemDelimeter + fixedText + systemDelimeter + dialogTime 
+					+ systemDelimeter + modifyPoint + systemDelimeter + fixedTextIdx;
+			
+			dialogs.set(modifyPoint, content);//수정 
+			
+		}else if(workType.equals("DELETE")) {
+			
+			int deletePoint = 0;
+			for (int i = 0; i < dialogs.size(); i++) {
+				String dialog = dialogs.get(i);
+				if(dialog.matches("("+ fixMatchingStr +".*[|]"+fixedTextIdx+")")) {//이미 수정문이 있는 상태에서 추가
+					deletePoint = i;
+				}
+			
+			}
+			
+			dialogs.remove(deletePoint);//제거
+		}
+				
 		//루프돌면서 dialogSeq 재 정렬시키기
 		List<String> newDialogs = new ArrayList<String>();
 		for (int i = 0; i < dialogs.size(); i++) {
@@ -251,21 +293,20 @@ public class ChatbotServiceImpl implements ChatbotService{
 			String[] elmnts = dialog.split("\\|");
 			//statusCd|msgIdx|Bot|BotText|time|seq
 			String newDialog = elmnts[0] + systemDelimeter + elmnts[1] + systemDelimeter + elmnts[2] + systemDelimeter + elmnts[3]
-					 + systemDelimeter + elmnts[4] + systemDelimeter + i;
+					 + systemDelimeter + elmnts[4] + systemDelimeter + i + systemDelimeter + fixedTextIdx;
 			newDialogs.add(newDialog);
 		}
 		//기존 파일 지우고 새로 쓰기 
 		cbu.deleteFile(userDialogFileDir, userDialogFileName);
-		cbu.writeFile(userDialogFileDir, userDialogFileName, newDialogs, false);
+		cbu.writeFile(userDialogFileDir, userDialogFileName, newDialogs,false);
 	}
 	
-	//시각화 
+	//로그 시각화 
 	@Override
 	public String makeDialogLogString(Map<String, Object> param, String rootPath) {
 		String result = "<p id='dialogShowBoxText'>";
 		
 		String userFilePath = rootPath + "/file/userfile/";
-//		String userDialogFileDir = userFilePath + param.get("userSeq").toString() + "/";
 		String userDialogFileDir = userFilePath + param.get("id").toString() + "/";
 		String userDialogFileName = param.get("loginTime").toString() + "_dialog.txt";
 		List<String> dialogs = cbu.readFileByLine(userDialogFileDir, userDialogFileName);
@@ -285,10 +326,22 @@ public class ChatbotServiceImpl implements ChatbotService{
 			if(!targetStatusCd.equals(statusCd)) {
 				newLineStr = "<br><br>";
 			}
-			//statusCd|msgIdx|Bot|BotText|time|seq
+			//statusCd|msgIdx|Bot|BotText|time|seq|fixeTextIdx(If Fix)
 			//[Bot]: BotText
 			String otomata = DialogStatus.get(statusCd).toString();
-			result += "[" + otomata + "(" + msgIdx + ")] " + elmnts[2] + ": " + elmnts[3] + newLineStr;
+			if(elmnts[2].equals("Fix")) {//Fix일때는 문구 옆에 수정 추가 삭제 버튼 추가해야함
+				String fixedTextIdx = elmnts[6];
+				result += "[" + otomata + "(" + msgIdx + ")] " + elmnts[2] + ": " + elmnts[3] 
+						+ "<button onclick=\"activeFixFixedBox(\'"+statusCd+"\',\'"+msgIdx+"\','" + fixedTextIdx + "')\">수정</button>"
+						+ "<button onclick=\"addFixText("+elmnts[5]+",\'"+statusCd+"\',\'"+elmnts[1]+"\','DELETE','" + fixedTextIdx + "')\">삭제</button>" 
+						+ "<div class='fixFixedBox' style='display:none'><textarea class='fixFixedText' rows='3' cols='30'></textarea><br>'"
+						+ "<button onclick=\"addFixText("+elmnts[5]+",\'"+statusCd+"\',\'"+elmnts[1]+"\','MODIFY','" + fixedTextIdx + "')\">확인</button>"
+						+ "<button onclick=\"cancleFixFixedText(\'"+statusCd+"\',\'"+msgIdx+"\','" + fixedTextIdx + "')\">취소</button>"
+						+ "</div>"
+						+ newLineStr;
+			}else {
+				result += "[" + otomata + "(" + msgIdx + ")] " + elmnts[2] + ": " + elmnts[3] + newLineStr;
+			}
 		}
 		return result + "</p>";
 	}
