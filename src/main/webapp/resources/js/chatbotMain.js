@@ -235,7 +235,6 @@ function doFixText(seq, statusCd, messageIdx, scriptPath){
 			   //시각화 부분 
 			   $('#dialogShowBoxText').remove();
 			   $('#dialogShowBox').append(jsonObj.dialogLogStr);
-			   $('#dialogShowBox1').append(jsonObj.dialogLogStr);
 		   	}
 		});
 	}
