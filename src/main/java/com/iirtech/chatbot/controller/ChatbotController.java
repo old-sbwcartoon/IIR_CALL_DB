@@ -2,9 +2,11 @@ package com.iirtech.chatbot.controller;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
 
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +48,19 @@ public class ChatbotController {
 	private ChatbotNLPService cbns;
 	@Autowired
 	private ChatbotUtil cbu;
+	
+	/**
+	 * 시스템 프로퍼티 변수 
+	 * systemFilePath: 시스템 파일 저장경로 
+	 * userFilePath: 사용자별 파일 저장경로 
+	 * userSeqFileName: 사용자 id pwd 별 seq 정보 저장파일명  
+	 */
+	@Value("#{systemProp['filepath']}") 
+	String filePath;
+	@Value("#{systemProp['userseqfilename']}") 
+	String userSeqFileName;
+	@Value("#{systemProp['systemdelimeter']}") 
+	String systemDelimeter;
 	
 	/**
 	 * @Method   : Index
@@ -81,11 +97,14 @@ public class ChatbotController {
 			Map<String, Object> userInfoMap = cbs.mergeSystemFile(param, session);
 			//사용자 대화접속 이력 파일 생성 
 			cbs.mergeUserHistFile(userInfoMap, session);
+			
 			//Session에 기억할 정보들(userSeq,userHistFile,userDialogFile) 저장!
 			String userSeq = String.valueOf(userInfoMap.get("userSeq"));
 			String userType = String.valueOf(userInfoMap.get("userType"));
 			String loginTime = String.valueOf(userInfoMap.get("loginTime"));
 			session.setAttribute("userSeq", userSeq);
+			session.setAttribute("id", String.valueOf(param.get("id")));
+			
 			//훗날 문장 최적화에 사용될 조건 정보들을 담는 객체 선언
 			Map<String,Object> conditionInfoMap = new HashMap<String, Object>();
 			conditionInfoMap.put("userType", userType);//사용자 타입 세팅 : oldUser, newUser
@@ -98,10 +117,12 @@ public class ChatbotController {
 			String initMsgIdx = "0";
 			MessageInfo info = new MessageInfo(initStatusCd,scriptFilePath);
 			String initInfo = info.getMessageByIdx(0).replace("\\n", "<br>");
+			
 			// loginTime으로 파일 초기화
 			String rootPath = System.getProperty("user.home") + "/Documents/chatbot";
 			log.debug("rootPath>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+rootPath);
 			userInfoMap.put("orglMessage", info.getMessageByIdx(Integer.parseInt(initMsgIdx)).replace("\\n","<br>")); //로그 기록하기 위해 tag 변환
+			userInfoMap.put("id", String.valueOf(param.get("id")));
 			userInfoMap.put("isUser", false);
 			userInfoMap.put("dialogTime", userInfoMap.get("loginTime"));
 			userInfoMap.put("statusCd", initStatusCd);
@@ -229,8 +250,10 @@ public class ChatbotController {
 		//statusCd|msgIdx|Bot|BotText|time|seq
 		//statusCd|msgIdx|Fix|fixedText|time|seq
 		//statusCd|msgIdx|User|UserText|time|seq
-		String userSeq = session.getAttribute("userSeq").toString();
-		param.put("userSeq", userSeq);
+//		String userSeq = session.getAttribute("userSeq").toString();
+//		param.put("userSeq", userSeq);
+		String userId = session.getAttribute("id").toString();
+		param.put("id", userId);
 		String rootPath = System.getProperty("user.home") + "/Documents/chatbot";
 		cbs.addFixedTextToDialogFile(param, rootPath);
 		
@@ -242,4 +265,65 @@ public class ChatbotController {
 		return mv;
 	}
 
+	@RequestMapping(value = "checkId.do", produces="text/plain;")
+	@ResponseBody
+	public String isNewId(String id) {
+		boolean isNewId = true;
+		
+		String systemFilePath = System.getProperty("user.home") + "/Documents/chatbot/systemfile/";
+//		String systemFilePath = session.getServletContext().getRealPath("resources/file/systemfile");
+		List<String> userInfos = cbu.readFileByLine(systemFilePath, userSeqFileName);
+
+		for (String userInfo : userInfos) {
+			String fileUserId = userInfo.split("\\"+systemDelimeter)[1];
+			if (fileUserId.equals(id)) {
+				isNewId = false;
+				break;
+			}
+		}
+		return isNewId ? Boolean.TRUE.toString() : Boolean.FALSE.toString();
+	}
+	
+	@RequestMapping(value = "checkLogin.do", produces="text/plain;")
+	@ResponseBody
+	public String checkIdAndPassword(String id, String password) {
+		boolean isLoginOk = false;
+		
+		String systemFilePath = System.getProperty("user.home") + "/Documents/chatbot/systemfile/";
+		List<String> userInfos = cbu.readFileByLine(systemFilePath, userSeqFileName);
+
+		if (!Boolean.getBoolean(isNewId(id))) {
+			for (String userInfo : userInfos) {
+				String fileUserId = userInfo.split("\\"+systemDelimeter)[1];
+				String fileUserPwd = userInfo.split("\\"+systemDelimeter)[2];
+				String encPassword = cbu.encryptPwd(password);
+				if (fileUserId.equals(id) && fileUserPwd.equals(encPassword)) {
+					isLoginOk = true;
+					break;
+				}
+			}
+		} else {
+			isLoginOk = false;
+		}
+		
+		return isLoginOk ? Boolean.TRUE.toString() : Boolean.FALSE.toString();
+	}
+	
+	@RequestMapping(value = "signup.do", produces="text/plain;")
+	@ResponseBody
+	public String signup(String id, String password) {
+		boolean isSucceed = true;
+		
+		String systemFilePath = System.getProperty("user.home") + "/Documents/chatbot/systemfile/";
+		
+		String userSeq = UUID.randomUUID().toString().replace("-", "").replace(systemDelimeter, "");
+		String encPassword = cbu.encryptPwd(password);
+		
+		String content = userSeq + systemDelimeter + id + systemDelimeter + encPassword;
+		List<String> contents = new ArrayList<String>();
+		contents.add(content);
+		cbu.writeFile(systemFilePath, userSeqFileName, contents, true);
+
+		return isSucceed ? Boolean.TRUE.toString() : Boolean.FALSE.toString();
+	}
 }

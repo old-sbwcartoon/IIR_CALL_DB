@@ -97,6 +97,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         try {
             //세션에서 가장 최근의 대화정보 가져오기 
 	    		String userSeq  = httpSession.get("userSeq").toString();
+	    		String userId  = httpSession.get("id").toString();
 	    		String statusCd = String.valueOf(param.get("statusCd"));
 //	    		Map<String,Object> conditionInfoMap = (Map<String, Object>) httpSession.get("conditionInfoMap");
 	    		Map<String,Object> conditionInfoMap =
@@ -165,7 +166,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		    		if (!statusCd.equals(DialogStatus.SYSTEM_ON.getStatusCd())) {
 		    			Map<String,Object> userDialogInfoMap = new HashMap<String, Object>();
 			    		userDialogInfoMap.put("loginTime", conditionInfoMap.get("loginTime"));
-			    		userDialogInfoMap.put("userSeq", userSeq);
+			    		userDialogInfoMap.put("id", userId);
+//			    		userDialogInfoMap.put("userSeq", userSeq);
 			    		userDialogInfoMap.put("isUser", true);
 			    		userDialogInfoMap.put("orglMessage", inputText);
 //				    		userDialogInfoMap.put("procMessage", procText); //현재 안쓴다
@@ -198,7 +200,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 				}
 				
 				botDialogInfoMap.put("loginTime", conditionInfoMap.get("loginTime"));
-				botDialogInfoMap.put("userSeq", userSeq); //session.id
+//				botDialogInfoMap.put("userSeq", userSeq); //session.id
+				botDialogInfoMap.put("id", userId); //session.id
 				botDialogInfoMap.put("isUser", false);
 				botDialogInfoMap.put("orglMessage", botMessage);
 				botDialogInfoMap.put("dialogTime", dialogTime);

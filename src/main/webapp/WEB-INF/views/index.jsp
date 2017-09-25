@@ -37,18 +37,46 @@
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-6 col-md-push-3 animate-box">	            
-				<form method="post" class="formLogin" action="chatbotMain.do" >
-					<div class="form-group">
-						<input type="text" name="id" class="userName form-control" placeholder="아이디(ID)">
+			<div class="col-md-6 col-md-push-3 animate-box">
+			
+				<div class="tab">
+					<a href="javascript:switchTab('login')" id="tab-head-login" class="active" style="margin-left:0;">로그인</a>
+					<a href="javascript:switchTab('signup')" id="tab-head-signup"  >회원 가입</a>
+				</div>
+				<div class="loginbox">
+					<div id="tab-body-login" style="display:block">
+						<form method="post" id="formLogin" action="chatbotMain.do" >
+							<div class="form-group">
+								<input type="text" id="loginId" name="id" class="userName form-control" placeholder="아이디(ID)">
+							</div>
+							<div class="form-group">
+								<input type="password" id="loginPassword" name="password" class="userPassword form-control" placeholder="비밀번호(Password)">
+							</div>
+							<div class="form-group">
+								<center>
+									<input type="button" value="입장" class="btnLogin btn btn-primary">
+								</center>
+							</div>
+						</form>
 					</div>
-					<div class="form-group">
-						<input type="password" name="password" class="userPassword form-control" placeholder="비밀번호(Password)">
+					
+					<div id="tab-body-signup" style="display:none">
+						<form method="post" id="formSignup">
+							<div class="form-group">
+								<input type="text" id="signupId" name="id" class="userName form-control" placeholder="가입 아이디(ID)">
+							</div>
+							<div class="form-group">
+								<input type="password" id="signupPassword" name="password" class="userPassword form-control" placeholder="비밀번호(Password)">
+							</div>
+							<div class="form-group">
+								<center>
+									<input type="button" value="아이디 중복 확인" class="btnChkId btn btn-warning" style="display:block;">
+									<input type="button" value="회원 가입" class="btnSignup btn btn-primary" style="display:none;">
+								</center>
+							</div>
+						</form>
 					</div>
-					<div class="form-group">
-						<center><input type="button" value="입장" class="btnLogin btn btn-primary"></center>
-					</div>
-				</form>
+				</div>
 			</div>
 		</div>
 	</div>

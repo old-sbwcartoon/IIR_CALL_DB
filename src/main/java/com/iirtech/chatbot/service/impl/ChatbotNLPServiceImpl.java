@@ -58,7 +58,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 		String fileName = keywordType + ".dict"; //TOPIC.dict
 		String procText = conditionInfoMap.get("procText").toString();
 		//사전파일읽음 
-		List<String> lines = cbu.ReadFileByLine(dictFilePath, fileName);
+		List<String> lines = cbu.readFileByLine(dictFilePath, fileName);
 		List<String> keywordCandidates = new ArrayList<String>();
 		for (String line : lines) {
 			//line >> 여행|travel

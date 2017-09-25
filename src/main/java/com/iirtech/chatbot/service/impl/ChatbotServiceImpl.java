@@ -64,18 +64,18 @@ public class ChatbotServiceImpl implements ChatbotService{
 			String systemFilePath = System.getProperty("user.home") + "/Documents/chatbot/systemfile/";
 //			String systemFilePath = session.getServletContext().getRealPath("resources/file/systemfile");
 			log.debug("path>>>"+systemFilePath);
-			List<String> userInfos = cbu.ReadFileByLine(systemFilePath, userSeqFileName);
-
+			List<String> userInfos = cbu.readFileByLine(systemFilePath, userSeqFileName);
+//
 			String userSeq = "";
-			if(userInfos.isEmpty()) {
-				//unique한 유저시퀀스생성 
-				userSeq = UUID.randomUUID().toString().replace("-", "").replace(systemDelimeter, "");
-				//시스템 최초로딩시 사용자관련 파일 없으므로 생성
-				String userSeqContent = userSeq + systemDelimeter + id + systemDelimeter + encPassword;
-				userInfos.add(userSeqContent);
-				cbu.WriteFile(systemFilePath, userSeqFileName, userInfos);
-				
-			}else {
+//			if(userInfos.isEmpty()) {
+//				//unique한 유저시퀀스생성 
+//				userSeq = UUID.randomUUID().toString().replace("-", "").replace(systemDelimeter, "");
+//				//시스템 최초로딩시 사용자관련 파일 없으므로 생성
+//				String userSeqContent = userSeq + systemDelimeter + id + systemDelimeter + encPassword;
+//				userInfos.add(userSeqContent);
+//				cbu.writeFile(systemFilePath, userSeqFileName, userInfos);
+//				
+//			}else {
 				//사용자정보 파일이 있는 경우 꺼내서 id & pwd 비교 후 없으면 추가 
 				for (String userInfo : userInfos) {
 					String[] userData = userInfo.split("\\"+systemDelimeter);
@@ -88,16 +88,15 @@ public class ChatbotServiceImpl implements ChatbotService{
 						userType = "oldUser";
 						userSeq = fileUserSeq;
 					}
-				}
-				//없는 회원이므로 추가
-				if(userType.equals("newUser")) {
-					userSeq = UUID.randomUUID().toString().replace("-", "").replace(systemDelimeter, "");
-					//시스템 파일 폴더의 userSeq.txt 에 정보추가 
-					String content = ""; 
-					content = userSeq + systemDelimeter + id + systemDelimeter + encPassword;
-					userInfos.add(content);
-					cbu.WriteFile(systemFilePath, userSeqFileName, userInfos);
-				}
+//				//없는 회원이므로 추가
+//				if(userType.equals("newUser")) {
+//					userSeq = UUID.randomUUID().toString().replace("-", "").replace(systemDelimeter, "");
+//					//시스템 파일 폴더의 userSeq.txt 에 정보추가 
+//					String content = ""; 
+//					content = userSeq + systemDelimeter + id + systemDelimeter + encPassword;
+//					userInfos.add(content);
+//					cbu.writeFile(systemFilePath, userSeqFileName, userInfos);
+//				}
 			}
 			resultMap.put("id", id);
 			resultMap.put("password", encPassword);
@@ -117,19 +116,22 @@ public class ChatbotServiceImpl implements ChatbotService{
 		//사용자 파일 폴더의 {userSeq}_hist.txt 파일 생성하고 정보추가 
 		//line0: logintime|logouttime|usingtime
 		try {
-			String userSeq = userInfoMap.get("userSeq").toString();
-			String userHistFileName = userSeq + "_hist.txt";
+//			String userSeq = userInfoMap.get("userSeq").toString();
+//			String userHistFileName = userSeq + "_hist.txt";
+			String userId = userInfoMap.get("id").toString();
+			String userHistFileName = userId + "_hist.txt";
 //			String userFilePath = filePath + "userfile/";
 			String userFilePath = session.getServletContext().getRealPath("resources/file/userfile");
-			List<String> userHistInfos = cbu.ReadFileByLine(userFilePath, userHistFileName);
+//			List<String> userHistInfos = cbu.readFileByLine(userFilePath, userHistFileName);
 
+			List<String> userHistInfos = new ArrayList<String>();
 			String content = ""; 
 			Long loginTime = Long.valueOf(userInfoMap.get("loginTime").toString());
 			Long logoutTime = Long.valueOf(cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis()));
 			Long usingTime = (logoutTime - loginTime)/1000; //sec
 			content = loginTime + systemDelimeter + logoutTime + systemDelimeter + usingTime;
 			userHistInfos.add(content);
-			cbu.WriteFile(userFilePath, userHistFileName, userHistInfos);
+			cbu.writeFile(userFilePath, userHistFileName, userHistInfos, true);
 			
 		} catch (Exception e) {
 			e.printStackTrace();		
@@ -150,11 +152,12 @@ public class ChatbotServiceImpl implements ChatbotService{
 		List<String> userDialogContents = new ArrayList<String>();
 		String content = ""; 
 		try {
-			String userSeq = userInfoMap.get("userSeq").toString();
+//			String userSeq = userInfoMap.get("userSeq").toString();
+			String userId = userInfoMap.get("id").toString();
 //			String userFilePath = filePath + "userfile/";
 //			String userFilePath = session.getServletContext().getRealPath("resources/file/userfile");
 			String userFilePath = rootPath + "/file/userfile/";
-			String userDialogFileDir = userFilePath + userSeq + "/";
+			String userDialogFileDir = userFilePath + userId + "/";
 			log.debug(userDialogFileDir);
 //			File targetDir = new File(userDialogFileDir);
 			
@@ -184,7 +187,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 			String messageIdx = userInfoMap.get("messageIdx").toString();
 			
 			//파일의 마지막 라인에서 seq값 읽어오기 
-			List<String> dialogs = cbu.ReadFileByLine(userDialogFileDir,userDialogFileName);
+			List<String> dialogs = cbu.readFileByLine(userDialogFileDir,userDialogFileName);
 			int dialogSeq = 0;//초기값 
 			if(!dialogs.isEmpty()) {
 				String lastDialogLine = dialogs.get(dialogs.size()-1);
@@ -196,7 +199,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 					+ systemDelimeter + dialogSeq;
 			
 			userDialogContents.add(content);
-			cbu.WriteFile(userDialogFileDir, userDialogFileName, userDialogContents);
+			cbu.writeFile(userDialogFileDir, userDialogFileName, userDialogContents, true);
 			
 		} catch (Exception e) {
 			e.printStackTrace();		
@@ -208,11 +211,12 @@ public class ChatbotServiceImpl implements ChatbotService{
 	public void addFixedTextToDialogFile(Map<String, Object> param, String rootPath) {
 		//1. 기존 대화로그파일 읽어비교 
 		String userFilePath = rootPath + "/file/userfile/";
-		String userDialogFileDir = userFilePath + param.get("userSeq").toString() + "/";
+//		String userDialogFileDir = userFilePath + param.get("userSeq").toString() + "/";
+		String userDialogFileDir = userFilePath + param.get("id").toString() + "/";
 		String userDialogFileName = param.get("loginTime").toString() + "_dialog.txt";
 		String statusCd = param.get("statusCd").toString();
 		String messageIdx = param.get("messageIdx").toString();
-		List<String> dialogs = cbu.ReadFileByLine(userDialogFileDir, userDialogFileName);
+		List<String> dialogs = cbu.readFileByLine(userDialogFileDir, userDialogFileName);
 		//삽입할 위치 구하기 //정규표현식 사용 (S000[|]0[|]Bot[|].*)
 		String botMatchingStr = statusCd + "[|]" + messageIdx + "[|]Bot[|]";
 		String fixMatchingStr = statusCd + "[|]" + messageIdx + "[|]Fix[|]";
@@ -251,8 +255,8 @@ public class ChatbotServiceImpl implements ChatbotService{
 			newDialogs.add(newDialog);
 		}
 		//기존 파일 지우고 새로 쓰기 
-		cbu.DeleteFile(userDialogFileDir, userDialogFileName);
-		cbu.WriteFile(userDialogFileDir, userDialogFileName, newDialogs);
+		cbu.deleteFile(userDialogFileDir, userDialogFileName);
+		cbu.writeFile(userDialogFileDir, userDialogFileName, newDialogs, false);
 	}
 	
 	//시각화 
@@ -261,9 +265,10 @@ public class ChatbotServiceImpl implements ChatbotService{
 		String result = "<p id='dialogShowBoxText'>";
 		
 		String userFilePath = rootPath + "/file/userfile/";
-		String userDialogFileDir = userFilePath + param.get("userSeq").toString() + "/";
+//		String userDialogFileDir = userFilePath + param.get("userSeq").toString() + "/";
+		String userDialogFileDir = userFilePath + param.get("id").toString() + "/";
 		String userDialogFileName = param.get("loginTime").toString() + "_dialog.txt";
-		List<String> dialogs = cbu.ReadFileByLine(userDialogFileDir, userDialogFileName);
+		List<String> dialogs = cbu.readFileByLine(userDialogFileDir, userDialogFileName);
 		//현재는 <br>을 \t으로 바꿔주고 line 별로는 <br>태그 붙여준다.
 		//statusCd 가 달라지면 <br><br> 붙임 
 		for (int i = 0; i < dialogs.size(); i++) {

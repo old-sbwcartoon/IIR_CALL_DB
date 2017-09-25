@@ -73,7 +73,7 @@ public class ChatbotUtil {
 	/////////////////////////////////////
 	//4. file read write
 	/////////////////////////////////////
-	public List<String> ReadFileByLine(String filePath, String fileName) {
+	public List<String> readFileByLine(String filePath, String fileName) {
 		List<String> contents = new ArrayList<String>();
 		
 		//filePath가 url이냐 local dir이냐에 따라 로직 달라짐
@@ -128,7 +128,7 @@ public class ChatbotUtil {
 	}
 	
 	
-	public void DeleteFile(String filePath, String fileName) {
+	public void deleteFile(String filePath, String fileName) {
         
 		File file = new File(filePath,fileName);
         try {
@@ -139,7 +139,7 @@ public class ChatbotUtil {
 	}
 	
 	
-	public void WriteFile(String filePath, String fileName, List<String> contents) {
+	public void writeFile(String filePath, String fileName, List<String> contents, boolean isAddLine) {
 		File targetDir = new File(filePath);
 		if(!targetDir.exists()) {
 			targetDir.mkdirs();
@@ -154,7 +154,7 @@ public class ChatbotUtil {
 //			connection.setDoOutput(true);
 
 //			bw = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
-            bw = new BufferedWriter(new FileWriter(targetFile, true)); //file이 있다면 이어쓴다
+            bw = new BufferedWriter(new FileWriter(targetFile, isAddLine)); //file이 있다면 이어쓴다=targetFile, true 
             //list 형태의 자료를 루프돌면서 write
             for (String content : contents) {
 	            	bw.write(content);
