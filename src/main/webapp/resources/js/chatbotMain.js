@@ -149,7 +149,7 @@ function insertBot(text, imgfilepath, messageIdx, statusCd){
 	var messageIdx = $('#messageIdx').val();
 	
     		//sleep(text.length * 100); //사용자 입력과 동시에 나오지 않도록 잠시 정지. 글자 수에 따라 정지 시간 길어짐. 버벅댐.
-        control = '<li style="width:100%">' +
+        control = '<li>' +
                         '<div class="msj macro">' +
                         '<div class="avatar"><img class="img-circle" style="width:100%;" src="'+ imgfilepath + bot.avatar +'" /></div>' +
                             '<div class="text text-l">' +
@@ -177,9 +177,9 @@ function insertUser(text, imgfilepath){
     var control = "";
     var date = formatAMPM(new Date());
     
-        control = '<li style="width:100%;">' +
+        control = '<li>' +
                         '<div class="msj-rta macro">' +
-                            '<div class="text text-r">' +
+                            '<div class="text text-r" style="text-align: left;">' +
                                 '<p>'+text+'</p>' +
                                 '<p><small>'+date+'</small></p>' +
                             '</div>' +

@@ -68,7 +68,6 @@
 
 	var offcanvasMenu = function() {
 
-		
 		$('body').prepend('<div id="gtco-offcanvas" />');
 		$('body').prepend('<a href="#" class="js-gtco-nav-toggle gtco-nav-toggle"><i></i></a>');
 		var clone1 = $('.menu-1 > ul').clone();
@@ -316,6 +315,12 @@
 		dropdown();
 		goToTop();
 		loaderPage();
+		//alert($('.js-gtco-nav-toggle').css('display'));
+		if($('.js-gtco-nav-toggle').css('display') == 'none') {
+			$('#toggle').show();
+		} else {
+			$('#toggle').css('display', 'none');
+		}
 	});
 
 
