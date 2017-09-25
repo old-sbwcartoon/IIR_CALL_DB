@@ -84,7 +84,7 @@
 				</div>
 				
 				<div id="toggle" class="col-md-6">
-					<div class="dialog-div" id="dialogShowBox" style="float: left; overflow: auto;">
+					<div class="dialog-div" id="dialogShowBox1" style="float: left; overflow: auto;">
 						${dialogLogStr}
 					</div>
 				</div>
