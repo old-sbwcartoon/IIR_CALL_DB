@@ -1,6 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -32,7 +31,7 @@
 		<div class="row row-pb-md">
 			<div class="col-md-8 col-md-offset-2 heading animate-box" data-animate-effect="fadeIn">
 				<h1>대화형 한국어 학습 시스템</h1>
-				<p class="sub">Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident. Odit ab aliquam dolor eius.</p>
+				<p class="sub">Computer Assistant Language Learning ( CALL )</p>
 				<p class="subtle-text animate-box" data-animate-effect="fadeIn">IIRTECH</p>
 			</div>
 		</div>
