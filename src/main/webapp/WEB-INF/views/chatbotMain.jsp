@@ -41,14 +41,14 @@
 
 	<br>
 		<center><h1>CALL</h1><center>
-	
+		<input type="hidden" id="idSeq" value="" />
 	<!-- navigator -->
 	<nav class="gtco-nav" role="navigation" style="background-color: black; display: none;">
 		<div class="container">
 			<div class="row">
 				<div class="col-xs-10 text-right menu-1 main-nav">
 					<ul>
-						<div class="dialog-div" id="dialogShowBox" style="float: left; overflow: auto; color: white;">
+						<div class="dialog-div" id="dialogShowBox-navigation" style="float: left; overflow: auto; color: white;">
 							<%-- ${dialogLogStr} --%>
 						</div>
 					</ul>
@@ -84,7 +84,7 @@
 				</div>
 				
 				<div id="toggle" class="col-md-6">
-					<div class="dialog-div" id="dialogShowBox1" style="float: left; overflow: auto;">
+					<div class="dialog-div" id="dialogShowBox-frame" style="float: left; overflow: auto;">
 						<%-- ${dialogLogStr} --%>
 					</div>
 				</div>

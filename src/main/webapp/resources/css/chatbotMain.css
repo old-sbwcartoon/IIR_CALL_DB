@@ -40,8 +40,17 @@
     float:left;background:white;border:1px solid whitesmoke; padding-left:0px;
 }
 .btnSmall{
-	margin:10px; border-radius:5px; border:1px solid #ccc; background:#e0e0e0; font-size:12px;
+	margin:10px 10px 10px 0px; border-radius:5px; border:1px solid #ccc; background:#e0e0e0; font-size:65%; padding:3px 8px 1px;
 }
+.align-right{
+	float:right;
+}
+.btnUpper{
+	margin-top:0px
+}
+
+#dialogShowBox-navigation button,
+#dialogShowBox-navigation textarea {color:#777}
 
 #userInput{
 	border-radius:5px 0px 0px 5px;
@@ -107,4 +116,4 @@ input:focus{
 }
 :-moz-placeholder { /* Firefox 18- */
     color: #d4d4d4;
-}   
+}

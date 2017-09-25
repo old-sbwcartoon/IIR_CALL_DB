@@ -331,12 +331,20 @@ public class ChatbotServiceImpl implements ChatbotService{
 			String otomata = DialogStatus.get(statusCd).toString();
 			if(elmnts[2].equals("Fix")) {//Fix일때는 문구 옆에 수정 추가 삭제 버튼 추가해야함
 				String fixedTextIdx = elmnts[6];
-				result += "[" + otomata + "(" + msgIdx + ")] " + elmnts[2] + ": " + elmnts[3] 
-						+ "<button onclick=\"activeFixFixedBox(\'"+statusCd+"\',\'"+msgIdx+"\','" + fixedTextIdx + "')\">수정</button>"
-						+ "<button onclick=\"addFixText("+elmnts[5]+",\'"+statusCd+"\',\'"+elmnts[1]+"\','DELETE','" + fixedTextIdx + "')\">삭제</button>" 
-						+ "<div class='fixFixedBox' style='display:none'><textarea class='fixFixedText' rows='3' cols='30'></textarea><br>'"
-						+ "<button onclick=\"addFixText("+elmnts[5]+",\'"+statusCd+"\',\'"+elmnts[1]+"\','MODIFY','" + fixedTextIdx + "')\">확인</button>"
-						+ "<button onclick=\"cancleFixFixedText(\'"+statusCd+"\',\'"+msgIdx+"\','" + fixedTextIdx + "')\">취소</button>"
+				result += "<div>"
+							+ "[" + otomata + "(" + msgIdx + ")] " + elmnts[2] + ": " + elmnts[3] 
+							+ "<div class='align-right'>"
+//								+ "<button class='btnSmall btnUpper' onclick=\"activeFixFixedBox('"+statusCd+"','"+msgIdx+"','" + fixedTextIdx + "')\">수정</button>"
+								+ "<button class='btnSmall btnUpper' onclick=\"activeFixFixedBox(this)\">수정</button>"
+								+ "<button class='btnSmall btnUpper' onclick=\"addFixText("+elmnts[5]+",'"+statusCd+"','"+elmnts[1]+"','DELETE','" + fixedTextIdx + "', this)\">삭제</button>"
+							+ "</div>"
+							+ "<div class='fixFixedBox' data-statusCd='"+statusCd+"' data-msgIdx='"+msgIdx+"' data-fixedTextIdx='"+fixedTextIdx+"' style='display:none'>"
+								+ "<textarea class='fixFixedText' rows='3' cols='30'></textarea>"
+								+ "<br>"
+								+ "<button class='btnSmall' onclick=\"addFixText("+elmnts[5]+",'"+statusCd+"','"+elmnts[1]+"','MODIFY','" + fixedTextIdx + "', this)\">확인</button>"
+//								+ "<button class='btnSmall' onclick=\"cancleFixFixedText('"+statusCd+"','"+msgIdx+"','" + fixedTextIdx + "')\">취소</button>"
++ "<button class='btnSmall' onclick=\"cancleFixFixedText(this)\">취소</button>"
+							+ "</div>"
 						+ "</div>"
 						+ newLineStr;
 			}else {
