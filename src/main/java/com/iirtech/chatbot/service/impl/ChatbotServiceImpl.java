@@ -312,6 +312,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 		List<String> dialogs = cbu.readFileByLine(userDialogFileDir, userDialogFileName);
 		//현재는 <br>을 \t으로 바꿔주고 line 별로는 <br>태그 붙여준다.
 		//statusCd 가 달라지면 <br><br> 붙임 
+		int idx = 0;
 		for (int i = 0; i < dialogs.size(); i++) {
 			String newLineStr = "<br>";
 			String dialog = dialogs.get(i).replaceAll("<br>", "\t");//기존 개행 표시<br>를 \t 으로 변경 
@@ -328,9 +329,11 @@ public class ChatbotServiceImpl implements ChatbotService{
 			}
 			//statusCd|msgIdx|Bot|BotText|time|seq|fixeTextIdx(If Fix)
 			//[Bot]: BotText
+			
 			String otomata = DialogStatus.get(statusCd).toString();
 			if(elmnts[2].equals("Fix")) {//Fix일때는 문구 옆에 수정 추가 삭제 버튼 추가해야함
-				String fixedTextIdx = elmnts[6];
+//				String fixedTextIdx = elmnts[6];
+				int fixedTextIdx = idx;
 				result += "<div>"
 							+ "[" + otomata + "(" + msgIdx + ")] " + elmnts[2] + ": " + elmnts[3] 
 							+ "<div class='align-right'>"
@@ -347,6 +350,8 @@ public class ChatbotServiceImpl implements ChatbotService{
 							+ "</div>"
 						+ "</div>"
 						+ newLineStr;
+				idx++;
+				
 			}else {
 				result += "[" + otomata + "(" + msgIdx + ")] " + elmnts[2] + ": " + elmnts[3] + newLineStr;
 			}
