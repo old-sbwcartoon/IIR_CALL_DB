@@ -196,7 +196,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 			
 			content = statusCd + systemDelimeter + messageIdx + systemDelimeter + speecher 
 					+ systemDelimeter + orglMessage + systemDelimeter + dialogTime 
-					+ systemDelimeter + dialogSeq;
+					+ systemDelimeter + dialogSeq + systemDelimeter + 0;
 			
 			userDialogContents.add(content);
 			cbu.writeFile(userDialogFileDir, userDialogFileName, userDialogContents, true);
@@ -236,7 +236,8 @@ public class ChatbotServiceImpl implements ChatbotService{
 				}else if(dialog.matches("("+ fixMatchingStr +".*)")) {//이미 수정문이 있는 상태에서 추가
 					insertPoint = i + 1;
 					fixedTextCnt++;
-					fixedTextIdx = String.valueOf(fixedTextCnt + 1);
+//					fixedTextIdx = String.valueOf(fixedTextCnt + 1);
+					fixedTextIdx = String.valueOf(fixedTextCnt);
 				}
 			}
 			
@@ -253,12 +254,12 @@ public class ChatbotServiceImpl implements ChatbotService{
 		}else if(workType.equals("MODIFY")){
 			
 			int modifyPoint = 0;
-			int fixedTextCnt = 0;
+//			int fixedTextCnt = 0;
 			for (int i = 0; i < dialogs.size(); i++) {
 				String dialog = dialogs.get(i);
 				if(dialog.matches("("+ fixMatchingStr +".*[|]"+fixedTextIdx+")")) {//이미 수정문이 있는 상태에서 추가
 					modifyPoint = i;
-					fixedTextIdx = String.valueOf(fixedTextCnt);
+//					fixedTextIdx = String.valueOf(fixedTextCnt);
 				}
 			}
 		
@@ -293,7 +294,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 			String[] elmnts = dialog.split("\\|");
 			//statusCd|msgIdx|Bot|BotText|time|seq
 			String newDialog = elmnts[0] + systemDelimeter + elmnts[1] + systemDelimeter + elmnts[2] + systemDelimeter + elmnts[3]
-					 + systemDelimeter + elmnts[4] + systemDelimeter + i + systemDelimeter + fixedTextIdx;
+					 + systemDelimeter + elmnts[4] + systemDelimeter + i + systemDelimeter + elmnts[6];
 			newDialogs.add(newDialog);
 		}
 		//기존 파일 지우고 새로 쓰기 
@@ -311,26 +312,31 @@ public class ChatbotServiceImpl implements ChatbotService{
 		String userDialogFileName = param.get("loginTime").toString() + "_dialog.txt";
 		List<String> dialogs = cbu.readFileByLine(userDialogFileDir, userDialogFileName);
 		//현재는 <br>을 \t으로 바꿔주고 line 별로는 <br>태그 붙여준다.
-		//statusCd 가 달라지면 <br><br> 붙임 
+		//statusCd 가 달라지면 <br><br> 붙임
+		String prevStatusCd = null;
+		String targetStatusCd = null;
 		int idx = 0;
 		for (int i = 0; i < dialogs.size(); i++) {
 			String newLineStr = "<br>";
 			String dialog = dialogs.get(i).replaceAll("<br>", "\t");//기존 개행 표시<br>를 \t 으로 변경 
 			String[] elmnts = dialog.split("\\|");
-			String statusCd = elmnts[0];
-			String targetStatusCd = statusCd;
+			
+			prevStatusCd = elmnts[0];
+			
 			if(i+1 < dialogs.size()) {
 				String nextDialog = dialogs.get(i+1).replaceAll("<br>", "\t");//기존 개행 표시<br>를 \t 으로 변경 
 				targetStatusCd = nextDialog.split("\\|")[0];
 			}
-			String msgIdx = elmnts[1];
-			if(!targetStatusCd.equals(statusCd)) {
+			if(targetStatusCd != null && !targetStatusCd.equals(prevStatusCd)) {
 				newLineStr = "<br><br>";
+				idx = 0;
 			}
+			String msgIdx = elmnts[1];
+			
 			//statusCd|msgIdx|Bot|BotText|time|seq|fixeTextIdx(If Fix)
 			//[Bot]: BotText
 			
-			String otomata = DialogStatus.get(statusCd).toString();
+			String otomata = DialogStatus.get(prevStatusCd).toString();
 			if(elmnts[2].equals("Fix")) {//Fix일때는 문구 옆에 수정 추가 삭제 버튼 추가해야함
 //				String fixedTextIdx = elmnts[6];
 				int fixedTextIdx = idx;
@@ -339,12 +345,12 @@ public class ChatbotServiceImpl implements ChatbotService{
 							+ "<div class='align-right'>"
 //								+ "<button class='btnSmall btnUpper' onclick=\"activeFixFixedBox('"+statusCd+"','"+msgIdx+"','" + fixedTextIdx + "')\">수정</button>"
 								+ "<button class='btnSmall btnUpper' onclick=\"activeFixFixedBox(this)\">수정</button>"
-								+ "<button class='btnSmall btnUpper' onclick=\"addFixText("+elmnts[5]+",'"+statusCd+"','"+elmnts[1]+"','DELETE','" + fixedTextIdx + "', this)\">삭제</button>"
+								+ "<button class='btnSmall btnUpper' onclick=\"addFixText("+elmnts[5]+",'"+prevStatusCd+"','"+elmnts[1]+"','DELETE','" + fixedTextIdx + "', this)\">삭제</button>"
 							+ "</div>"
-							+ "<div class='fixFixedBox' data-statusCd='"+statusCd+"' data-msgIdx='"+msgIdx+"' data-fixedTextIdx='"+fixedTextIdx+"' style='display:none'>"
+							+ "<div class='fixFixedBox' data-statusCd='"+prevStatusCd+"' data-msgIdx='"+msgIdx+"' data-fixedTextIdx='"+fixedTextIdx+"' style='display:none'>"
 								+ "<textarea class='fixFixedText' rows='3' cols='30'></textarea>"
 								+ "<br>"
-								+ "<button class='btnSmall' onclick=\"addFixText("+elmnts[5]+",'"+statusCd+"','"+elmnts[1]+"','MODIFY','" + fixedTextIdx + "', this)\">확인</button>"
+								+ "<button class='btnSmall' onclick=\"addFixText("+elmnts[5]+",'"+prevStatusCd+"','"+elmnts[1]+"','MODIFY','" + fixedTextIdx + "', this)\">확인</button>"
 //								+ "<button class='btnSmall' onclick=\"cancleFixFixedText('"+statusCd+"','"+msgIdx+"','" + fixedTextIdx + "')\">취소</button>"
 + "<button class='btnSmall' onclick=\"cancleFixFixedText(this)\">취소</button>"
 							+ "</div>"
