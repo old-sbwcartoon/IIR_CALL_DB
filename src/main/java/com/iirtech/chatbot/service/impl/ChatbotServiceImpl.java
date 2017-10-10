@@ -31,9 +31,6 @@ public class ChatbotServiceImpl implements ChatbotService{
 	private Logger log = Logger.getLogger(this.getClass());
 	
 	@Autowired
-	private ChatbotDao cbd;
-	
-	@Autowired
 	private ChatbotUtil cbu;
 	
 	/**
