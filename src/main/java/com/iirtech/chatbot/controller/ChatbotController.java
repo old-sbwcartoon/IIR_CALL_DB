@@ -120,7 +120,7 @@ public class ChatbotController {
 			
 			// loginTime으로 파일 초기화
 			String rootPath = System.getProperty("user.home") + "/Documents/chatbot";
-			log.debug("rootPath>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+rootPath);
+			log.debug("rootPath>>>>>>"+rootPath);
 			userInfoMap.put("orglMessage", info.getMessageByIdx(Integer.parseInt(initMsgIdx)).replace("\\n","<br>")); //로그 기록하기 위해 tag 변환
 			userInfoMap.put("id", String.valueOf(param.get("id")));
 			userInfoMap.put("isUser", false);
