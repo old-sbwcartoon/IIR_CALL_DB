@@ -1,5 +1,8 @@
 package com.iirtech.chatbot.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -92,6 +95,19 @@ public class ChatbotController {
 		log.debug("*************************chatbotMain.do*************************");
 		ModelAndView mv = new ModelAndView("chatbotMain");
 		try {
+			
+			log.debug("session_id>>>>>>" + session.getAttribute("id"));
+			if(param.isEmpty()) {
+				String errorMsg = "잘못된 접근입니다. 다시 로그인 하세요.";
+				try {
+					errorMsg = URLEncoder.encode(errorMsg, "utf8");
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+				mv = new ModelAndView("redirect:/error.do?errorMsg="+errorMsg);
+				return mv;
+			}
+			
 			//사용자 정보 조회 후 없으면 create 있으면 update 
 			//userInfoMap : id, password, userSeq, isOldUserYN, loginTime
 			Map<String, Object> userInfoMap = cbs.mergeSystemFile(param, session);
@@ -154,92 +170,6 @@ public class ChatbotController {
 	 * @param session(userSeq,userType, dialogStatus, dialogTime), param(userText)
 	 * @return session(userSeq, userType, dialogStatus, dialogTime), resultmap(speecher, message, imgsrc)
 	 */
-//	@RequestMapping(value = "messageInput.json")
-//	public Map<String, Object> inputPreprocess(@RequestParam Map<String, Object> param, HttpSession session) {
-//		log.debug("*************************messageInput.json*************************");
-////		ModelAndView mv = new ModelAndView("jsonView");
-//        Map<String, Object> resultMap = new HashMap<String, Object>();
-//        
-//		// 1. 상태정보를 확인한다.
-//		// 2. 입력문장을 언어처리(전처리+언어분석)한다.
-//		// 3. 현재 상태에서 처리해야 하는 입력데이터 처리 -> 다음 상태 결정, 출력여부, 입력데이터의 처리/가공
-//		// 4. 처리결과 리턴
-//		// 5. 입력대기
-//        
-//        try {
-//            //세션에서 가장 최근의 대화정보 가져오기 
-//	    		String userSeq = session.getAttribute("userSeq").toString();
-//	    		String statusCd = String.valueOf(param.get("statusCd"));
-//	    		Map<String,Object> conditionInfoMap = (Map<String, Object>) session.getAttribute("conditionInfoMap");
-//	    		String userType = String.valueOf(conditionInfoMap.get("userType"));
-//
-//	    		//대화가 끝난경우 현재는 채팅페이지로 리다이렉트 시킴
-//	    		if(statusCd.equals(DialogStatus.END_DIALOG.getStatusCd())) {
-////	    			return (ModelAndView)new ModelAndView("redirect:/" + redirectPath );
-//	    		}
-//	    		
-//	    		//입력문 넘겨받아 메시지 생성 메소드에 넘겨줌, inputText 는 null 값이 될 수도 있다.
-//	    		String inputText = String.valueOf(param.get("userText"));
-//	    		String procText = inputText; //오리지널 문자열 보존 차원
-//	    		if(procText != null && procText != "") {
-//	    			//전처리 메소드는 preprocess안에서 다시 여러 단계로 확장될 예정
-//	    			conditionInfoMap = cbns.preProcess(procText);//List textTypes, String procText
-//	    			//CIT값(사용자 인풋텍스트에서 체크해야되는 키워드keywordType)가 있다면 판별 후 추출
-//	    			if(session.getAttribute("CIT")!=null) {
-//	    				String keywordType = session.getAttribute("CIT").toString();
-//	    				String keyword = cbns.selectKeyword(keywordType, conditionInfoMap);
-//	    				conditionInfoMap.put("CITKeyword", keyword);
-//	    			}
-//	    			conditionInfoMap.put("userType", userType);
-//	    			procText = String.valueOf(conditionInfoMap.get("procText"));
-//	    		}
-//	    		String messageIdx = String.valueOf(param.get("messageIdx"));
-//	    		
-//	    		//세션의 lastDialogStatus 값, 입력문장 등 정보를 가지고 발화자, 상태코드, 메시지 생성
-//	    		//conditionInfoMap 에는 String userType, List textTypes, List CITKeywords(사용자인풋텍스트에서 추출된 키워드)
-//	    		//statusCd,message,messageIdx(string)-not null, CIT(map)-nullable 이 들어있음
-//	    		Map<String, Object> messageInfo = cbss.getMessageInfo(statusCd, procText, messageIdx, conditionInfoMap);
-//	    		
-//	    		
-//	    		
-//	    		//세션에 저장된 시스템 변수값을 제거해야하는 경우인지 체크
-//	    		if(messageInfo.get("CITDelete")!=null && session.getAttribute("CIT")!=null) {
-//	    			String deleteType = messageInfo.get("CITDelete").toString();
-//	    			String sessionType = session.getAttribute("CIT").toString();
-//	    			if (deleteType.equals("TOPIC") && sessionType.equals("TOPIC")) {
-//	    				//topic을 지워야하는 경우 세션에서 제거
-//	    				session.removeAttribute("CIT");
-//				}
-//	    		}
-//	    		
-//	    		//CIT가 있으면 세션에 값넣기 CIT:type으로 넣고 사용자 input 처리하는 부분에서 항상 체크하여 처리 
-//	    		if(messageInfo.get("CIT") != null) {
-//	    			session.setAttribute("CIT", messageInfo.get("CIT"));
-//	    		}
-//	    		String dialogTime = cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis());
-//	    		
-//	    		//사용자 대화내용 로그 파일 업데이트!!
-//	    		Map<String,Object> userDialogInfoMap = new HashMap<String, Object>();
-//	    		userDialogInfoMap.put("userSeq", userSeq);
-//	    		userDialogInfoMap.put("orglMessage", inputText);
-//	    		userDialogInfoMap.put("procMessage", procText);
-//	    		userDialogInfoMap.put("dialogTime", dialogTime);
-//	    		
-//	    		// 상태체크해서 최초 시스템 시작이 아닌경우에는 updateUserDialogFile 실행 
-////	    		cbs.makeUserDialogFile(userDialogInfoMap, session);
-//	    		
-//	    		//화면에 뿌릴 데이터 세팅 
-//	    		resultMap = messageInfo;
-//	    		resultMap.put("imgSrc", urlSystemImgFilePath);
-////	    		mv.addAllObjects(resultMap);
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//        
-////	    return mv;
-//        return resultMap;
-//	}
 	
 	//봇발화 수정하는 경우 대화로그 파일 수정로직  fixedText  messageIdx  statusCd
 	@RequestMapping(value = "createNewScriptFile.do")
@@ -326,4 +256,20 @@ public class ChatbotController {
 
 		return isSucceed ? Boolean.TRUE.toString() : Boolean.FALSE.toString();
 	}
+	
+	//자신이 작업한 내용을 확인하고 다운라드 받을 수 있는 페이지
+	@RequestMapping(value = "error.do")
+	public ModelAndView error(@RequestParam Map<String, Object> param, HttpSession session) {
+		log.debug("*************************error.do*************************");
+		ModelAndView mv = new ModelAndView("error");
+		try {
+			String errorMsg;
+			errorMsg = URLDecoder.decode(param.get("errorMsg").toString(),"utf8");
+			mv.addObject("errorMsg", errorMsg);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return mv;
+	}
+	
 }
