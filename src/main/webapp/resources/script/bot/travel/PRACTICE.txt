@@ -1,0 +1,10 @@
+한국에서 음식을 어떻게 주문하면 되는지 한 번 이야기해볼께요.\n\n한국에서 음식을 주문할 때는 "{STYL|blue|음식이름}+{STYL|red|수량}+{STYL|green|단위}~{STYL|orange|주세요~}"라고 말하면 돼요.\n\n\n음식(menu): {STYL|blue|순두부 찌개}, 수량(quantity): {STYL|red|1}, 단위(unit): {STYL|green|인분}\n{IMG|tofu.png}\n따라해 보세요. "{STYL|blue|순두부 찌개} {STYL|red|일} {STYL|green|인분} {STYL|orange|주세요}. "
+{IF|isCorrect|맞았어요. {STYL|blue|순두부 찌개} {STYL|red|일} {STYL|green|인분} {STYL|orange|주세요.}\n다시 한 번 해볼까요?}{IF|isWrong|이때는 "{STYL|blue|순두부 찌개} {STYL|red|일} {STYL|green|인분} {STYL|orange|주세요.}"라고 하면 돼요.\n다시 한 번 해볼까요?}
+자, 이제 사진에 있는 음식을 주문해 보세요.\n{IMG|soybeanPasteStew.png}\n음식(menu): {STYL|blue|된장 찌개}, 수량(quantity): {STYL|red|2}, 단위(unit): {STYL|green|인분}
+{IF|isCorrect|맞았어요. {STYL|blue|된장찌개} {STYL|red|이} {STYL|green|인분} {STYL|orange|주세요.}\n다시 한 번 해보세요.}{IF|isWrong|"이때는 "{STYL|blue|된장찌개} {STYL|red|이} {STYL|green|인분} {STYL|orange|주세요.}"라고 하면 돼요.\n다시 한 번 해보세요.}
+따라해보니 어떤가요?
+그러면 우리 조금 더 연습해볼까요?\n{IMG|bibimbap.png}\n음식(menu): {STYL|blue|비빔밥}, 수량(quantity): {STYL|red|1}, 단위(unit): {STYL|green|그릇}\n{STYL|red|따라해 보세요.} "{STYL|blue|비빔밥} {STYL|red|한} {STYL|green|그릇} 주세요."
+{IF|isCorrect|맞았어요. {STYL|blue|비빔밥} {STYL|red|한} {STYL|green|그릇} {STYL|orange|주세요.}\n다시 한 번 해보세요~}{IF|isWrong|"이때는 "{STYL|blue|비빔밥} {STYL|red|한} {STYL|green|그릇} {STYL|orange|주세요.}"라고 하면 돼요.\n다시 한 번 해보세요~}
+이제 사진에 있는 음식을 주문해 보세요.\n{IMG|meatBowl.png}\n음식(menu): {STYL|blue|제육덮밥}, 수량(quantity): {STYL|red|2}, 단위(unit): {STYL|green|그릇}
+{IF|isCorrect|맞았어요. {STYL|blue|제육덮밥} {STYL|red|두} {STYL|green|그릇} {STYL|orange|주세요.}}{IF|isWrong|"이 때는 "{STYL|blue|제육덮밥} {STYL|red|두} {STYL|green|그릇} {STYL|orange|주세요.}"라고 하면 돼요.}
+S050
