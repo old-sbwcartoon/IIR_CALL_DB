@@ -187,7 +187,14 @@
 			<artifactId>junit</artifactId>
 			<version>4.7</version>
 			<scope>test</scope>
-		</dependency>        
+		</dependency>
+		
+		<!-- 유사도 -->
+		<dependency>
+		    <groupId>info.debatty</groupId>
+		    <artifactId>java-string-similarity</artifactId>
+		    <version>RELEASE</version>
+		</dependency>
 	</dependencies>
     <build>
         <plugins>

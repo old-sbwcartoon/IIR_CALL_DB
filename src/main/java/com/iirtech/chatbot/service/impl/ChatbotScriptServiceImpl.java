@@ -267,15 +267,15 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 						oprtStrParsStrSet.put(operrationStringWithKeyIdx, operationString);
 						
 						switch (Operation.get(key)) {
-							case NNP:	operationString = String.valueOf(Operation.NNP.doParse(operationString,null,null));						break;
-							case IF:	operationString = String.valueOf(Operation.IF.doParse(operationString,null,conditionInfoMap));			break; //conditionInfoMap 에는 String userType, List textTypes 이 들어있음.
-							case IMG:	operationString = String.valueOf(Operation.IMG.doParse(operationString,urlSystemImgFilePath,null));		break;
+							case NNP:	operationString = String.valueOf(Operation.NNP.doParse(operationString,null,null));					break;
+							case IF:	operationString = String.valueOf(Operation.IF.doParse(operationString,null,conditionInfoMap));				break; //conditionInfoMap 에는 String userType, List textTypes 이 들어있음.
+							case IMG:	operationString = String.valueOf(Operation.IMG.doParse(operationString,urlSystemImgFilePath,null));	break;
 							case STYL:	operationString = String.valueOf(Operation.STYL.doParse(operationString,null,null));					break;
 							case CIT:	//{CIT|TOPIC} >> TOPIC.dict 사전을 찾아서 안에 있는 어휘들을 key:value set으로 만들어 리턴
 								String dictName = (String) Operation.CIT.doParse(operationString,null,null);
 								resultMap.put("CIT", dictName);
 								//처리됐으니 시스템명령어 null string 처리해서 없앰
-								operationString = "";																							break;
+								operationString = "";																						break;
 							default:																											break; //현재까지 시스템 명령어 목록에 없는 내용. 업데이트 내용이 누락되거나 오타일 가능성 체크
 						}//switch_case
 
@@ -355,6 +355,10 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 				sliceEndIdx = message.indexOf(tmpStrSlice);
 			} else {
 				sliceEndIdx = message.lastIndexOf("}") + 1;
+			}
+			
+			if (sliceEndIdx < message.indexOf(tmpStrStart)) {
+				sliceEndIdx = message.lastIndexOf(tmpStrSlice);
 			}
 			operations.add(message.substring(message.indexOf(tmpStrStart), sliceEndIdx));
 			bracketOpenCnt  = 0;

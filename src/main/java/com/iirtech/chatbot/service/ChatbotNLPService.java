@@ -16,4 +16,5 @@ public interface ChatbotNLPService {
 
 	String selectKeyword(String keywordType, Map<String, Object> conditionInfoMap);
 
+	String checkSubTheme(String procText);
 }

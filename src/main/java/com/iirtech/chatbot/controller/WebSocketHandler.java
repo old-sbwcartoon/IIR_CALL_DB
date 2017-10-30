@@ -138,7 +138,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		    		//statusCd,message,messageIdx(string)-not null, CIT(map)-nullable 이 들어있음
 		    		Map<String, Object> messageInfo = cbss.getMessageInfo(statusCd, procText, messageIdx, conditionInfoMap);
 		    		
-		    		
+		    		// 서브 테마 찾기
+		    		String subTheme = null;
+		    		if(statusCd.equals(DialogStatus.ONGOING_TOPIC.getStatusCd()) && messageIdx.equals("0")) {
+		    			subTheme = cbns.checkSubTheme(procText);
+		    		}
 		    		
 		    		//세션에 저장된 시스템 변수값을 제거해야하는 경우인지 체크
 //		    		if(messageInfo.get("CITDelete")!=null && httpSession.get("CIT")!=null) {
