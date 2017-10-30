@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.iirtech.chatbot.dao.ChatbotDao;
 import com.iirtech.chatbot.service.ChatbotService;
 import com.iirtech.common.enums.DialogStatus;
 import com.iirtech.common.utils.ChatbotUtil;

@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.snu.ids.ha.index.Keyword;
-import org.snu.ids.ha.index.KeywordExtractor;
-import org.snu.ids.ha.index.KeywordList;
 import org.snu.ids.ha.ma.Eojeol;
 import org.snu.ids.ha.ma.MExpression;
 import org.snu.ids.ha.ma.Morpheme;
