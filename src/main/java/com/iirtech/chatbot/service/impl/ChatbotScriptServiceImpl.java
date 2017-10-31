@@ -36,16 +36,16 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	@Autowired
 	ChatbotUtil cbu;
 	
-	@Value("#{systemProp['systemdelimeter']}") 
+	@Value("#{systemProp['systemdelimeter']}")
 	String systemDelimeter;
-	@Value("#{systemProp['imgfilepath']}") 
+	@Value("#{systemProp['imgfilepath']}")
 	String urlSystemImgFilePath;
-	@Value("#{systemProp['filepath']}") 
+	@Value("#{systemProp['filepath']}")
 	String urlFilePath;
 	
 	@Override
 	public Map<String, Object> getMessageInfo(String statusCd, String procInputText
-			, String messageIdx, Map<String,Object> conditionInfoMap) {
+			, String messageIdx, String subMessageIdx, Map<String,Object> conditionInfoMap) {
 		log.debug("*************************getMessageInfo*************************");
 		
 		//컨트롤러로 리턴할 리턴 값들을 담는 맵객체 
@@ -58,12 +58,24 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			scriptFilePath = this.addTopicScriptPath(statusCd, scriptFilePath, conditionInfoMap);
 			MessageInfo info = new MessageInfo(statusCd, scriptFilePath);
 			
-			int nextIdx = Integer.parseInt(messageIdx) + 1; //한 파일(statusCd) 내부에서의 index=한 줄
-			String nextMessages = info.getMessageByIdx(nextIdx);
+			int nextIdx = Integer.parseInt(messageIdx); //한 파일(statusCd) 내부에서의 index=한 줄
+			int nextSubIdx = Integer.parseInt(subMessageIdx);
+			int idx = 0;
+			// statusCd가 서브 테마가 아니라면
+			if (!DialogStatus.get(statusCd).name().contains("SUB_")) {
+				nextIdx++;
+				idx = nextIdx;
+			} else {
+				idx = nextSubIdx;
+				nextSubIdx++;
+			}
+			
+			String nextMessages = info.getMessageByIdx(idx);
 			Map<String,Object> applySysOprtResultMap = null;
 			String nextMessage = "";
 			
 			if (nextMessages == null ) {
+				int nextAutomataIdx = 0;
 				//index 해당 문장이 없다면 (해당 statusCd의 봇 발화 모두 진행했다면)
 				//다음 statusCd 데이터 불러옴
 				//APPROACH_TOPIC 주제 진입 스크립트의 마지막줄일때만 스크립트 파일경로에 주제경로 구하기 
@@ -77,9 +89,17 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 					//CITDelete/deleteType TOPIC이면 세션에서 CIT
 					resultMap.put("CITDelete", "TOPIC");
 				}
+				
+				if(DialogStatus.get(statusCd).name().contains("SUB_")) {
+					conditionInfoMap.put("CIT", "TOPIC");
+					conditionInfoMap.put("CITKeyword", "travel|TOPIC");
+					scriptFilePath = this.addTopicScriptPath(info.getNextStatusCd(), urlFilePath + "script/bot/", conditionInfoMap);
+					nextIdx++;
+					nextAutomataIdx = nextIdx;
+				}
 				info = new MessageInfo(info.getNextStatusCd(), scriptFilePath);
-				nextMessages = info.getMessageByIdx(0);
-				nextIdx = 0;
+				nextMessages = info.getMessageByIdx(nextAutomataIdx);
+				nextIdx = nextAutomataIdx;
 			}
 			//현재 nextMessages 는 | 가 붙은 상태임. 따라서 optimize할때는 짤라내고 루프돌면서 한개씩 처리
 			//인자값으로 conditionInfoMap(oldUser, newUser , isPositive/isNegative/isAsking)등의 정보들을 넣어줌 
@@ -100,6 +120,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			//resultMap.put("statusCd", statusCd);
 			resultMap.put("message", nextMessage);
 			resultMap.put("messageIdx", nextIdx);
+			resultMap.put("subMessageIdx", nextSubIdx);
 			resultMap.put("scriptFilePath", scriptFilePath);
 		}
 		return resultMap;
@@ -109,10 +130,13 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 		if(conditionInfoMap.get("CITKeyword")!=null) {
 			String CITKeyword = (String) conditionInfoMap.get("CITKeyword");
 			String[] CITs = CITKeyword.split("\\"+systemDelimeter);
-			String CITValue = CITs[0]; //dict에서 여행에 매핑되는 값인 travel
-			String keywordType = CITs[1]; //TOPIC
+			String CITValue = CITs[0]; //dict에서 여행에 매핑되는 값인 travel or travel/sub
+			String keywordType = CITs[1]; //TOPIC or SUB
 			//만약 키워드타입이 TOPIC이면 파일경로를 /CITValue/ 만큼 depth를 더 파고듦  
-			if(keywordType.equals("TOPIC") && !statusCd.equals(DialogStatus.APPROACH_TOPIC.getStatusCd())) {
+			if (keywordType.equals("TOPIC") && !statusCd.equals(DialogStatus.APPROACH_TOPIC.getStatusCd())) {
+				scriptFilePath += CITValue + "/";
+				log.debug("CITKeywordPath>>>>>>>>>>>"+scriptFilePath);
+			} else if (keywordType.equals("SUB") /* && !statusCd.equals(DialogStatus.ONGOING_TOPIC.getStatusCd()) */) {
 				scriptFilePath += CITValue + "/";
 				log.debug("CITKeywordPath>>>>>>>>>>>"+scriptFilePath);
 			}
@@ -130,7 +154,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 		//후보 문장들을 담아둘 리스트 객체: 나중에 이중에서 한개만 랜덤하게 추출 
 		List<String> candidateNextMessages = new ArrayList<String>();
 		for(int i=0; i<nextMessagesArr.length; i++) {
-			//정규표현식으로 한개 문장안의 모든 시스템명령문구를 찾음 
+			//정규표현식으로 한개 문장안의 모든 시스템명령문구를 찾음
 			String candidateMessage = nextMessagesArr[i];
 
 			candidateMessage = initPropMessage(candidateMessage,conditionInfoMap, resultMap);
@@ -268,7 +292,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 						
 						switch (Operation.get(key)) {
 							case NNP:	operationString = String.valueOf(Operation.NNP.doParse(operationString,null,null));					break;
-							case IF:	operationString = String.valueOf(Operation.IF.doParse(operationString,null,conditionInfoMap));				break; //conditionInfoMap 에는 String userType, List textTypes 이 들어있음.
+							case IF:		operationString = String.valueOf(Operation.IF.doParse(operationString,null,conditionInfoMap));			break; //conditionInfoMap 에는 String userType, List textTypes 이 들어있음.
 							case IMG:	operationString = String.valueOf(Operation.IMG.doParse(operationString,urlSystemImgFilePath,null));	break;
 							case STYL:	operationString = String.valueOf(Operation.STYL.doParse(operationString,null,null));					break;
 							case CIT:	//{CIT|TOPIC} >> TOPIC.dict 사전을 찾아서 안에 있는 어휘들을 key:value set으로 만들어 리턴
@@ -370,7 +394,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 		return operations;
 	}
 	
-	/*
+	/**
 	 * java 문법 기호를 html 문법 기호로 변환
 	 */
 	public String parseForHtml(String message) {

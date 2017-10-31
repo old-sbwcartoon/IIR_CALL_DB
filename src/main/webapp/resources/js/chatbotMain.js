@@ -8,7 +8,7 @@ $(document).ready(function() {
 	// $('.img-circle').attr("src", $('#imgSrc').val()+bot.avatar);
 	$('#img-bot').attr("src", $('#imgSrc').val() + bot.avatar);
 	// init SYSTEM_ON
-	doInput("0000", 0);
+	doInput("0000", 0, 0);
 
 	btnEvent();
 });
@@ -34,7 +34,7 @@ function btnEvent() {
 		}
 
 		insertUser($('#userInput').val(), $('#imgSrc').val()); // user
-		doInput($('#statusCd').val(), $('#messageIdx').val()); // bot
+		doInput($('#statusCd').val(), $('#messageIdx').val(), $('#subMessageIdx').val()); // bot
 		$('#userInput').val('');
 		// 스크롤바 focusing
 		$("html, body").animate({
@@ -51,7 +51,7 @@ function btnEvent() {
 		if (e.which == 13) {
 			event.preventDefault();
 			insertUser($('#userInput').val(), $('#imgSrc').val());
-			doInput($('#statusCd').val(), $('#messageIdx').val());
+			doInput($('#statusCd').val(), $('#messageIdx').val(), $('#subMessageIdx').val());
 			$('#userInput').val('');
 			// 스크롤바 focusing
 			$("html, body").animate({
@@ -66,12 +66,13 @@ function btnEvent() {
 	});
 }
 
-function doInput(statusCd, messageIdx) {
+function doInput(statusCd, messageIdx, subMessageIdx) {
 
 	var msg = {
 		userText : $('#userInput').val(),
 		statusCd : statusCd,
 		messageIdx : messageIdx,
+		subMessageIdx : subMessageIdx,
 		conditionInfoMap : $('#conditionInfos').val()
 	}
 
@@ -94,10 +95,11 @@ function socketHandler(clientMessage) {
 		var data = JSON.parse(serverMessage.data);
 		$('#statusCd').val(data.statusCd);
 		$('#messageIdx').val(data.messageIdx);
+		$('#subMessageIdx').val(data.subMessageIdx);
 		$('#conditionInfos').val(data.conditionInfoMap);
 		// script path hidden 기록
 		$('#scriptPath').val(data.scriptFilePath);
-		insertBot(data.message, data.imgSrc, data.messageIdx, data.statusCd);
+		insertBot(data.message, data.imgSrc, data.messageIdx, data.subMessageIdx, data.statusCd);
 
 		// 시각화 부분
 		$('#dialogShowBoxText').remove();
@@ -160,11 +162,12 @@ function formatAMPM(date) {
 //    
 // }
 
-function insertBot(text, imgfilepath, messageIdx, statusCd) {
+function insertBot(text, imgfilepath, messageIdx, subMessageIDx, statusCd) {
 	var control = "";
 	var date = formatAMPM(new Date());
 	var seq = $('#idSeq').val();
 	var messageIdx = $('#messageIdx').val();
+	var subMessageIdx = $('#subMessageIdx').val();
 
 	// sleep(text.length * 100); //사용자 입력과 동시에 나오지 않도록 잠시 정지. 글자 수에 따라 정지 시간
 	// 길어짐. 버벅댐.
@@ -189,6 +192,8 @@ function insertBot(text, imgfilepath, messageIdx, statusCd) {
 			+ statusCd
 			+ '\',\''
 			+ messageIdx
+			+ '\',\''
+			+ subMessageIdx
 			+ '\',\'ADD\',\'0\', this)" class="btnFixInput btnSmall">입력</button>'
 			+ '<button onclick="cancleFixText(' + seq
 			+ ')" class="cancleFixInput btnSmall">취소</button>' + '</div>'
@@ -247,7 +252,7 @@ function activeFixFixedBox(obj) {
 	toggleFixFixedBox(obj);
 }
 
-function addFixText(seq, statusCd, messageIdx, workType, fixedTextIdx, obj) {
+function addFixText(seq, statusCd, messageIdx, subMessageIdx, workType, fixedTextIdx, obj) {
 	// var objBoxName = $(obj).parent().parent().attr('id');
 	// var fixedText = $('.fixText').eq(seq).val();
 	var fixedText = '';
@@ -273,6 +278,7 @@ function addFixText(seq, statusCd, messageIdx, workType, fixedTextIdx, obj) {
 				workType : workType,
 				fixedTextIdx : fixedTextIdx,
 				messageIdx : messageIdx,
+				subMessageIdx : subMessageIdx,
 				statusCd : statusCd,
 				loginTime : loginTime
 			},

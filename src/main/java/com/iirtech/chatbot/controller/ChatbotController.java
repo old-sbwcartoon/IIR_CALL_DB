@@ -131,6 +131,7 @@ public class ChatbotController {
 			String scriptFilePath = urlFilePath + "script/bot/";
 			String initStatusCd = "0000";
 			String initMsgIdx = "0";
+			String initSubMsgIdx = "0";
 			MessageInfo info = new MessageInfo(initStatusCd,scriptFilePath);
 			String initInfo = info.getMessageByIdx(0).replace("\\n", "<br>");
 			
@@ -143,6 +144,7 @@ public class ChatbotController {
 			userInfoMap.put("dialogTime", userInfoMap.get("loginTime"));
 			userInfoMap.put("statusCd", initStatusCd);
 			userInfoMap.put("messageIdx", initMsgIdx);
+			userInfoMap.put("subMessageIdx", initSubMsgIdx);
 			cbs.makeUserDialogFile(userInfoMap, rootPath);
 			
 			//시각화 
@@ -150,6 +152,7 @@ public class ChatbotController {
 			
 			mv.addObject("statusCd", initStatusCd);
 			mv.addObject("messageIdx", initMsgIdx);
+			mv.addObject("subMessageIdx", initSubMsgIdx);
 			mv.addObject("initInfo", initInfo);
 			mv.addObject("imgSrc", urlSystemImgFilePath);
 			mv.addObject("loginTime", loginTime);

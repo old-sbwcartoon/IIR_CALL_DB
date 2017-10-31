@@ -180,7 +180,12 @@ public class ChatbotServiceImpl implements ChatbotService{
 			//statusCd|msgIdx|User|UserText|time|seq
 			String dialogTime = userInfoMap.get("dialogTime").toString();
 			String statusCd = userInfoMap.get("statusCd").toString();
-			String messageIdx = userInfoMap.get("messageIdx").toString();
+			String idx = null;
+			if (!DialogStatus.get(statusCd).name().contains("SUB_")) {
+				idx = userInfoMap.get("messageIdx").toString();
+			} else {
+				idx = userInfoMap.get("subMessageIdx").toString();
+			}
 			
 			//파일의 마지막 라인에서 seq값 읽어오기 
 			List<String> dialogs = cbu.readFileByLine(userDialogFileDir,userDialogFileName);
@@ -190,7 +195,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 				dialogSeq = Integer.parseInt(lastDialogLine.split("\\|")[5]) + 1;
 			}
 			
-			content = statusCd + systemDelimeter + messageIdx + systemDelimeter + speecher 
+			content = statusCd + systemDelimeter + idx + systemDelimeter + speecher 
 					+ systemDelimeter + orglMessage + systemDelimeter + dialogTime 
 					+ systemDelimeter + dialogSeq + systemDelimeter + 0;
 			
@@ -210,15 +215,20 @@ public class ChatbotServiceImpl implements ChatbotService{
 		String userDialogFileDir = userFilePath + param.get("id").toString() + "/";
 		String userDialogFileName = param.get("loginTime").toString() + "_dialog.txt";
 		String statusCd = param.get("statusCd").toString();
-		String messageIdx = param.get("messageIdx").toString();
 		String workType = param.get("workType").toString();//ADD, MODIFY, DELETE
 		String fixedTextIdx = param.get("fixedTextIdx").toString();
-
+		String idx = null;
+		// statusCd가 서브 테마가 아니라면
+		if (!DialogStatus.get(statusCd).name().contains("SUB_")) {
+			idx = param.get("messageIdx").toString();
+		} else {
+			idx = param.get("subMessageIdx").toString();
+		}
 		
 		List<String> dialogs = cbu.readFileByLine(userDialogFileDir, userDialogFileName);
 		//삽입할 위치 구하기 //정규표현식 사용 (S000[|]0[|]Bot[|].*)
-		String botMatchingStr = statusCd + "[|]" + messageIdx + "[|]Bot[|]";
-		String fixMatchingStr = statusCd + "[|]" + messageIdx + "[|]Fix[|]";
+		String botMatchingStr = statusCd + "[|]" + idx + "[|]Bot[|]";
+		String fixMatchingStr = statusCd + "[|]" + idx + "[|]Fix[|]";
 
 		if(workType.equals("ADD")) {
 			
@@ -241,7 +251,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 			String fixedText = param.get("fixedText").toString().replaceAll("\r\n", "<br>").replaceAll("\n", "<br>");
 			String speecher = "Fix";
 			String dialogTime = cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis());
-			String content = statusCd + systemDelimeter + messageIdx + systemDelimeter + speecher 
+			String content = statusCd + systemDelimeter + idx + systemDelimeter + speecher 
 					+ systemDelimeter + fixedText + systemDelimeter + dialogTime 
 					+ systemDelimeter + insertPoint + systemDelimeter + fixedTextIdx;
 			
@@ -263,7 +273,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 			String fixedText = param.get("fixedText").toString().replaceAll("\r\n", "<br>").replaceAll("\n", "<br>");
 			String speecher = "Fix";
 			String dialogTime = cbu.getYYYYMMDDhhmmssTime(System.currentTimeMillis());
-			String content = statusCd + systemDelimeter + messageIdx + systemDelimeter + speecher 
+			String content = statusCd + systemDelimeter + idx + systemDelimeter + speecher 
 					+ systemDelimeter + fixedText + systemDelimeter + dialogTime 
 					+ systemDelimeter + modifyPoint + systemDelimeter + fixedTextIdx;
 			

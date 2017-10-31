@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.iirtech.chatbot.service.ChatbotNLPService;
+import com.iirtech.common.enums.DialogStatus;
 import com.iirtech.common.utils.ChatbotUtil;
 
 import info.debatty.java.stringsimilarity.JaroWinkler;
@@ -71,8 +72,8 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 		for (String line : lines) {
 			//line >> 여행|travel
 			String[] lineArr = line.split("\\"+systemDelimeter);
-			String CITKey = lineArr[0]; //여행
-			String CITValue = lineArr[1]; //travel
+			String CITKey = lineArr[0]; //TOPIC:여행 or SUB:여행 서브 테마
+			String CITValue = lineArr[1]; //TOPIC:travel or SUB:travel/sub
 			if(line.contains(CITKey) && !keywordCandidates.contains(CITValue)) {
 				keywordCandidates.add(CITValue);
 			}
@@ -84,7 +85,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 		//3.추출된 키워드가 한개 이상일 경우 한개만 선택하기(사용자가 고의로 여러개 입력-에러)로 봄
 		//예외처리이므로 미구현
 		
-		//일단 임시로 첫번째 것만 리턴하는거로 string "travel|TOPIC"
+		//일단 임시로 첫번째 것만 리턴하는거로 TOPIC:string "travel|TOPIC" or SUB:string "travel/sub|SUB"
 		result = keywordCandidates.get(0) + systemDelimeter + keywordType;
 		return result;
 	}
@@ -94,8 +95,8 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 	 * 
 	 */
 	@Override
-	public String checkSubTheme(String procText) {
-		String subThemeCode = null;
+	public String getSubThemeStatusCd(String procText) {
+		String subThemeStatusCd = null;
 		String strToExtrtKwrd = procText;
 		
 		
@@ -104,7 +105,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			
 			
 			// 식사하다, 탈것을 타다, 이동하다, 숙소로 가다, 짐을 찾다, 차 렌트하다, 쇼핑하다, 친구 만나다, 환전하다, 길잃다
-			String[] subThemeArr = {"meal", "vehicle", "move", "inn", "getLuggage", "carRental", "shopping", "meetFriend", "exchangeMoney", "loseMyWay"};
+			String[] subThemeArr = {"meal", "vehicle_bus", "vehicle_taxi", "move", "inn", "getLuggage", "carRental", "shopping", "meetFriend", "exchangeMoney", "loseMyWay"};
 			
 			String[] dictNameArr = {"company", "drink", "entertainer", "food", "hotel", "korea_location", "music", "nation", "restaurant"
 					, "school", "transport", "travel_place", "TV_drama_program", "TV_movie_program", "TV_show_program"};
@@ -112,7 +113,8 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			// 주제별 대응 사전 이름 저장
 			HashMap<String, ArrayList<String>> dictNameListInSubTheme = new HashMap<String, ArrayList<String>>();
 			dictNameListInSubTheme.put("meal", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[1], dictNameArr[3], dictNameArr[8]})));
-			dictNameListInSubTheme.put("vehicle", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[10]})));
+			dictNameListInSubTheme.put("vehicle_bus", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[10]})));
+			dictNameListInSubTheme.put("vehicle_taxi", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[10]})));
 			dictNameListInSubTheme.put("move", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[5], dictNameArr[7], dictNameArr[9], dictNameArr[11]})));
 			dictNameListInSubTheme.put("inn", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[4]})));
 			dictNameListInSubTheme.put("getLuggage", new ArrayList<String>(Arrays.asList(new String[]{null})));
@@ -125,7 +127,8 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			// 예문 문장 저장
 			HashMap<String, ArrayList<String>> expInput = new HashMap<String, ArrayList<String>>();
 			expInput.put("meal", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 밥을 먹었어요~"})));
-			expInput.put("vehicle", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 버스를 탔어요~", "도착하자마자 택시를 탔어요~"})));
+			expInput.put("vehicle_bus", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 버스를 탔어요~"})));
+			expInput.put("vehicle_taxi", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 택시를 탔어요~"})));
 			expInput.put("move", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 {where}으로/로 갔어요~"})));
 			expInput.put("inn", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 숙소로 갔어요~"})));
 			expInput.put("getLuggage", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 짐을 찾았어요~"})));
@@ -266,7 +269,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 					ArrayList<String> keywordList = inputNList;
 					double minSimilarityScore = 0.7;
 
-					String filePath = System.getProperty("user.home") + "/Documents/chatbot/file/dict/WikiDictionary";
+					String filePath = urlFilePath + "dictionary/WikiDictionary/";
 					
 					ArrayList<Double> maxSimilarityPerKeyword  = new ArrayList<Double>();
 					ArrayList<String> maxSimilarDictPerKeyword = new ArrayList<String>();
@@ -356,7 +359,8 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 					}
 				}
 			
-				subThemeCode = maxSimiarSubTheme;
+				subThemeStatusCd = DialogStatus.getStatusName("sub_"+maxSimiarSubTheme).getStatusCd();
+				log.debug("subTheme=" + subThemeStatusCd);
 				
 //				ma.closeLogger();
 			} catch (Exception e) {
@@ -364,7 +368,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			}
 		}
 		
-		return subThemeCode;
+		return subThemeStatusCd;
 	}
 	
 	/**

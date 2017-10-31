@@ -132,17 +132,18 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		    			procText = String.valueOf(conditionInfoMap.get("procText"));
 //		    		}
 		    		String messageIdx = String.valueOf(param.get("messageIdx"));
+		    		String subMessageIdx = String.valueOf(param.get("subMessageIdx"));
 		    		
 		    		//세션의 lastDialogStatus 값, 입력문장 등 정보를 가지고 발화자, 상태코드, 메시지 생성
 		    		//conditionInfoMap 에는 String userType, List textTypes, List CITKeywords(사용자인풋텍스트에서 추출된 키워드)
 		    		//statusCd,message,messageIdx(string)-not null, CIT(map)-nullable 이 들어있음
-		    		Map<String, Object> messageInfo = cbss.getMessageInfo(statusCd, procText, messageIdx, conditionInfoMap);
-		    		
+
 		    		// 서브 테마 찾기
-		    		String subTheme = null;
 		    		if(statusCd.equals(DialogStatus.ONGOING_TOPIC.getStatusCd()) && messageIdx.equals("0")) {
-		    			subTheme = cbns.checkSubTheme(procText);
+		    			statusCd = cbns.getSubThemeStatusCd(procText);
 		    		}
+		    		Map<String, Object> messageInfo = cbss.getMessageInfo(statusCd, procText, messageIdx, subMessageIdx, conditionInfoMap);
+		    		
 		    		
 		    		//세션에 저장된 시스템 변수값을 제거해야하는 경우인지 체크
 //		    		if(messageInfo.get("CITDelete")!=null && httpSession.get("CIT")!=null) {
@@ -178,6 +179,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			    		userDialogInfoMap.put("dialogTime", dialogTime);
 			    		userDialogInfoMap.put("statusCd", statusCd);
 			    		userDialogInfoMap.put("messageIdx", messageIdx);
+			    		userDialogInfoMap.put("subMessageIdx", subMessageIdx);
 			    		// 상태체크해서 최초 시스템 시작이 아닌경우에는 updateUserDialogFile 실행 
 			    		cbs.makeUserDialogFile(userDialogInfoMap, rootPath);
 		    		}
@@ -211,6 +213,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 				botDialogInfoMap.put("dialogTime", dialogTime);
 				botDialogInfoMap.put("statusCd", messageInfo.get("statusCd"));
 				botDialogInfoMap.put("messageIdx", messageInfo.get("messageIdx"));
+				botDialogInfoMap.put("subMessageIdx", messageInfo.get("subMessageIdx"));
 				cbs.makeUserDialogFile(botDialogInfoMap, rootPath);
 				
 		    		String dialogLogStr = cbs.makeDialogLogString(botDialogInfoMap,rootPath);
