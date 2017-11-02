@@ -128,7 +128,11 @@ public class ChatbotController {
 			session.setAttribute("conditionInfoMap", conditionInfoMap);
 			mv.addObject("conditionInfoMap", new ObjectMapper().writeValueAsString(conditionInfoMap));
 			
-			String scriptFilePath = urlFilePath + "script/bot/";
+			Map<String, Object> shortTermInfoMap = new HashMap<String, Object>();
+			shortTermInfoMap.put("name", String.valueOf(param.get("id")).split("@")[0]);
+			mv.addObject("shortTermInfoMap", new ObjectMapper().writeValueAsString(shortTermInfoMap));
+			
+			String scriptFilePath = urlFilePath + "script/iitp_bot/";
 			String initStatusCd = "0000";
 			String initMsgIdx = "0";
 			String initSubMsgIdx = "0";

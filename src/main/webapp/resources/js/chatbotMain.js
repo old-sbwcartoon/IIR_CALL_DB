@@ -73,7 +73,8 @@ function doInput(statusCd, messageIdx, subMessageIdx) {
 		statusCd : statusCd,
 		messageIdx : messageIdx,
 		subMessageIdx : subMessageIdx,
-		conditionInfoMap : $('#conditionInfos').val()
+		conditionInfoMap : $('#conditionInfos').val(),
+		shortTermInfoMap : $('#shortTermInfos').val()
 	}
 
 	socketHandler(JSON.stringify(msg));
@@ -97,6 +98,7 @@ function socketHandler(clientMessage) {
 		$('#messageIdx').val(data.messageIdx);
 		$('#subMessageIdx').val(data.subMessageIdx);
 		$('#conditionInfos').val(data.conditionInfoMap);
+		$('#shortTermInfos').val(data.shortTermInfoMap);
 		// script path hidden 기록
 		$('#scriptPath').val(data.scriptFilePath);
 		insertBot(data.message, data.imgSrc, data.messageIdx, data.subMessageIdx, data.statusCd);

@@ -97,6 +97,7 @@
 		<input type="hidden" id="messageIdx" value='${messageIdx}'>
 		<input type="hidden" id="subMessageIdx" value='${subMessageIdx}'>
 		<input type="hidden" id="conditionInfos" value='${conditionInfoMap}'>
+		<input type="hidden" id="shortTermInfos" value='${shortTermInfoMap}'>
 		<input type="hidden" id="loginTime" value='${loginTime}'>
 	
 	<!-- jQuery -->

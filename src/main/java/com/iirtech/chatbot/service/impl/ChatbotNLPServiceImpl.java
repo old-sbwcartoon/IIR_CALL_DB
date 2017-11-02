@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.snu.ids.ha.index.Keyword;
+import org.snu.ids.ha.index.KeywordExtractor;
+import org.snu.ids.ha.index.KeywordList;
 import org.snu.ids.ha.ma.Eojeol;
 import org.snu.ids.ha.ma.MExpression;
 import org.snu.ids.ha.ma.Morpheme;
@@ -92,7 +95,8 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 
 	/**
 	 * 서브테마 체크 후 해당하는 코드를 반환
-	 * 
+	 * @param procText
+	 * @return 서브 테마 code
 	 */
 	@Override
 	public String getSubThemeStatusCd(String procText) {
@@ -117,12 +121,12 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			dictNameListInSubTheme.put("vehicle_taxi", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[10]})));
 			dictNameListInSubTheme.put("move", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[5], dictNameArr[7], dictNameArr[9], dictNameArr[11]})));
 			dictNameListInSubTheme.put("inn", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[4]})));
-			dictNameListInSubTheme.put("getLuggage", new ArrayList<String>(Arrays.asList(new String[]{null})));
+			dictNameListInSubTheme.put("getLuggage", new ArrayList<String>(Arrays.asList(new String[]{})));
 			dictNameListInSubTheme.put("carRental", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[10]})));
-			dictNameListInSubTheme.put("shopping", new ArrayList<String>(Arrays.asList(new String[]{null})));
-			dictNameListInSubTheme.put("meetFriend", new ArrayList<String>(Arrays.asList(new String[]{null})));
-			dictNameListInSubTheme.put("exchangeMoney", new ArrayList<String>(Arrays.asList(new String[]{null})));
-			dictNameListInSubTheme.put("loseMyWay", new ArrayList<String>(Arrays.asList(new String[]{null})));
+			dictNameListInSubTheme.put("shopping", new ArrayList<String>(Arrays.asList(new String[]{})));
+			dictNameListInSubTheme.put("meetFriend", new ArrayList<String>(Arrays.asList(new String[]{})));
+			dictNameListInSubTheme.put("exchangeMoney", new ArrayList<String>(Arrays.asList(new String[]{})));
+			dictNameListInSubTheme.put("loseMyWay", new ArrayList<String>(Arrays.asList(new String[]{})));
 			
 			// 예문 문장 저장
 			HashMap<String, ArrayList<String>> expInput = new HashMap<String, ArrayList<String>>();
@@ -133,7 +137,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			expInput.put("inn", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 숙소로 갔어요~"})));
 			expInput.put("getLuggage", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 짐을 찾았어요~"})));
 			expInput.put("carRental", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 차를 빌렸어요~"})));
-			expInput.put("shopping", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 쇼핑했어요~"})));
+			expInput.put("shopping", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 쇼핑했어요~", "도착하자마자 옷을 샀어요~", "도착하자마자 물건을 샀어요~", "도착하자마자 기념품을 샀어요~"})));
 			expInput.put("meetFriend", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 친구를/가족을 만났어요~"})));
 			expInput.put("exchangeMoney", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 환전을 했어요~"})));
 			expInput.put("loseMyWay", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 길을 잃어버렸어요~"})));
@@ -141,44 +145,12 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			// 조사 + 동사 = 사용자 문장 : 예문 문장
 			// 명사 = 사용자 키워드 단어 : 사전 단어
 			
-			try {
-			
-				ArrayList<String> inputVList = new ArrayList<String>(); // 입력 문장 속 동사 리스트
-				ArrayList<String> inputJList = new ArrayList<String>(); // 입력 문장 속 조사 리스트
-				ArrayList<String> inputNList = new ArrayList<String>(); // 입력 문장 속 명사 리스트
+				HashMap<String, ArrayList<String>> inputMorpMap = getMorpListMap(strToExtrtKwrd);
+				ArrayList<String> inputJList = inputMorpMap.get("jList");
+				ArrayList<String> inputVList = inputMorpMap.get("vList");
+				ArrayList<String> inputNList = inputMorpMap.get("nList");
 				
-				// 사용자 입력 문장 형태소 분석
-				MorphemeAnalyzer ma = null;
-				
-				ma = new MorphemeAnalyzer();
-//				ma.createLogger(null);
-			
-				List<MExpression> ret = ma.analyze(strToExtrtKwrd);
-				ret = ma.postProcess(ret);
-				ret = ma.leaveJustBest(ret);
-	
-				List<Sentence> stl = ma.divideToSentences(ret);
-				
-				for( int i = 0; i < stl.size(); i++ ) {
-					Sentence st = stl.get(i);
-//					System.out.println("=============================================  " + st.getSentence());
-					
-					for( int j = 0; j < st.size(); j++ ) {
-						
-						Eojeol eojeol = st.get(j);
-//						log.debug(eojeol);
-						
-						for (Morpheme morp : eojeol) {
-							if (morp.getTag().contains("JK")) {
-								inputJList.add(morp.getString());
-							} else if (morp.getTag().equals("VV")) {
-								inputVList.add(morp.getString());
-							} else if (morp.getTag().contains("NN")) {
-								inputNList.add(morp.getString());
-							}
-						}
-					}
-				}
+				HashMap<String, ArrayList<String>> expMorpMap = null;
 				
 				// subThemeScore = (vCnt * vWeight) + (jCnt * jWeight) + (nCnt * nWeight)
 				double jWeight = 0.5;
@@ -196,45 +168,32 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 					int nCnt = 0;
 					for (String expStr : expInputList) {
 //						expStr; 예문 문장
-						ma = null;
+						expMorpMap = getMorpListMap(expStr);
 						
-						ma = new MorphemeAnalyzer();
-//						ma.createLogger(null);
-					
-						ret = ma.analyze(expStr);
-						ret = ma.postProcess(ret);
-						ret = ma.leaveJustBest(ret);
-	
-						stl = ma.divideToSentences(ret);
+						ArrayList<String> expJList = expMorpMap.get("jList");
+						ArrayList<String> expVList = expMorpMap.get("vList");
+						ArrayList<String> expNList = expMorpMap.get("nList");
 						
-						for( int j = 0; j < stl.size(); j++ ) {
-							Sentence st = stl.get(j);
-//							System.out.println("=============================================  " + st.getSentence());
-							
-							for( int k = 0; k < st.size(); k++ ) {
-								
-								Eojeol eojeol = st.get(k);
-								log.debug(eojeol);
-								for (Morpheme morp : eojeol) {
-									if (morp.getTag().contains("JK")) {
-										for (String inputJ : inputJList) {
-											if (inputJ.equals(morp.getString())) {
-												jCnt++;
-											}
-										}
-									} else if (morp.getTag().equals("VV")) {
-										for (String inputV : inputVList) {
-											if (inputV.equals(morp.getString())) {
-												vCnt++;
-											}
-										}
-									} else if (morp.getTag().contains("NN")) {
-										for (String inputN : inputNList) {
-											if (inputN.equals(morp.getString())) {
-												nCnt++;
-											}
-										}
-									}
+						for (int j = 0; j < expJList.size(); j++) {
+							for (String inputJ : inputJList) {
+								if (inputJ.equalsIgnoreCase(expJList.get(j))) {
+									jCnt++;
+								}
+							}
+						}
+						
+						for (int j = 0; j < expVList.size(); j++) {
+							for (String inputV : inputVList) {
+								if (inputV.equalsIgnoreCase(expVList.get(j))) {
+									vCnt++;
+								}
+							}
+						}
+						
+						for (int j = 0; j < expNList.size(); j++) {
+							for (String inputN : inputNList) {
+								if (inputN.equalsIgnoreCase(expNList.get(j))) {
+									nCnt++;
 								}
 							}
 						}
@@ -266,79 +225,24 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 						candidateSubThemeList.addAll(new ArrayList<String>(Arrays.asList(subThemeArr)));
 						candidateSubThemeScoreList.addAll(new ArrayList<Double>(Arrays.asList(subThemeScoreArr)));
 					}
-					ArrayList<String> keywordList = inputNList;
+					
+
 					double minSimilarityScore = 0.7;
-
 					String filePath = urlFilePath + "dictionary/WikiDictionary/";
+					HashMap<String, ArrayList<?>> similarityMap = getMaxSimilarityAndFileName(filePath, candidateSubThemeList, dictNameListInSubTheme, inputNList, minSimilarityScore);
 					
-					ArrayList<Double> maxSimilarityPerKeyword  = new ArrayList<Double>();
-					ArrayList<String> maxSimilarDictPerKeyword = new ArrayList<String>();
-					for (int i = 0; i < keywordList.size(); i++) { // 입력문 키워드 수만큼
-
-						for (String candidateSubTheme : candidateSubThemeList) {
-							ArrayList<String> candidateDictNameList = dictNameListInSubTheme.get(candidateSubTheme);
-								
-							for (int j = 0; j < candidateDictNameList.size(); j++) {
-								String themeName = candidateDictNameList.get(j);
-								String fileName  = themeName + ".txt";
-								List<String> lines = cbu.readFileByLine(filePath, fileName);
-								
-								String dict = "";
-								for (String line : lines) {
-									dict += line;
-								}
-								
-								double oneWordSimilarityScore = 0;
-								double oneDictSimilarityScore = 0;
-								int overThresholdCnt = 0;
-								// 유사도 
-								String[] dictWordArr = dict.split(",");
-								JaroWinkler jw = new JaroWinkler();
-								for (int k = 0; k < dictWordArr.length; k++) { // 
-									String dictWord = dictWordArr[k];
-									oneWordSimilarityScore = jw.similarity(dictWord, keywordList.get(i));
-									// min유사도 점수를 넘는 유효 유사도 값 더하기
-									if (oneWordSimilarityScore > minSimilarityScore) {
-										oneDictSimilarityScore += oneWordSimilarityScore;
-										overThresholdCnt++;
-									}
-								}
-								if (overThresholdCnt == 0) {
-									overThresholdCnt = 1;
-								}
-								// 한 사전 내 유효 유사도 값들의 평균값 저장
-								oneDictSimilarityScore = oneDictSimilarityScore / overThresholdCnt;
-								
-//								log.debug(themeName + ": " + oneDictSimilarityScore);
-								// 유사도 점수 최대값 파일 이름 구하기
-								if (!maxSimilarDictPerKeyword.contains(themeName)) {
-									maxSimilarityPerKeyword.add(oneDictSimilarityScore);
-									maxSimilarDictPerKeyword.add(themeName);
-								} else {
-									maxSimilarityPerKeyword.set(j, maxSimilarityPerKeyword.get(j) + oneDictSimilarityScore);
-								}
-							
-							}
-							
-						}
-								
-					}
-					
-					// 각 키워드의 각 사전별 유사도 평균 셋팅
-					for (int i = 0; i < maxSimilarityPerKeyword.size(); i++) {
-						maxSimilarityPerKeyword.set(i, maxSimilarityPerKeyword.get(i) / keywordList.size());
-					}
-					
+					ArrayList<String> fileNameList   = (ArrayList<String>)similarityMap.get("fileNameList");
+					ArrayList<Double> similarityList = (ArrayList<Double>)similarityMap.get("similarityList");
 					// 사용자 입력문 키워드마다, 사전과 가장 높은 유사도 수치를 대응 서브 테마의 score에 더함
 					for (int i = 0; i < candidateSubThemeList.size(); i++) {
 						
-						for (int j = 0; j < maxSimilarDictPerKeyword.size(); j++) {
+						for (int j = 0; j < fileNameList.size(); j++) {
 //							log.debug(maxSimilarDictPerKeyword.get(i) + ":" + keywordList.get(i) + " = " + maxSimilarityPerKeyword.get(i));
-							ArrayList<String> subThemeKeyList = getKeyFromValue(dictNameListInSubTheme, maxSimilarDictPerKeyword.get(j));
+							ArrayList<String> subThemeKeyList = getKeyFromValue(dictNameListInSubTheme, fileNameList.get(j));
 							
 							for (int k = 0; k < subThemeKeyList.size(); k++) {
 								if (candidateSubThemeList.get(i).equals(subThemeKeyList.get(k))) {
-									candidateSubThemeScoreList.set(i, candidateSubThemeScoreList.get(i) + maxSimilarityPerKeyword.get(j));
+									candidateSubThemeScoreList.set(i, candidateSubThemeScoreList.get(i) + similarityList.get(j));
 								}
 							}
 						}
@@ -358,14 +262,21 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 						maxSimiarSubTheme = candidateSubThemeList.get(i);
 					}
 				}
-			
+				
+				// maxSimilarityScore가 0일 때
+				/*
+				 * 
+				 * 
+				 * 
+				 * 
+				 * 
+				 * 
+				 * 
+				 */
+				
 				subThemeStatusCd = DialogStatus.getStatusName("sub_"+maxSimiarSubTheme).getStatusCd();
 				log.debug("subTheme=" + subThemeStatusCd);
 				
-//				ma.closeLogger();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 		}
 		
 		return subThemeStatusCd;
@@ -388,5 +299,244 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			}
 		}
 		return keyList;
+	}
+	
+	/**
+	 * 문자열을 형태소 (JK, VV, NN)로 분류해서 각각 리스트로 변환 후 맵으로 반환한다
+	 * @param String str
+	 * @return HashMap("jList", jlist), HashMap("vList", vlist), HashMap("nList", nlist)
+	 */
+	@Override
+	public HashMap<String, ArrayList<String>> getMorpListMap(String str) {
+		HashMap<String, ArrayList<String>> resultMap = null;
+		
+		if (str != null && str != "") {
+			resultMap = new HashMap<String, ArrayList<String>>();
+			
+			ArrayList<String> vList = new ArrayList<String>(); // 입력 문장 속 동사 리스트
+			ArrayList<String> jList = new ArrayList<String>(); // 입력 문장 속 조사 리스트
+			ArrayList<String> nList = new ArrayList<String>(); // 입력 문장 속 명사 리스트
+			
+			// 사용자 입력 문장 형태소 분석
+			MorphemeAnalyzer ma = new MorphemeAnalyzer();
+//					ma.createLogger(null);
+		
+			try {
+				List<MExpression> ret = ma.analyze(str);
+				ret = ma.postProcess(ret);
+				ret = ma.leaveJustBest(ret);
+		
+				List<Sentence> stl = ma.divideToSentences(ret);
+				
+				for( int i = 0; i < stl.size(); i++ ) {
+					Sentence st = stl.get(i);
+					
+					for( int j = 0; j < st.size(); j++ ) {
+						
+						Eojeol eojeol = st.get(j);
+						
+						for (Morpheme morp : eojeol) {
+							
+							
+							if (morp.getTag().contains("JK")) {
+								jList.add(morp.getString());
+							} else if (morp.getTag().equals("VV")) {
+								vList.add(morp.getString());
+							} 
+//							else if (morp.getTag().contains("NN")) {
+//								n    = morp.getString();
+//								// 유효 키워드가 한 글자일 경우 그 글자를 포함한 어절에서 조사를 제외한 명사의 합으로 대치
+//								if (nIdx == morp.getIndex()) {
+//									if (nLen < morp.getString().length()) {
+//										
+//									}
+//								}
+//								nList.add(n);
+//								nIdx = morp.getIndex();
+//								nLen = morp.getString().length();
+//							}
+						}
+					}
+				}
+				
+				// string to extract keywords
+				String strToExtrtKwrd = str;
+
+				// init KeywordExtractor
+				KeywordExtractor ke = new KeywordExtractor();
+
+				// extract keywords
+				KeywordList kl = ke.extractKeyword(strToExtrtKwrd, true);
+
+				// print result
+				String n = "";
+				int nIdx = 0;
+				int nLen = 0;
+				int nCnt = 0;
+				
+				// 키워드의 어절 내 idx가 겹칠 경우, 등장 수가 가장 많거나 문자 수가 가장 많은 키워드를 nList 추가함
+				for( int i = 0; i < kl.size(); i++ ) {
+					Keyword kwrd = kl.get(i);
+					
+					// 새 문자열의 어절 내 idx가 이전과 같다면
+					if (nIdx == kwrd.getIndex()) {
+						
+						// 새 문자열의 등장 수가 이전과 같거나 더 크다면, 또는 길이가 더 길다면
+						if (nCnt <= kwrd.getCnt() || nLen < kwrd.getString().length()) {
+							n = kwrd.getString();
+							
+							if (i == kl.size() -1) {
+								nList.add(n);
+							}
+						}
+					
+						// 이전의 문자열 길이와 지금 문자열의 index가 같다면 (이전 문자열 다음 문자열이라면)
+					} else if (i == kl.size() -1 || kwrd.getIndex() == n.length() + nIdx){
+//						if (i == kl.size() -1) {
+//							nList.add(kwrd.getString());
+//						} else {
+							nList.add(n);
+							nIdx = kwrd.getIndex();
+						
+					}
+					nLen = kwrd.getString().length();
+					nCnt = kwrd.getCnt();
+				}
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+			
+			resultMap.put("jList", jList);
+			resultMap.put("vList", vList);
+			resultMap.put("nList", nList);
+		}
+		
+		return resultMap;
+	}
+	
+	
+	/**
+	 * list 포함된 키워드 별 최대 유사도에 해당하는 수치 및 파일이름을 가져온다.<br>
+	 * 결과값으로 리턴되는 fileNameList와 similarityList의 index는 같이 움직인다.
+	 * @param candidateList
+	 * @param dictNameListMap
+	 * @param keywordList
+	 * @return HashMap("fileNameList", (String)maxSimilarFileNameList)<br>HashMap("similarityList", (Double)maxSimilarityList)
+	 * 
+	 */
+	@Override
+	public HashMap<String, ArrayList<?>> getMaxSimilarityAndFileName(String filePath, ArrayList<String> sysKeywordList, HashMap<String, ArrayList<String>> dictNameListMap, ArrayList<String> inputKeywordList, double minSimilarityScore) {
+		
+		HashMap<String, ArrayList<?>> resultMap = new HashMap<String, ArrayList<?>>();
+
+		
+		ArrayList<Double> maxSimilarityList  = new ArrayList<Double>();
+		ArrayList<String> maxSimilarFileNameList = new ArrayList<String>();
+		ArrayList<String> targetInputKeywordList = new ArrayList<String>();
+		for (int i = 0; i < inputKeywordList.size(); i++) { // 입력문 키워드 수만큼
+
+			for (String sysKeyword : sysKeywordList) {
+				
+				if (dictNameListMap.containsKey(sysKeyword) && !dictNameListMap.get(sysKeyword).isEmpty()) {
+					ArrayList<String> candidateDictNameList = dictNameListMap.get(sysKeyword);
+					
+					for (int j = 0; j < candidateDictNameList.size(); j++) {
+						String dictName = candidateDictNameList.get(j);
+						String fileName  = dictName + ".txt";
+						List<String> lines = cbu.readFileByLine(filePath, fileName);
+						
+						String dict = "";
+						for (String line : lines) {
+							dict += line;
+						}
+						
+						double oneWordSimilarityScore = 0;
+						double oneDictSimilarityScore = 0;
+						int overThresholdCnt = 0;
+						// 유사도 
+						String[] dictWordArr = dict.split(",");
+						JaroWinkler jw = new JaroWinkler();
+						for (int k = 0; k < dictWordArr.length; k++) { // 
+							String dictWord = dictWordArr[k];
+							oneWordSimilarityScore = jw.similarity(dictWord, inputKeywordList.get(i));
+							// min유사도 점수를 넘는 유효 유사도 값 더하기
+							if (oneWordSimilarityScore > minSimilarityScore) {
+								oneDictSimilarityScore += oneWordSimilarityScore;
+								overThresholdCnt++;
+							}
+						}
+						if (overThresholdCnt == 0) {
+							overThresholdCnt = 1;
+						}
+						// 한 사전 내 유효 유사도 값들의 평균값 저장
+						oneDictSimilarityScore = oneDictSimilarityScore / overThresholdCnt;
+						
+//						log.debug(dictName + ": " + oneDictSimilarityScore);
+						// 유사도 점수 최대값 파일 이름 구하기
+//						if (!maxSimilarFileNameList.contains(dictName)) {
+							maxSimilarityList.add(oneDictSimilarityScore);
+							maxSimilarFileNameList.add(dictName);
+							targetInputKeywordList.add(inputKeywordList.get(i));
+//						} else {
+//							maxSimilarityList.set(j, maxSimilarityList.get(j) + oneDictSimilarityScore);
+//						}
+					
+					}
+				}
+				
+				
+			}
+					
+		}
+		
+		// 각 키워드의 각 사전별 유사도 평균 셋팅
+		for (int i = 0; i < maxSimilarityList.size(); i++) {
+			maxSimilarityList.set(i, maxSimilarityList.get(i) / inputKeywordList.size());
+		}
+		resultMap.put("fileNameList", maxSimilarFileNameList);
+		resultMap.put("similarityList", maxSimilarityList);
+		resultMap.put("keywordList", targetInputKeywordList);
+		
+		return resultMap;
+	}
+	
+	
+	/**
+	 * 조사 을/를, 이/가, 은/는 을 앞 단어에 따라 선택해서 반환한다
+	 * @param str
+	 * @param josaWithJongsung
+	 * @param josaWithoutJongsung
+	 * @return 을 or 를, 이 or 가, 은 or 는
+	 */
+	@Override
+	public String getJosaByJongsung(String str, String josaWithJongsung, String josaWithoutJongsung) {
+		String result = null;
+		
+		char lastWord = str.charAt(str.length() - 1);
+		// 한글이 아닐 경우
+		if (lastWord < 0xAC00 || lastWord > 0xD7A3) {
+			result = josaWithJongsung + "/" + josaWithoutJongsung;
+		} else {
+			if (hasLastKoreanWordJongsung(lastWord)) {
+				result = josaWithJongsung;
+			} else {
+				result = josaWithoutJongsung;
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 한글 문자열의 마지막 글자가 받침을 가졌는지 알려준다
+	 * @param str
+	 * @return boolean
+	 */
+	@Override
+	public boolean hasLastKoreanWordJongsung(char lastWord) {
+		boolean hasJongsung = true;
+		hasJongsung = (lastWord - 0xAC00) % 28 > 0 ? true : false;
+
+		return hasJongsung;
 	}
 }

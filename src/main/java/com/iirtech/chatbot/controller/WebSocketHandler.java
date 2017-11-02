@@ -100,11 +100,15 @@ public class WebSocketHandler extends TextWebSocketHandler {
 	    		String userId  = httpSession.get("id").toString();
 	    		String statusCd = String.valueOf(param.get("statusCd"));
 //	    		Map<String,Object> conditionInfoMap = (Map<String, Object>) httpSession.get("conditionInfoMap");
-	    		Map<String,Object> conditionInfoMap =
+	    		Map<String, Object> conditionInfoMap =
 	    				jacksonMapper.readValue(String.valueOf(param.get("conditionInfoMap")), new TypeReference<Map<String, Object>>(){}); // session 안되므로 임시
 	    		
+	    		Map<String, Object> shortTermInfoMap =
+	    				jacksonMapper.readValue(String.valueOf(param.get("shortTermInfoMap")), new TypeReference<Map<String, Object>>(){}); // session 안되므로 임시
+	    		
+	    		
 	    		String userType = String.valueOf(conditionInfoMap.get("userType"));
-
+	    		
 	    		//대화가 끝난경우 현재는 채팅페이지로 리다이렉트 시킴
 	    		if(statusCd.equals(DialogStatus.CLOSE.getStatusCd())) {
 //			    	return (ModelAndView)new ModelAndView("redirect:/" + redirectPath );
@@ -142,7 +146,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		    		if(statusCd.equals(DialogStatus.ONGOING_TOPIC.getStatusCd()) && messageIdx.equals("0")) {
 		    			statusCd = cbns.getSubThemeStatusCd(procText);
 		    		}
-		    		Map<String, Object> messageInfo = cbss.getMessageInfo(statusCd, procText, messageIdx, subMessageIdx, conditionInfoMap);
+		    		Map<String, Object> messageInfo = cbss.getMessageInfo(statusCd, procText, messageIdx, subMessageIdx, conditionInfoMap, shortTermInfoMap);
 		    		
 		    		
 		    		//세션에 저장된 시스템 변수값을 제거해야하는 경우인지 체크
@@ -223,12 +227,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		    		resultMap.put("imgSrc", urlSystemImgFilePath);
 		    		resultMap.put("dialogLogStr", dialogLogStr);
 		    		resultMap.put("conditionInfoMap", jacksonMapper.writeValueAsString(conditionInfoMap));
-
+		    		resultMap.put("shortTermInfoMap", jacksonMapper.writeValueAsString(resultMap.get("shortTermInfoMap")));
+		    		
 	    		}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	    		
+	    	
 		
 		/**
 		 * client로 보낼 message session에 담음

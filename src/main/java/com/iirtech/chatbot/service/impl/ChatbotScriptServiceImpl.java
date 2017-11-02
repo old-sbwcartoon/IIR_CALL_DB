@@ -1,13 +1,11 @@
 package com.iirtech.chatbot.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.iirtech.chatbot.dto.MessageInfo;
+import com.iirtech.chatbot.service.ChatbotNLPService;
 import com.iirtech.chatbot.service.ChatbotScriptService;
-import com.iirtech.chatbot.service.ChatbotService;
 import com.iirtech.common.enums.DialogStatus;
 import com.iirtech.common.enums.Operation;
 import com.iirtech.common.utils.ChatbotUtil;
@@ -32,7 +30,9 @@ import com.iirtech.common.utils.ChatbotUtil;
 public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 
 	private Logger log = Logger.getLogger(this.getClass());
-	
+
+	@Autowired
+	private ChatbotNLPService cbns;
 	@Autowired
 	ChatbotUtil cbu;
 	
@@ -45,12 +45,12 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	
 	@Override
 	public Map<String, Object> getMessageInfo(String statusCd, String procInputText
-			, String messageIdx, String subMessageIdx, Map<String,Object> conditionInfoMap) {
+			, String messageIdx, String subMessageIdx, Map<String,Object> conditionInfoMap, Map<String,Object> shortTermInfoMap) {
 		log.debug("*************************getMessageInfo*************************");
 		
 		//컨트롤러로 리턴할 리턴 값들을 담는 맵객체 
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String scriptFilePath = urlFilePath + "script/bot/";
+		String scriptFilePath = urlFilePath + "script/iitp_bot/";
 		if (statusCd != DialogStatus.CLOSE.getStatusCd()) {//마지막이 아닐 때
 			//여기서 스크립트 파일 읽어옴 
 			//APPROACH_TOPIC에서 TOPIC이 정해진 후 해당 스크립트를 다 탄 시점부터 topic경로 적용
@@ -84,16 +84,16 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 				}
 				//END_TOPIC 주제 종료 스크립트의 마지막줄일때만 스크립트 파일경로의 주제경로 제거
 				if(statusCd.equals(DialogStatus.REMIND.getStatusCd())) {
-					scriptFilePath = urlFilePath + "script/bot/";
+					scriptFilePath = urlFilePath + "script/iitp_bot/";
 					//컨트롤러 세션에서 CIT TOPIC 값 제거할 트리거 담아줌
 					//CITDelete/deleteType TOPIC이면 세션에서 CIT
 					resultMap.put("CITDelete", "TOPIC");
 				}
-				
+				//SUB 테마가 끝나고 돌아올 때 폴더를 CIT|TOPIC용으로 돌림
 				if(DialogStatus.get(statusCd).name().contains("SUB_")) {
 					conditionInfoMap.put("CIT", "TOPIC");
 					conditionInfoMap.put("CITKeyword", "travel|TOPIC");
-					scriptFilePath = this.addTopicScriptPath(info.getNextStatusCd(), urlFilePath + "script/bot/", conditionInfoMap);
+					scriptFilePath = this.addTopicScriptPath(info.getNextStatusCd(), urlFilePath + "script/iitp_bot/", conditionInfoMap);
 					nextIdx++;
 					nextAutomataIdx = nextIdx;
 				}
@@ -106,25 +106,35 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			applySysOprtResultMap = (Map<String, Object>) this.applySysOprt(nextMessages, conditionInfoMap);
 			//applySysOprtResultMap 안에는 optmzMessage-not null 와 CIT(keywordType) -nullable
 			String optmzMessage = (String) applySysOprtResultMap.get("optmzMessage");
+			//blank 채우기
+			shortTermInfoMap.put("procInputText", procInputText);
+			shortTermInfoMap = fillBlank(optmzMessage, statusCd, shortTermInfoMap);
+			//조사 을/를, 이/가, 은/는 중 하나 선택하기
+			String chgJosaMessage = getMessageWithRightJosa((String)shortTermInfoMap.get("nextMessage"));
+			shortTermInfoMap.put("nextMessage", chgJosaMessage);
+			
 			if(applySysOprtResultMap.get("CIT")!=null) {
 				String CIT = (String)applySysOprtResultMap.get("CIT");
 				resultMap.put("CIT", CIT);//TOPIC
 			}
-			nextMessage = this.parseForHtml(optmzMessage);
+			nextMessage = this.parseForHtml(String.valueOf(shortTermInfoMap.get("nextMessage")));
 			
 			log.debug("statusCd>>>>>>>>>"+statusCd);
 			log.debug("optimizedMsg>>>>>>>>>"+nextMessage);
 			
 			resultMap.put("statusCd", info.getStatusCd());
 			log.debug("statusCd>>>>>>>>>"+info.getStatusCd());
-			//resultMap.put("statusCd", statusCd);
+			// resultMap.put("statusCd", statusCd);
 			resultMap.put("message", nextMessage);
 			resultMap.put("messageIdx", nextIdx);
 			resultMap.put("subMessageIdx", nextSubIdx);
 			resultMap.put("scriptFilePath", scriptFilePath);
+			// 단기 기억
+			resultMap.put("shortTermInfoMap", shortTermInfoMap);
 		}
 		return resultMap;
 	}
+	
 
 	private String addTopicScriptPath(String statusCd, String scriptFilePath,Map<String, Object>conditionInfoMap) {
 		if(conditionInfoMap.get("CITKeyword")!=null) {
@@ -417,5 +427,171 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 		result = chgMessage;
 
 		return result;
+	}
+	
+	
+	/**
+	 * script의 blank ({where}, {name} 등등) 채워서 리턴
+	 * @param nextMessage
+	 * @param statusCd
+	 * @param shortTermInfoMap
+	 * @return
+	 */
+	private Map<String, Object> fillBlank(String nextMessage, String statusCd, Map<String, Object> shortTermInfoMap) {
+		String inputStr = String.valueOf(shortTermInfoMap.get("procInputText"));
+		if (!statusCd.equals(DialogStatus.SYSTEM_ON.getStatusCd()) && inputStr != "") {
+			
+			boolean hasTarget = false;
+			String[] sysKeywordArr = {"food_0", "where_0", "where_1", "what_0"};
+			
+			
+			for (String sysKeyword : sysKeywordArr) {
+				if (nextMessage.contains("{"+sysKeyword+"}")) {
+					hasTarget = true;
+					break;
+				}
+			}
+			// name 따로 추가
+			if (!hasTarget) {
+				if (nextMessage.contains("{name}")) {
+					hasTarget = true;
+				}
+			}
+			
+			if (hasTarget) {
+				HashMap<String, String> map = new HashMap<String, String>();
+				// 대응 사전 이름 저장
+				HashMap<String, ArrayList<String>> dictNameListInBlank = new HashMap<String, ArrayList<String>>();
+				
+				String[] dictNameArr = {"company", "drink", "entertainer", "food", "hotel", "korea_location", "music", "nation", "restaurant"
+						, "school", "transport", "travel_place", "TV_drama_program", "TV_movie_program", "TV_show_program"};
+				
+				dictNameListInBlank.put("food", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[1], dictNameArr[3]})));
+				dictNameListInBlank.put("where", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[5], dictNameArr[7], dictNameArr[11]})));
+				dictNameListInBlank.put("what", new ArrayList<String>(Arrays.asList(dictNameArr))); // what일 경우 모든 사전찾음
+				
+				HashMap<String, ArrayList<String>> inputMorpListMap = cbns.getMorpListMap(inputStr);
+				if (!(inputMorpListMap.get("jList").isEmpty() && inputMorpListMap.get("vList").isEmpty() && inputMorpListMap.get("nList").isEmpty())) {
+					
+					double minSimilarityScore = 0.8;
+					ArrayList<String> nList = inputMorpListMap.get("nList");
+					String filePath = urlFilePath + "dictionary/WikiDictionary/";
+					
+					for (String sysKeyword : sysKeywordArr) {
+						
+						// {~!@#_index} //index 순차적이지 않음. where_0과 where_1은 완전히 별개
+						if (nextMessage.contains("{"+sysKeyword+"}")) {
+							
+//							if (nextMessage.contains("{food_")) { // {~!@#_save}, {~!@#_load} 사용시
+//								if (nextMessage.contains("save}")) {
+								HashMap<String, ArrayList<?>> similarityMap = cbns.getMaxSimilarityAndFileName(filePath, new ArrayList<String>(Arrays.asList(new String[]{sysKeyword.split("_")[0]})), dictNameListInBlank, nList, minSimilarityScore);
+//								ArrayList<String> fileNameList   = (ArrayList<String>)similarityMap.get("fileNameList");
+								ArrayList<Double> similarityList = (ArrayList<Double>)similarityMap.get("similarityList");
+								ArrayList<String> keywordList    = (ArrayList<String>)similarityMap.get("keywordList");
+								
+								// 이전에 저장해 놨던 sysKeyword 데이터를 다시 사용
+								if (shortTermInfoMap.containsKey(sysKeyword)) {
+									map.put(sysKeyword, (String)shortTermInfoMap.get(sysKeyword));
+									// 한 번 사용하면 기존 정보 삭제
+									shortTermInfoMap.remove(sysKeyword);
+									
+								} else {
+									
+									double maxSimilarity = 0;
+									for (int i = 0; i < similarityList.size(); i++) {
+										if (similarityList.get(i) > maxSimilarity) {
+											maxSimilarity = similarityList.get(i);
+										}
+									}
+									
+									if (maxSimilarity > minSimilarityScore) {
+										for (int i = 0; i < similarityList.size(); i++) {
+											if (similarityList.get(i) == maxSimilarity) {
+												
+												map.put(sysKeyword, keywordList.get(i));
+												shortTermInfoMap.put(sysKeyword, keywordList.get(i));
+												break;
+											}
+											
+										}
+									} else {
+										// 봇 발화와 유사성이 0일 때
+										int maxLen = 0;
+										for (String n : nList) {
+											if (n.length() > maxLen) {
+												map.put(sysKeyword, n);
+												shortTermInfoMap.put(sysKeyword, n); // 우선은 가장 길이가 긴 (원본 문자열) 문자열을 매핑
+												maxLen = n.length();
+											}
+										}
+										
+									}
+								}
+								
+							}
+						
+						
+					}
+					
+					
+					
+				} else {
+					// 예외 처리: 입력문에서 명사, 동사, 조사가 분석되지 않았을 경우
+					
+				}
+				// {name}은 오류문이라도 교체
+				if (nextMessage.contains("{name}")) {
+					map.put("name", String.valueOf(shortTermInfoMap.get("name")));
+				}
+			
+				for (String key : map.keySet()) {
+					nextMessage = nextMessage.replace("{"+key+"}", map.get(key));
+				}
+			}
+			
+			
+		} else {
+			// 예외 처리: 입력문이 존재 않을 경우
+			
+		}
+		shortTermInfoMap.put("nextMessage", nextMessage);
+		return shortTermInfoMap;
+	}
+	
+
+	/**
+	 * 조사 을/를, 이/가, 은/는 을 앞 단어에 맞게 변환해서 반환
+	 * @param str
+	 * @return 조사 선택이 완료된 문자열
+	 */
+	private String getMessageWithRightJosa(String str) {
+		String resultMsg = str;
+		
+		boolean hasTarget = false;
+		String[] josaArr = {"이/가", "은/는", "을/를", "으로/로"};
+		for (String josa : josaArr) {
+			if (resultMsg.contains(josa)) {
+				hasTarget = true;
+				break;
+			}
+		}
+		
+		if (hasTarget) {
+			
+			String strBeforeJosa = null;
+			String scriptJosa = null;
+			String selectedJosa = null;
+			ArrayList<String> josaList = new ArrayList<String>();
+			
+			for (String josa : josaArr) {
+				strBeforeJosa = resultMsg.split(josa)[0];
+				selectedJosa = cbns.getJosaByJongsung(strBeforeJosa, josa.split("/")[0], josa.split("/")[1]);
+				resultMsg = resultMsg.replaceFirst(josa, selectedJosa);
+			}
+			// 조사 선택이 완료될 때까지 재귀
+			resultMsg = getMessageWithRightJosa(resultMsg);
+		}
+		
+		return resultMsg;
 	}
 }

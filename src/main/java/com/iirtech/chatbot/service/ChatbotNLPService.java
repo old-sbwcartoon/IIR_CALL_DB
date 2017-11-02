@@ -1,5 +1,7 @@
 package com.iirtech.chatbot.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,4 +19,14 @@ public interface ChatbotNLPService {
 	String selectKeyword(String keywordType, Map<String, Object> conditionInfoMap);
 
 	String getSubThemeStatusCd(String procText);
+
+	HashMap<String, ArrayList<String>> getMorpListMap(String str);
+	
+	HashMap<String, ArrayList<?>> getMaxSimilarityAndFileName(String filePath, ArrayList<String> candidateList,
+			HashMap<String, ArrayList<String>> dictNameListMap, ArrayList<String> keywordList, double minSimilarityScore);
+
+	String getJosaByJongsung(String str, String josaWithJongsung, String josaWithoutJongsung);
+
+	boolean hasLastKoreanWordJongsung(char lastWord);
+
 }
