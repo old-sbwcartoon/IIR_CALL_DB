@@ -1,14 +1,17 @@
 package com.iirtech.common.utils;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -22,6 +25,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ChatbotAPIUtil {
 
 	private Logger log = Logger.getLogger(this.getClass());
+	
+	
+	//node 형태의 중첩 json에서 inner node의 값을 꺼내오기 
+	public String getInnerJsonValueFromJsonNodes(String jsonStr) {
+		//{"message":{"@type":"response","@service":"naverservice.nmt.proxy","@version":"1.0.0","result":{"srcLangType":"ko","tarLangType":"en","translatedText":"Hello."}}}
+		JsonNode rootNode;
+		String result = "";
+		try {
+			rootNode = new ObjectMapper().readTree(new StringReader(jsonStr));
+			JsonNode innerNode = rootNode.get("message");
+			JsonNode test = innerNode.get("result");
+			result = test.toString();
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
 	
 	// json parser
 	// json_string >> map_object
