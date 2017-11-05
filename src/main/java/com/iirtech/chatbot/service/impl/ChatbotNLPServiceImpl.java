@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import com.iirtech.chatbot.service.ChatbotNLPService;
 import com.iirtech.common.enums.DialogStatus;
 import com.iirtech.common.utils.ChatbotUtil;
+import com.iirtech.common.utils.UtilsForPPGO;
 
 import info.debatty.java.stringsimilarity.JaroWinkler;
 
@@ -263,7 +264,10 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 					}
 				}
 				
-				// maxSimilarityScore가 0일 때
+				// maxSimilarityScore가 0일 때 // 오류로 분류해야 함
+				if (maxSimilarityScore == 0) {
+					maxSimiarSubTheme = subThemeArr[0]; // 임시로 무조건 subTheme 첫번째("meal")로 매핑
+				}
 				/*
 				 * 
 				 * 
@@ -334,10 +338,10 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 					for( int j = 0; j < st.size(); j++ ) {
 						
 						Eojeol eojeol = st.get(j);
-						
+						log.debug(eojeol);
 						for (Morpheme morp : eojeol) {
 							
-							
+							log.debug(morp);
 							if (morp.getTag().contains("JK")) {
 								jList.add(morp.getString());
 							} else if (morp.getTag().equals("VV")) {
@@ -377,6 +381,10 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 				// 키워드의 어절 내 idx가 겹칠 경우, 등장 수가 가장 많거나 문자 수가 가장 많은 키워드를 nList 추가함
 				for( int i = 0; i < kl.size(); i++ ) {
 					Keyword kwrd = kl.get(i);
+					
+					if (i == 0) {
+						nIdx = kwrd.getIndex();
+					}
 					
 					// 새 문자열의 어절 내 idx가 이전과 같다면
 					if (nIdx == kwrd.getIndex()) {
@@ -513,9 +521,12 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 		String result = null;
 		
 		char lastWord = str.charAt(str.length() - 1);
+		if (lastWord == 34) { // 마지막 문자가 "일 경우. ascii code 34 == "
+			lastWord = str.charAt(str.length() - 2);
+		}
 		// 한글이 아닐 경우
 		if (lastWord < 0xAC00 || lastWord > 0xD7A3) {
-			result = josaWithJongsung + "/" + josaWithoutJongsung;
+			result = null;
 		} else {
 			if (hasLastKoreanWordJongsung(lastWord)) {
 				result = josaWithJongsung;
@@ -526,6 +537,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 		
 		return result;
 	}
+	
 	
 	/**
 	 * 한글 문자열의 마지막 글자가 받침을 가졌는지 알려준다
@@ -539,4 +551,158 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 
 		return hasJongsung;
 	}
+	
+	
+	/**
+	 * 한글을 입력하면 영문으로 번역해서 반환
+	 * @param korStr
+	 * @return engStr
+	 */
+	@Override
+	public String getEngByKor(String korStr) {
+		String engStr = null;
+		
+		UtilsForPPGO ufp = new UtilsForPPGO();
+		
+		String clientId = "v_norw0FYk6gNwbDHt7Q";	//후보아이디1: S3PJoLLxPOJUy9hNLtv7,	후보아이디2: JeP6rRJ4lQfBmEndNrMd
+		String clientPwd = "CxWLhAMS5C";				//후보암호1: NVKI_JDMU3,				후보암호2: WfUqaWRsRU
+		String fromLang = "KOR";
+		
+		if (korStr != null) {
+			engStr = ufp.getTranslation(korStr, clientId, clientPwd, fromLang);
+		}
+		
+		return engStr;
+	}
+
+	
+	/**
+	 * 스크립트 진행을 멈추고 도움말(번역을 요청한 단어, 오류 주석) 정보를 가져온다<br>
+	 * 입력문이 질문이 아닐 경우 오류 체크를 한다
+	 * @param procInputText
+	 * @return hashMap.infoType(translation 또는 errorCode), hashMap.data(번역을 요청한 단어 또는 오류 주석 코드)
+	 */
+	@Override
+	public HashMap<String, String> getPauseCondition(String procInputText) {
+		HashMap<String, String> resultMap = new HashMap<String, String>();
+		
+		String askContent = getAskContent(procInputText);
+		
+		if (askContent != null) {
+			resultMap.put("infoType", "translation");
+			resultMap.put("data", askContent);
+		} else {
+//			String errorCode  = 오류체크메서드(procInputText); 오류 판별시 errorCode, 정상 문장은 null
+//			if (errorCode != null) {
+//				resultMap.put("infoType", errorCode);
+//				resultMap.put("data", errorCode);
+//			}
+		}
+
+		return resultMap;
+	}
+	
+
+	/**
+	 * 사용자 입력문이 질문인지 확인해서 결과 반환
+	 * @param procInputText
+	 * @return 질문이라면 문장에서 질문글 제거한 문장, 일반 응답문이라면 null
+	 */
+	@Override
+	public String getAskContent(String procInputText) {
+		boolean isAsk = false;
+		String askContent = null;
+		String[] wordArr  = null;
+		
+		if (procInputText != null) {
+			
+			String str = procInputText;
+			String askKey     = "";
+			String trimAskKey = "";
+			
+			String[] chkArr1 = {"뭐", "무엇", "뜻이 뭐", "무슨 뜻", "무슨", "무엇 뜻", "뜻이 무엇", "뜻 뭐", "뭔", "뭔 뜻", "뭡"};
+			String[] chkArr2 = {"야", "냐", "이냐", "라고", "이라고", "요", "이요", "이오", "이야", "지", "이지", "죠", "지요", "데", "인데", "인가", "인가요", "가", "가요", "에요", "예요", "이에요", "이예요", "니까", "입니까"};	
+			String[] chkArr3 = {"?"};
+			
+			for (int i = 0; i < chkArr1.length; i++) {
+				
+				if (!isAsk) {
+					for (int j = 0; j < chkArr2.length; j++) {
+						
+						if (!isAsk) {
+							for (int k = 0; k < chkArr3.length; k++) {
+								askKey = chkArr1[i] + chkArr2[j] + chkArr3[k];
+								// 질문 키워드 제외하고 다른 문자열이 있을 때, 질문 키워드를 가지고 있다면
+								if (str.contains(askKey) && str.length() > askKey.length() ) {
+									askContent = str.replace(askKey, "");
+								}
+								trimAskKey = chkArr1[i].replaceAll(" ", "") + chkArr2[j] + chkArr3[k];
+								// askKey에서 공백 제거한 문자열로도 대조
+								if (str.contains(trimAskKey) && str.replaceAll(" ", "").length() > trimAskKey.length() ) {
+									askContent = str.replace(trimAskKey, "");
+								}
+								
+								if (askContent != null) {
+									
+									// 마지막 공백만 제거
+									wordArr = askContent.split(" ");
+									askContent = "";
+									for (int h = 0; h < wordArr.length; h++) {
+										askContent += wordArr[h];
+										if (h < wordArr.length - 1) {
+											askContent += " ";
+										}
+									}
+									
+//									시간 오래 걸리므로 getEngByKor를 여러 번 돌려서 제어
+									// 사용자 입력 문장 형태소 분석
+//									MorphemeAnalyzer ma = new MorphemeAnalyzer();
+//
+//									try {
+//										List<MExpression> ret = ma.analyze(str);
+//										ret = ma.postProcess(ret);
+//										ret = ma.leaveJustBest(ret);
+//								
+//										List<Sentence> stl = ma.divideToSentences(ret);
+//										
+//										for( Sentence st : stl ) {
+//											
+//											for( Eojeol eojeol : st ) {
+//												
+//												for (Morpheme morp : eojeol) {
+//													
+//													if (morp.getIndex() == askContent.length() - 1) {
+//														if (morp.getTag().contains("JK") || morp.getTag().equals("JX")) {
+//															askContent = askContent.substring(0, askContent.length() - 1);
+//														}
+//													}
+//												}
+//											}
+//										}
+//									} catch (Exception e) {
+//										e.printStackTrace();
+//									}
+									
+									isAsk = true;
+									break;
+								}
+							}
+						} else {
+							break;
+						}
+						
+					}
+				} else {
+					break;
+				}
+				
+			}
+			
+			
+		}
+		
+		return askContent;
+	}
+	
+	
 }

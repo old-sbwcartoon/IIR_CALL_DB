@@ -29,4 +29,11 @@ public interface ChatbotNLPService {
 
 	boolean hasLastKoreanWordJongsung(char lastWord);
 
+	public String getEngByKor(String korStr);
+
+	HashMap<String, String> getPauseCondition(String procInputText);
+
+	String getAskContent(String procInputText);
+
+
 }

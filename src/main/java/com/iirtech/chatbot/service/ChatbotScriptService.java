@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public interface ChatbotScriptService {
 
-	Map<String, Object> getMessageInfo(String statusCd, String procInputText, String messageIdx, String subMessageIdx,
+	Map<String, Object> getMessageInfo(String statusCd, String exStatusCd, String procInputText, String messageIdx, String subMessageIdx,
 			Map<String, Object> conditionInfoMap, Map<String, Object> shortTermInfoMap);
 
 	List<String> findAllOperationStrings(String message);

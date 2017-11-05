@@ -8,7 +8,7 @@ $(document).ready(function() {
 	// $('.img-circle').attr("src", $('#imgSrc').val()+bot.avatar);
 	$('#img-bot').attr("src", $('#imgSrc').val() + bot.avatar);
 	// init SYSTEM_ON
-	doInput("0000", 0, 0);
+	doInput("0000", 0, 0, 0);
 
 	btnEvent();
 });
@@ -34,7 +34,7 @@ function btnEvent() {
 		}
 
 		insertUser($('#userInput').val(), $('#imgSrc').val()); // user
-		doInput($('#statusCd').val(), $('#messageIdx').val(), $('#subMessageIdx').val()); // bot
+		doInput($('#statusCd').val(), $('#exStatusCd').val(), $('#messageIdx').val(), $('#subMessageIdx').val()); // bot
 		$('#userInput').val('');
 		// 스크롤바 focusing
 		$("html, body").animate({
@@ -44,14 +44,13 @@ function btnEvent() {
 			scrollTop : '+=400'
 		}, 'slow');
 
-		$('#exStatusCd').val($('#statusCd').val());
 	});
 
 	$('#userInput').keypress(function(e) {
 		if (e.which == 13) {
 			event.preventDefault();
 			insertUser($('#userInput').val(), $('#imgSrc').val());
-			doInput($('#statusCd').val(), $('#messageIdx').val(), $('#subMessageIdx').val());
+			doInput($('#statusCd').val(), $('#exStatusCd').val(), $('#messageIdx').val(), $('#subMessageIdx').val());
 			$('#userInput').val('');
 			// 스크롤바 focusing
 			$("html, body").animate({
@@ -61,16 +60,17 @@ function btnEvent() {
 				scrollTop : '+=400'
 			}, 'slow');
 
-			$('#exStatusCd').val($('#statusCd').val());
+//			$('#exStatusCd').val($('#statusCd').val());
 		}
 	});
 }
 
-function doInput(statusCd, messageIdx, subMessageIdx) {
+function doInput(statusCd, exStatusCd, messageIdx, subMessageIdx) {
 
 	var msg = {
 		userText : $('#userInput').val(),
 		statusCd : statusCd,
+		exStatusCd : exStatusCd,
 		messageIdx : messageIdx,
 		subMessageIdx : subMessageIdx,
 		conditionInfoMap : $('#conditionInfos').val(),
@@ -95,6 +95,7 @@ function socketHandler(clientMessage) {
 	sock.onmessage = function(serverMessage) {
 		var data = JSON.parse(serverMessage.data);
 		$('#statusCd').val(data.statusCd);
+		$('#exStatusCd').val(data.exStatusCd);
 		$('#messageIdx').val(data.messageIdx);
 		$('#subMessageIdx').val(data.subMessageIdx);
 		$('#conditionInfos').val(data.conditionInfoMap);
@@ -126,43 +127,6 @@ function formatAMPM(date) {
 	var strTime = hours + ':' + minutes + ' ' + ampm;
 	return strTime;
 }
-// function insertChat(who, text, imgfilepath){
-// var control = "";
-// var date = formatAMPM(new Date());
-//    
-// if (who == "bot"){
-//        
-// control = '<li style="width:100%">' +
-// '<div class="msj macro">' +
-// '<div class="avatar"><img class="img-circle" style="width:100%;" src="'+
-// imgfilepath + bot.avatar +'" /></div>' +
-// '<div class="text text-l">' +
-// '<p>'+ text +'</p>' +
-// '<p><small>'+date+'</small></p>' +
-// '</div>' +
-// '</div>' +
-// '</li>';
-//        
-//        
-// }else{
-// control = '<li style="width:100%;">' +
-// '<div class="msj-rta macro">' +
-// '<div class="text text-r">' +
-// '<p>'+text+'</p>' +
-// '<p><small>'+date+'</small></p>' +
-// '</div>' +
-// '<div class="avatar" style="padding:0px 0px 0px 10px !important"><img
-// class="img-circle" style="width:100%;" src="'+ imgfilepath + usr.avatar+'"
-// /></div>' +
-// '</li>';
-// }
-// setTimeout(
-// function(){
-// $(".dialog-ul").append(control);
-// }
-// );
-//    
-// }
 
 function insertBot(text, imgfilepath, messageIdx, subMessageIDx, statusCd) {
 	var control = "";
@@ -235,14 +199,6 @@ function insertUser(text, imgfilepath) {
 	});
 
 }
-
-// function resetChat() {
-// // $(".dialog-ul").empty();
-// $("#speecher").val('');
-// $("#message").val('');
-// // $("#imgSrc").val('');
-// $('#idSeq').val(0);
-// }
 
 function activeFixBox(seq) {
 	toggleFixBox(seq);

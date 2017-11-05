@@ -99,6 +99,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
 	    		String userSeq  = httpSession.get("userSeq").toString();
 	    		String userId  = httpSession.get("id").toString();
 	    		String statusCd = String.valueOf(param.get("statusCd"));
+	    		String exStatusCd = String.valueOf(param.get("exStatusCd"));
+	    		String messageIdx = String.valueOf(param.get("messageIdx"));
+	    		String subMessageIdx = String.valueOf(param.get("subMessageIdx"));
+	    		
 //	    		Map<String,Object> conditionInfoMap = (Map<String, Object>) httpSession.get("conditionInfoMap");
 	    		Map<String, Object> conditionInfoMap =
 	    				jacksonMapper.readValue(String.valueOf(param.get("conditionInfoMap")), new TypeReference<Map<String, Object>>(){}); // session 안되므로 임시
@@ -119,7 +123,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		    		String inputText = String.valueOf(param.get("userText"));
 		    		String procText = inputText; //오리지널 문자열 보존 차원
 		    		
-	    			
+			    		
 //		    		if(procText != null && procText != "") { //문장을 입력하지 않아도 작동시킴
 		    			//전처리 메소드는 preprocess안에서 다시 여러 단계로 확장될 예정
 		    			//CIT값(사용자 인풋텍스트에서 체크해야되는 키워드keywordType)가 있다면 판별 후 추출
@@ -135,20 +139,15 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		    			conditionInfoMap.put("userType", userType);
 		    			procText = String.valueOf(conditionInfoMap.get("procText"));
 //		    		}
-		    		String messageIdx = String.valueOf(param.get("messageIdx"));
-		    		String subMessageIdx = String.valueOf(param.get("subMessageIdx"));
 		    		
 		    		//세션의 lastDialogStatus 값, 입력문장 등 정보를 가지고 발화자, 상태코드, 메시지 생성
 		    		//conditionInfoMap 에는 String userType, List textTypes, List CITKeywords(사용자인풋텍스트에서 추출된 키워드)
 		    		//statusCd,message,messageIdx(string)-not null, CIT(map)-nullable 이 들어있음
 
-		    		// 서브 테마 찾기
-		    		if(statusCd.equals(DialogStatus.ONGOING_TOPIC.getStatusCd()) && messageIdx.equals("0")) {
-		    			statusCd = cbns.getSubThemeStatusCd(procText);
-		    		}
-		    		Map<String, Object> messageInfo = cbss.getMessageInfo(statusCd, procText, messageIdx, subMessageIdx, conditionInfoMap, shortTermInfoMap);
-		    		
-		    		
+		    		Map<String, Object> messageInfo = cbss.getMessageInfo(statusCd, exStatusCd, procText, messageIdx, subMessageIdx, conditionInfoMap, shortTermInfoMap);
+		    		String removedTagMsg = getStrRemovedTag((String)(messageInfo.get("message")));
+		    		System.out.println(">>>\n>>>>>>>>papago result: " + cbns.getEngByKor(removedTagMsg) + "\n>>>");
+
 		    		//세션에 저장된 시스템 변수값을 제거해야하는 경우인지 체크
 //		    		if(messageInfo.get("CITDelete")!=null && httpSession.get("CIT")!=null) {
 		    		if(messageInfo.get("CITDelete")!=null && conditionInfoMap.get("CIT")!=null) {
@@ -228,8 +227,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		    		resultMap.put("dialogLogStr", dialogLogStr);
 		    		resultMap.put("conditionInfoMap", jacksonMapper.writeValueAsString(conditionInfoMap));
 		    		resultMap.put("shortTermInfoMap", jacksonMapper.writeValueAsString(resultMap.get("shortTermInfoMap")));
-		    		
 	    		}
+	    		
+	    		
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -255,6 +255,37 @@ public class WebSocketHandler extends TextWebSocketHandler {
 //		}
 //		return result;
 //	}
+	
+	
+	/**
+	 * 문자열에서 태그를 제거해서 반환
+	 * @param str
+	 * @return 태그 제거한 문자열
+	 */
+	public String getStrRemovedTag(String str) {
+		String result = str;
+		
+		if (result != null) {
+			while (result.contains("<") && result.contains(">")) {
+				int startIdx = 0;
+				int endIdx   = 0;
+				String rep   = "";
+				
+				startIdx = result.indexOf("<");
+				endIdx   = result.indexOf(">") + 1;
+				
+				String tag = result.substring(startIdx, endIdx);
+				
+				if (tag.equals("<br>")) {
+					rep = " ";
+				}
+				result = result.replaceFirst(tag, rep);
+			}
+		}
+		
+		return result;
+	}
+	
 	
 	/**
 	 * 원본 맵에 새 맵의 값을 추가. 키가 같은 경우 원본 맵의 해당 값을 새 맵의 값으로 바꿈. 
