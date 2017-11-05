@@ -620,7 +620,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			String askKey     = "";
 			String trimAskKey = "";
 			
-			String[] chkArr1 = {"뭐", "무엇", "뜻이 뭐", "무슨 뜻", "무슨", "무엇 뜻", "뜻이 무엇", "뜻 뭐", "뭔", "뭔 뜻", "뭡"};
+			String[] chkArr1 = {"뭐", "무엇", "뜻이 뭐", "무슨 뜻", "무슨", "무엇 뜻", "뜻이 무엇", "뜻 뭐", "뭔", "뭔 뜻", "뭡", "뜻이 뭡", "뜻 뭡"};
 			String[] chkArr2 = {"야", "냐", "이냐", "라고", "이라고", "요", "이요", "이오", "이야", "지", "이지", "죠", "지요", "데", "인데", "인가", "인가요", "가", "가요", "에요", "예요", "이에요", "이예요", "니까", "입니까"};	
 			String[] chkArr3 = {"?"};
 			

@@ -145,8 +145,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		    		//statusCd,message,messageIdx(string)-not null, CIT(map)-nullable 이 들어있음
 
 		    		Map<String, Object> messageInfo = cbss.getMessageInfo(statusCd, exStatusCd, procText, messageIdx, subMessageIdx, conditionInfoMap, shortTermInfoMap);
-		    		String removedTagMsg = getStrRemovedTag((String)(messageInfo.get("message")));
-		    		System.out.println(">>>\n>>>>>>>>papago result: " + cbns.getEngByKor(removedTagMsg) + "\n>>>");
+//		    		String removedTagMsg = getStrRemovedTag((String)(messageInfo.get("message")));
+//		    		System.out.println(">>>\n>>>>>>>>papago result: " + cbns.getEngByKor(removedTagMsg) + "\n>>>");
 
 		    		//세션에 저장된 시스템 변수값을 제거해야하는 경우인지 체크
 //		    		if(messageInfo.get("CITDelete")!=null && httpSession.get("CIT")!=null) {
