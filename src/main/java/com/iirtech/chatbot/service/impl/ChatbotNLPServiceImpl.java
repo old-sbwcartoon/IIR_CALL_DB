@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.iirtech.chatbot.service.ChatbotNLPService;
+import com.iirtech.chatbot.service.ChatbotScriptService;
 import com.iirtech.common.enums.DialogStatus;
 import com.iirtech.common.utils.ChatbotUtil;
 import com.iirtech.common.utils.UtilsForPPGO;
@@ -40,6 +41,10 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 	
 	@Autowired
 	ChatbotUtil cbu;
+	@Autowired
+	private ChatbotScriptService cbss;
+	@Autowired
+	private ChatbotNLPService cbns;
 	
 	@Value("#{systemProp['filepath']}") 
 	String urlFilePath;
@@ -100,7 +105,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 	 * @return 서브 테마 code
 	 */
 	@Override
-	public String getSubThemeStatusCd(String procText) {
+	public String getSubThemeStatusCd(String procText, MorphemeAnalyzer ma) {
 		String subThemeStatusCd = null;
 		String strToExtrtKwrd = procText;
 		
@@ -110,7 +115,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			
 			
 			// 식사하다, 탈것을 타다, 이동하다, 숙소로 가다, 짐을 찾다, 차 렌트하다, 쇼핑하다, 친구 만나다, 환전하다, 길잃다
-			String[] subThemeArr = {"meal", "vehicle_bus", "vehicle_taxi", "move", "inn", "getLuggage", "carRental", "shopping", "meetFriend", "exchangeMoney", "loseMyWay"};
+			String[] subThemeArr = {"meal", "vehicle" /*, "vehicle_taxi" */, "move" /* , "inn", "getLuggage", "carRental" */,  "shopping" /*, "meetFriend", "exchangeMoney", "loseMyWay" */ };
 			
 			String[] dictNameArr = {"company", "drink", "entertainer", "food", "hotel", "korea_location", "music", "nation", "restaurant"
 					, "school", "transport", "travel_place", "TV_drama_program", "TV_movie_program", "TV_show_program"};
@@ -118,35 +123,35 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			// 주제별 대응 사전 이름 저장
 			HashMap<String, ArrayList<String>> dictNameListInSubTheme = new HashMap<String, ArrayList<String>>();
 			dictNameListInSubTheme.put("meal", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[1], dictNameArr[3], dictNameArr[8]})));
-			dictNameListInSubTheme.put("vehicle_bus", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[10]})));
-			dictNameListInSubTheme.put("vehicle_taxi", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[10]})));
+			dictNameListInSubTheme.put("vehicle", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[10]})));
+//			dictNameListInSubTheme.put("vehicle_taxi", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[10]})));
 			dictNameListInSubTheme.put("move", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[5], dictNameArr[7], dictNameArr[9], dictNameArr[11]})));
-			dictNameListInSubTheme.put("inn", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[4]})));
-			dictNameListInSubTheme.put("getLuggage", new ArrayList<String>(Arrays.asList(new String[]{})));
-			dictNameListInSubTheme.put("carRental", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[10]})));
+//			dictNameListInSubTheme.put("inn", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[4]})));
+//			dictNameListInSubTheme.put("getLuggage", new ArrayList<String>(Arrays.asList(new String[]{})));
+//			dictNameListInSubTheme.put("carRental", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[10]})));
 			dictNameListInSubTheme.put("shopping", new ArrayList<String>(Arrays.asList(new String[]{})));
-			dictNameListInSubTheme.put("meetFriend", new ArrayList<String>(Arrays.asList(new String[]{})));
-			dictNameListInSubTheme.put("exchangeMoney", new ArrayList<String>(Arrays.asList(new String[]{})));
-			dictNameListInSubTheme.put("loseMyWay", new ArrayList<String>(Arrays.asList(new String[]{})));
+//			dictNameListInSubTheme.put("meetFriend", new ArrayList<String>(Arrays.asList(new String[]{})));
+//			dictNameListInSubTheme.put("exchangeMoney", new ArrayList<String>(Arrays.asList(new String[]{})));
+//			dictNameListInSubTheme.put("loseMyWay", new ArrayList<String>(Arrays.asList(new String[]{})));
 			
 			// 예문 문장 저장
 			HashMap<String, ArrayList<String>> expInput = new HashMap<String, ArrayList<String>>();
-			expInput.put("meal", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 밥을 먹었어요~"})));
-			expInput.put("vehicle_bus", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 버스를 탔어요~"})));
-			expInput.put("vehicle_taxi", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 택시를 탔어요~"})));
-			expInput.put("move", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 {where}으로/로 갔어요~"})));
-			expInput.put("inn", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 숙소로 갔어요~"})));
-			expInput.put("getLuggage", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 짐을 찾았어요~"})));
-			expInput.put("carRental", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 차를 빌렸어요~"})));
+			expInput.put("meal", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 {food_1}을/를 먹었어요~"})));
+			expInput.put("vehicle", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 {what_0}을/를 탔어요~"})));
+//			expInput.put("vehicle_taxi", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 택시를 탔어요~"})));
+			expInput.put("move", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 {where_1}으로/로 갔어요~"})));
+//			expInput.put("inn", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 숙소로 갔어요~"})));
+//			expInput.put("getLuggage", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 짐을 찾았어요~"})));
+//			expInput.put("carRental", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 차를 빌렸어요~"})));
 			expInput.put("shopping", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 쇼핑했어요~", "도착하자마자 옷을 샀어요~", "도착하자마자 물건을 샀어요~", "도착하자마자 기념품을 샀어요~"})));
-			expInput.put("meetFriend", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 친구를/가족을 만났어요~"})));
-			expInput.put("exchangeMoney", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 환전을 했어요~"})));
-			expInput.put("loseMyWay", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 길을 잃어버렸어요~"})));
+//			expInput.put("meetFriend", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 친구를/가족을 만났어요~"})));
+//			expInput.put("exchangeMoney", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 환전을 했어요~"})));
+//			expInput.put("loseMyWay", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 길을 잃어버렸어요~"})));
 			
 			// 조사 + 동사 = 사용자 문장 : 예문 문장
 			// 명사 = 사용자 키워드 단어 : 사전 단어
 			
-				HashMap<String, ArrayList<String>> inputMorpMap = getMorpListMap(strToExtrtKwrd);
+				HashMap<String, ArrayList<String>> inputMorpMap = getMorpListMap(strToExtrtKwrd, ma);
 				ArrayList<String> inputJList = inputMorpMap.get("jList");
 				ArrayList<String> inputVList = inputMorpMap.get("vList");
 				ArrayList<String> inputNList = inputMorpMap.get("nList");
@@ -169,7 +174,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 					int nCnt = 0;
 					for (String expStr : expInputList) {
 //						expStr; 예문 문장
-						expMorpMap = getMorpListMap(expStr);
+						expMorpMap = getMorpListMap(expStr, ma);
 						
 						ArrayList<String> expJList = expMorpMap.get("jList");
 						ArrayList<String> expVList = expMorpMap.get("vList");
@@ -201,7 +206,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 					}
 					subThemeScoreArr[i] = (vCnt * vWeight) + (jCnt * jWeight) + (nCnt * nWeight);
 				}
-			
+				
 				// 사용자 입력 동사, 조사의 점수가 0 넘는 주제 모으기
 				ArrayList<String> candidateSubThemeList      = new ArrayList<String>();
 				ArrayList<Double> candidateSubThemeScoreList = new ArrayList<Double>();
@@ -311,7 +316,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 	 * @return HashMap("jList", jlist), HashMap("vList", vlist), HashMap("nList", nlist)
 	 */
 	@Override
-	public HashMap<String, ArrayList<String>> getMorpListMap(String str) {
+	public HashMap<String, ArrayList<String>> getMorpListMap(String str, MorphemeAnalyzer ma) {
 		HashMap<String, ArrayList<String>> resultMap = null;
 		
 		if (str != null && str != "") {
@@ -322,7 +327,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			ArrayList<String> nList = new ArrayList<String>(); // 입력 문장 속 명사 리스트
 			
 			// 사용자 입력 문장 형태소 분석
-			MorphemeAnalyzer ma = new MorphemeAnalyzer();
+			
 //					ma.createLogger(null);
 		
 			try {
@@ -410,6 +415,25 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 					nLen = kwrd.getString().length();
 					nCnt = kwrd.getCnt();
 				}
+				
+
+				// 명사를 못찾으면
+				if (nList.isEmpty()) {
+					
+					// 조사가 있다면
+					if (!jList.isEmpty()) {
+						// 첫 번째 조사 앞까지를 명사로 저장
+						nList.add(strToExtrtKwrd.split(jList.get(0))[0]);
+					} else if (!vList.isEmpty()) {
+						// 동사가 있다면
+						String tmpN = strToExtrtKwrd.split(vList.get(0))[0];
+						// 동사 앞까지 중 마지막 공백 제거하고 명사로 저장
+						if (tmpN.lastIndexOf(" ") == tmpN.length() - 1) {
+							nList.add(tmpN.substring(0, tmpN.length() - 1));
+						}
+					}
+				}
+				
 			} catch(Exception e) {
 				e.printStackTrace();
 			}
@@ -589,8 +613,36 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 		String askContent = getAskContent(procInputText);
 		
 		if (askContent != null) {
-			resultMap.put("infoType", "translation");
-			resultMap.put("data", askContent);
+			int askCode = getContentCode(askContent);
+			
+			// 챗봇 시스템에 관한 질문일 경우
+			if (askCode > 0) {
+				resultMap.put("infoType", "systemAsk");
+				resultMap.put("data", cbss.getAnswerSentence(askCode, null, null));
+				
+			} else {
+				// 번역에 관한 질문일 경우
+				String korContent = askContent;
+				String engContent = cbns.getEngByKor(korContent);
+				
+				// 질문한 내용이 번역되지 않았을 경우 -- 마지막 글자 은, 는, 이, 가 삭제 후 다시 번역 
+				if (engContent == null || engContent.equals("")) {
+					String lastWord = korContent.substring(korContent.length() - 1, korContent.length());
+					String[] chkArr = {"은", "는", "이", "가"};
+					for (String chk : chkArr) {
+						if (lastWord.equals(chk)) {
+							korContent = korContent.substring(0, korContent.length() - 1);
+							break;
+						}
+					}
+					engContent = cbns.getEngByKor(korContent);
+				}
+				resultMap.put("infoType", "translation");
+				resultMap.put("data", cbss.getAnswerSentence(askCode, korContent, engContent));
+				
+			}
+			
+			
 		} else {
 //			String errorCode  = 오류체크메서드(procInputText); 오류 판별시 errorCode, 정상 문장은 null
 //			if (errorCode != null) {
@@ -602,6 +654,43 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 		return resultMap;
 	}
 	
+
+	/**
+	 * 컨텐츠의 종류 판별해서 반환
+	 * @param askContent
+	 * @return 0: 뜻 질문, 1: 이름, 2: 나이 
+	 */
+	private int getContentCode(String askContent) {
+		int code = 0;
+		
+		String[] chkArr1 = {"너", "넌", "너는", "니", "닌", "니는", "네", "너의", "니의"};
+		String[] chkArr2 = {"이름", "나이", "연세", "몇살", ""};
+		
+		
+		for (int i = 0; i < chkArr1.length; i++) {
+			
+			for (int j = 0; j < chkArr2.length; j++) {
+				String askKey  = chkArr1[i] + chkArr2[j];
+				String trimStr = askContent.replaceAll(" ", "");
+				// 공백을 제거한 문자가 askKey의 길이 + 1(문자 마지막의 "은, 는, 이, 가" 붙었을 경우를 포함)보다 작거나 같을 때, 서로 같다면,
+				if (trimStr.length() <= askKey.length() + 1 && trimStr.contains(askKey)) {
+					if ( j == chkArr2.length - 1) { // chkArr2 == ""
+						if (i > 5) {
+							code = 0;
+						} else {
+							code = 1;
+						}
+					} else if (j == 0) {
+						code = 1;
+					} else {
+						code = 2;
+					}
+				}
+			}
+		}
+		
+		return code;
+	}
 
 	/**
 	 * 사용자 입력문이 질문인지 확인해서 결과 반환
@@ -621,7 +710,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			String trimAskKey = "";
 			
 			String[] chkArr1 = {"뭐", "무엇", "뜻이 뭐", "무슨 뜻", "무슨", "무엇 뜻", "뜻이 무엇", "뜻 뭐", "뭔", "뭔 뜻", "뭡", "뜻이 뭡", "뜻 뭡"};
-			String[] chkArr2 = {"야", "냐", "이냐", "라고", "이라고", "요", "이요", "이오", "이야", "지", "이지", "죠", "지요", "데", "인데", "인가", "인가요", "가", "가요", "에요", "예요", "이에요", "이예요", "니까", "입니까"};	
+			String[] chkArr2 = {"야", "니", "냐", "이냐", "라고", "이라고", "요", "이요", "이오", "이야", "지", "이지", "죠", "지요", "데", "인데", "인가", "인가요", "가", "가요", "에요", "예요", "이에요", "이예요", "니까", "입니까"};	
 			String[] chkArr3 = {"?"};
 			
 			for (int i = 0; i < chkArr1.length; i++) {
@@ -703,6 +792,8 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 		
 		return askContent;
 	}
-	
+
+
 	
 }
+

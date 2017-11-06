@@ -1,13 +1,17 @@
 package com.iirtech.chatbot.service.impl;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import org.apache.log4j.Logger;
+import org.snu.ids.ha.ma.MorphemeAnalyzer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -45,7 +49,8 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	
 	@Override
 	public Map<String, Object> getMessageInfo(String statusCd, String exStatusCd, String procInputText
-			, String messageIdx, String subMessageIdx, Map<String,Object> conditionInfoMap, Map<String,Object> shortTermInfoMap) {
+			, String messageIdx, String subMessageIdx, Map<String,Object> conditionInfoMap, Map<String,Object> shortTermInfoMap
+			,MorphemeAnalyzer ma) {
 		log.debug("*************************getMessageInfo*************************");
 		
 		//컨트롤러로 리턴할 리턴 값들을 담는 맵객체 
@@ -61,7 +66,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	    		if(statusCd.equals(DialogStatus.ONGOING_TOPIC.getStatusCd()) && messageIdx.equals("0")) {
 				
 				exStatusCd = statusCd;
-				statusCd = cbns.getSubThemeStatusCd(procInputText);
+				statusCd = cbns.getSubThemeStatusCd(procInputText, ma);
     				
 	    		}
 
@@ -171,24 +176,11 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			String nextMessage = "";
 			if (!pauseInfo.isEmpty()) {
 				
-				if (pauseInfo.get("infoType").equals("translation")) {
-					// 사용자 입력문 = 도움말 요청했을 경우
-					String korContent = pauseInfo.get("data");
-					String engContent = cbns.getEngByKor(korContent);
+				String infoType = pauseInfo.get("infoType");
+				
+				if (infoType.equals("systemAsk") || infoType.equals("translation")) {
+					nextMessage = pauseInfo.get("data");
 					
-					// 질문한 내용이 번역되지 않았을 경우 -- 마지막 글자 은, 는, 이, 가 삭제 후 다시 번역 
-					if (engContent == null || engContent.equals("")) {
-						String lastWord = korContent.substring(korContent.length() - 1, korContent.length());
-						String[] chkArr = {"은", "는", "이", "가"};
-						for (String chk : chkArr) {
-							if (lastWord.equals(chk)) {
-								korContent = korContent.substring(0, korContent.length() - 1);
-								break;
-							}
-						}
-						engContent = cbns.getEngByKor(korContent);
-					}
-					nextMessage = getAnswerSentence(korContent, engContent);
 				} else {
 					// 사용자 입력문 = 오류 체크일 경우
 					
@@ -202,6 +194,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 				String nextMessages = info.getMessageByIdx(idx);
 				Map<String,Object> applySysOprtResultMap = null;
 				
+				// 질문이 아닌 경우 또는 해당 스크립트에서 메시지가 없는 경우
 				if (nextMessages == null && !hasReturnToScript) {
 					int nextAutomataIdx = 0;
 					//index 해당 문장이 없다면 (해당 statusCd의 봇 발화 모두 진행했다면)
@@ -240,7 +233,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 				//blank 채우기 //본래 스크립트로 돌아갈 경우에, 직전 사용한 스크립트를 다시 사용
 				if (!hasReturnToScript) {
 					shortTermInfoMap.put("procInputText", procInputText);
-					shortTermInfoMap = getCompleteMap(optmzMessage, statusCd, shortTermInfoMap);
+					shortTermInfoMap = getCompleteMap(optmzMessage, statusCd, shortTermInfoMap, ma);
 				}
 				
 				if(applySysOprtResultMap.get("CIT")!=null) {
@@ -571,7 +564,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	 * @param shortTermInfoMap
 	 * @return 완성된 단기 기억 맵
 	 */
-	private Map<String, Object> getCompleteMap(String nextMessage, String statusCd, Map<String, Object> shortTermInfoMap) {
+	private Map<String, Object> getCompleteMap(String nextMessage, String statusCd, Map<String, Object> shortTermInfoMap, MorphemeAnalyzer ma) {
 		
 		Map<String, Object> resultMap = shortTermInfoMap;
 		
@@ -579,7 +572,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 		if (!statusCd.equals(DialogStatus.SYSTEM_ON.getStatusCd()) && inputStr != "") {
 			
 			boolean hasTarget = false;
-			String[] sysKeywordArr = {"food_0", "where_0", "where_1", "what_0"};
+			String[] sysKeywordArr = {"food_0", "food_1", "where_0", "where_1", "what_0"};
 			
 			
 			for (String sysKeyword : sysKeywordArr) {
@@ -596,7 +589,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			}
 			
 			if (hasTarget) {
-				resultMap = fillBlank(nextMessage, statusCd, shortTermInfoMap, sysKeywordArr);
+				resultMap = fillBlank(nextMessage, statusCd, shortTermInfoMap, sysKeywordArr, ma);
 				nextMessage = getMessageWithRightJosa((String)resultMap.get("nextMessage"));
 			}
 			
@@ -610,7 +603,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	}
 	
 
-	private Map<String, Object> fillBlank(String nextMessage, String statusCd, Map<String, Object> shortTermInfoMap, String[] sysKeywordArr) {
+	private Map<String, Object> fillBlank(String nextMessage, String statusCd, Map<String, Object> shortTermInfoMap, String[] sysKeywordArr, MorphemeAnalyzer ma) {
 		
 		Map<String, Object> resultMap = shortTermInfoMap;
 		
@@ -627,7 +620,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 		dictNameListInBlank.put("where", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[5], dictNameArr[7], dictNameArr[11]})));
 		dictNameListInBlank.put("what",  new ArrayList<String>(Arrays.asList(dictNameArr))); // what일 경우 모든 사전찾음
 		
-		HashMap<String, ArrayList<String>> inputMorpListMap = cbns.getMorpListMap(inputStr);
+		HashMap<String, ArrayList<String>> inputMorpListMap = cbns.getMorpListMap(inputStr, ma);
 		if (!(inputMorpListMap.get("jList").isEmpty() && inputMorpListMap.get("vList").isEmpty() && inputMorpListMap.get("nList").isEmpty())) {
 			
 			double minSimilarityScore = 0.8;
@@ -638,7 +631,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 				
 				// {~!@#_index} //index 순차적이지 않음. where_0과 where_1은 완전히 별개
 				if (nextMessage.contains("{"+sysKeyword+"}")) {
-					
+						
 //						if (nextMessage.contains("{food_")) { // {~!@#_save}, {~!@#_load} 사용시
 //							if (nextMessage.contains("save}")) {
 						HashMap<String, ArrayList<?>> similarityMap = cbns.getMaxSimilarityAndFileName(filePath, new ArrayList<String>(Arrays.asList(new String[]{sysKeyword.split("_")[0]})), dictNameListInBlank, nList, minSimilarityScore);
@@ -764,24 +757,61 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	
 	
 	/**
-	 * 질문글에 대한 답변 문자열을 반환한다.<br>
+	 * code에 따라 질문의 종류를 판별한 후, 질문글에 대한 답변 문자열을 반환한다.<br>
+	 * @param code
 	 * @param korContent
 	 * @param engContent
-	 * @return "한국어"는 "영문"이라는 뜻이에요.\n더 궁금한게 있으면 언제든 질문해 주세요.
+	 * @return 문자열
 	 */
-	private String getAnswerSentence(String korContent, String engContent) {
+	@Override
+	public String getAnswerSentence(int code, String korContent, String engContent) {
 		String result = null;
 		
-		if (korContent != null && engContent != null && !korContent.equals("") && !engContent.equals("")) {
-			result = "\"" + korContent + "\"" + "은/는 " + "\"" + engContent + "\"이라는 뜻이에요.";
-			result = getMessageWithRightJosa(result);
-		} else {
-			if (korContent == null) {
-				korContent = "";
-			}
-			result = "\"" + korContent + "\"" + "의 뜻은 잘 모르겠어요. 공부해야겠어요.";
+		switch (code) {
+
+			case 0:
+				if (korContent != null && engContent != null && !korContent.equals("") && !engContent.equals("")) {
+					result = "\"" + korContent + "\"" + "은/는 " + "\"" + engContent + "\"이라는 뜻이에요.";
+					result = getMessageWithRightJosa(result);
+				} else {
+					if (korContent == null) {
+						korContent = "";
+					}
+					result = "\"" + korContent + "\"" + "의 뜻은 잘 모르겠어요. 공부해야겠어요.";
+				}
+				break;
+			
+			case 1:
+				result = "저는 이르입니다.";
+				break;
+				
+			case 2:
+				String CALLInitDate = "2017-08-09 18:02:21";
+				SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+				Date date;
+				long start = 0;
+				long now   = 0;
+				try {
+					now    = System.currentTimeMillis();
+					date   = dayTime.parse(CALLInitDate);
+					start  = date.getTime();
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				long ageInSecond = (now - start) / 1000;
+				String ageStr = "초";
+				if (ageInSecond == 0) {
+					// 계산 오류 발생시
+					ageInSecond = 4;
+					ageStr = "달";
+				}
+				
+				result = "제 나이는 " + ageInSecond + ageStr + "입니다.";
+				break;
 		}
+		
 		result += "<br>궁금한게 있으면 언제든 물어보세요.";
+		
 		
 		return result;
 	}
