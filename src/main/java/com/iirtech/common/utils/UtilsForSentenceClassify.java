@@ -68,6 +68,27 @@ public class UtilsForSentenceClassify {
 		return result;
 	}
 	
+	//인사하는 문장인지 판별
+	public boolean isGreetingTypeOfSentence(String inputStr, List<List<String>> morphAnalyzeResult) {
+		boolean result = false;
+		String[] greetingExpressions = {
+				"/안녕/","/반갑/"
+		};
+		for (int i = 0; i < morphAnalyzeResult.size(); i++) {
+			for (int j = 0; j < morphAnalyzeResult.get(i).size(); j++) {
+				String morphline = morphAnalyzeResult.get(i).get(j);
+				for (int k = 0; k < greetingExpressions.length; k++) {
+					if(morphline.contains(greetingExpressions[k])) {
+						result = true;
+					}
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	
 	//무의미한 입력문 잡기 - 멈블링 
 	public boolean isMumbleTypeOfSentence(String inputStr) {
 		boolean result = false;
@@ -287,16 +308,16 @@ public class UtilsForSentenceClassify {
 	public boolean isAskSentence(String inputStr, List<List<String>> morphAnalyzeResult) {
 		boolean result = false;
 		String[] askingEnds = {
-			"?","냐","니"
+			"?","냐","니","냐.","니."
 		};
 		String[] askingElmnts = {
-			"누구", "언제", "어디", "무엇", "왜", "뭐", "어째서", "몇", "얼마", "얼마나", "며칠"
+			"/누구/", "/언제/", "/어디/", "/무엇/", "/왜/", "/뭐/", "/어째서/", "/몇/", "/얼마/", "/얼마나/", "/며칠/"
 		};
 		String[] askingExpressions = {
 			"왜요","누가"
 		};
 		for (int i = 0; i < askingEnds.length; i++) {
-			if(inputStr.contains(askingEnds[i])) {
+			if(inputStr.endsWith(askingEnds[i])) {
 				return true;
 			};
 		}
