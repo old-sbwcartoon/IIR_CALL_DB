@@ -231,7 +231,7 @@ public class UtilsForSentenceClassify {
 			0/맛/NNG+1/이/JKS/3/있/VV+4/어요/EFN+6/./SF  
 		 */
 		String[] negativeEndingExpressions = {
-				"/않/V","/못/V","/없/V"
+				"/않/V","/못/V","/없/V","/못하/V"
 		};
 		String[] negativeAdverbExpressions = {
 				"/안/M","/못/M"

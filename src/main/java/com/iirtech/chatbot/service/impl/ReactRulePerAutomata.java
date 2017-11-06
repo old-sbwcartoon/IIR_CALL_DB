@@ -13,7 +13,6 @@ import com.iirtech.common.utils.ChatbotUtil;
 import com.iirtech.common.utils.UtilsForGGMA;
 import com.iirtech.common.utils.UtilsForSentenceClassify;
 
-
 /**
  * @Package   : com.iir.chatbot.classify
  * @FileName  : ClassifyRulePerAutomata.java
@@ -28,14 +27,18 @@ public class ReactRulePerAutomata {
 	//정상일 경우에는 판별 결과를 리턴하며 오류일 경우에는 오류 스크립트를 태운다.
 	//오류스크립트는 거의 yes no 형태로만 응답이 나올 수 있도록 발화문을 구성하며 오토마타 별로 별개의 폴더에 위치한다.
 	public List<String> normalSentenceTypeList;
+	public String filePath;
+	public final String negativeWordDicFilePath = filePath + "/800_refer/900_020 materials/negative_positive_dictionary/";
+	public final String errorScriptFilePath = filePath = "/senario/error/";
+	
 	
 	//생성자로 넣어준 변수값(오토마타 상태코드)에 따라서 오류와 정상 문장 타입이 바뀜
-	public ReactRulePerAutomata(String dialogStatusCd) {
+	public ReactRulePerAutomata(String dialogStatusCd, String filePath) {
+		this.filePath = filePath;
 		if (dialogStatusCd.equals("S000")) {	//안녕하세요? 반갑습니다.
 			System.out.println("*******START_CONVERSATION*******");
 			String[] normalSentenceTypes = {
-					SentenceClassifyConstants.IS_POSITIVE_FEEDBACK
-					,SentenceClassifyConstants.IS_DO
+					SentenceClassifyConstants.IS_GREETING
 					,SentenceClassifyConstants.IS_ANSWER_YES
 			};
 			normalSentenceTypeList = Arrays.asList(normalSentenceTypes);
@@ -118,9 +121,8 @@ public class ReactRulePerAutomata {
 		}
 		
 		ChatbotUtil cu = new ChatbotUtil();
-		String filePath = "/Users/rnder_004/Kino/iir/chatbot/800_refer/900_020 materials/negative_positive_dictionary/";
-		String negativeFileName = "filterdKorNegDic.txt";
-		List<String> negativeWords = cu.readFileByLine(filePath, negativeFileName);
+		String negativeWordDicFileName = "filterdKorNegDic.txt";
+		List<String> negativeWords = cu.readFileByLine(negativeWordDicFilePath, negativeWordDicFileName);
 		List<Integer> intenseList = ufsc.analyzeIntenseOfSentence(morphAnalyzeResult, negativeWords);
 		String intense = ufsc.decideIntenseString(intenseList);
 		

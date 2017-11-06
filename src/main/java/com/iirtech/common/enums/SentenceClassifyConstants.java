@@ -41,7 +41,8 @@ public class SentenceClassifyConstants {
 	public static final String IS_ASK_SYSTEM_ATTRIBUTE = "askSysAttr";
 	public static final String IS_ASK_INFO = "askInfo";
 	public static final String IS_REJECT = "reject";
-	
+	public static final String IS_GREETING = "greeting";
+
 	
 	public static final String IS_NORMAL_SENTENCE = "normalSentence";
 	public static final String IS_ERROR_SENTENCE = "errorSentence";
