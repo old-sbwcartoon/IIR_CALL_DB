@@ -18,18 +18,6 @@ public enum DialogStatus {
 	,CLOSE("S070")
 	,SYSTEM_OFF("9999")
 	
-	,START_DIALOG_EXCEPTION("E000")
-	,GREETING_EXCEPTION("E010")
-	,APPROACH_TOPIC_EXCEPTION("E011")
-	,START_TOPIC_EXCEPTION("E020")
-	,LEAD_TOPIC_EXCEPTION("E021")
-	,SHOW_EXPRESSION_EXCEPTION("E022")
-	,TRAIN_EXPRESSION_EXCEPTION("E023")
-	,FEEDBACK_EXCEPTION("E024")
-	,END_TOPIC_EXCEPTION("E025")
-	,REMIND_EXCEPTION("E030")
-	,END_DIALOG_EXCEPTION("E001")
-	
 	,SUB_MEAL("T000")
 	,SUB_VEHICLE_BUS("T010")
 	,SUB_VEHICLE_TAXI("T020")
@@ -41,6 +29,12 @@ public enum DialogStatus {
 	,SUB_MEETFRIEND("T080")
 	,SUB_EXCHANGEMONEY("T090")
 	,SUB_LOSEMYWAY("T100")
+	
+	
+	,ENTER_ERROR_STATUS("E000") //오류로 진입
+	,WAIT_FOR_INPUT("E001") //다음 입력이 올때까지 대기
+	,FORCED_LEARNING("E002") //강제로 혼내고 다시 입력하게 함 2회반복되면 다음 상태로 그냥 넘어감
+	,EXIT_ERROR_STATUS("E999") //오류에서 나옴 - 다시 입력문 체크대상이 됨
 	;
 	private final String statusCd;
 	
@@ -70,18 +64,6 @@ public enum DialogStatus {
 		else if (statusName.toUpperCase().equals("REMIND"))						{ status = REMIND; }
 		else if (statusName.toUpperCase().equals("SYSTEM_OFF"))					{ status = SYSTEM_OFF; }
 		
-		else if (statusName.toUpperCase().equals("START_DIALOG_EXCEPTION"))		{ status = START_DIALOG_EXCEPTION; }
-		else if (statusName.toUpperCase().equals("GREETING_EXCEPTION"))			{ status = GREETING_EXCEPTION; }
-		else if (statusName.toUpperCase().equals("APPROACH_TOPIC_EXCEPTION"))		{ status = APPROACH_TOPIC_EXCEPTION; }
-		else if (statusName.toUpperCase().equals("START_TOPIC_EXCEPTION"))		{ status = START_TOPIC_EXCEPTION; }
-		else if (statusName.toUpperCase().equals("LEAD_TOPIC_EXCEPTION"))			{ status = LEAD_TOPIC_EXCEPTION; }
-		else if (statusName.toUpperCase().equals("SHOW_EXPRESSION_EXCEPTION"))	{ status = SHOW_EXPRESSION_EXCEPTION; }
-		else if (statusName.toUpperCase().equals("TRAIN_EXPRESSION_EXCEPTION"))	{ status = TRAIN_EXPRESSION_EXCEPTION; }
-		else if (statusName.toUpperCase().equals("FEEDBACK_EXCEPTION"))			{ status = FEEDBACK_EXCEPTION; }
-		else if (statusName.toUpperCase().equals("END_TOPIC_EXCEPTION"))			{ status = END_TOPIC_EXCEPTION; }
-		else if (statusName.toUpperCase().equals("REMIND_EXCEPTION"))				{ status = REMIND_EXCEPTION; }
-		else if (statusName.toUpperCase().equals("END_DIALOG_EXCEPTION"))			{ status = END_DIALOG_EXCEPTION; }
-		
 		else if (statusName.toUpperCase().equals("SUB_MEAL"))						{ status = SUB_MEAL; }
 		else if (statusName.toUpperCase().equals("SUB_VEHICLE_BUS"))				{ status = SUB_VEHICLE_BUS; }
 		else if (statusName.toUpperCase().equals("SUB_VEHICLE_TAXI"))				{ status = SUB_VEHICLE_TAXI; }
@@ -93,6 +75,11 @@ public enum DialogStatus {
 		else if (statusName.toUpperCase().equals("SUB_MEETFRIEND"))				{ status = SUB_MEETFRIEND; }
 		else if (statusName.toUpperCase().equals("SUB_EXCHANGEMONEY"))			{ status = SUB_EXCHANGEMONEY; }
 		else if (statusName.toUpperCase().equals("SUB_LOSEMYWAY"))				{ status = SUB_LOSEMYWAY; }
+
+		else if (statusName.toUpperCase().equals("ENTER_ERROR_STATUS"))			{ status = ENTER_ERROR_STATUS; }
+		else if (statusName.toUpperCase().equals("WAIT_FOR_INPUT"))				{ status = WAIT_FOR_INPUT; }
+		else if (statusName.toUpperCase().equals("FORCED_LEARNING"))				{ status = FORCED_LEARNING; }
+		else if (statusName.toUpperCase().equals("EXIT_ERROR_STATUS"))			{ status = EXIT_ERROR_STATUS; }
 
 		return status;
 	}
