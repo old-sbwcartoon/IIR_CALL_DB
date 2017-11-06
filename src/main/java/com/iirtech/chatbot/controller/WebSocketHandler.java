@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snu.ids.ha.ma.MorphemeAnalyzer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.socket.CloseStatus;
@@ -76,6 +77,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
 
 		logger.info(message.getPayload().toString());
+		//형태소 분석기 최초 로드
+		MorphemeAnalyzer ma = new MorphemeAnalyzer();
 		
 		String rootPath = System.getProperty("user.home") + "/Documents/chatbot";
 		logger.info(session.getAttributes().toString());
@@ -144,7 +147,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		    		//conditionInfoMap 에는 String userType, List textTypes, List CITKeywords(사용자인풋텍스트에서 추출된 키워드)
 		    		//statusCd,message,messageIdx(string)-not null, CIT(map)-nullable 이 들어있음
 
-		    		Map<String, Object> messageInfo = cbss.getMessageInfo(statusCd, exStatusCd, procText, messageIdx, subMessageIdx, conditionInfoMap, shortTermInfoMap);
+		    		Map<String, Object> messageInfo = cbss.getMessageInfo(statusCd, exStatusCd, procText, messageIdx, subMessageIdx, conditionInfoMap, shortTermInfoMap, ma);
 //		    		String removedTagMsg = getStrRemovedTag((String)(messageInfo.get("message")));
 //		    		System.out.println(">>>\n>>>>>>>>papago result: " + cbns.getEngByKor(removedTagMsg) + "\n>>>");
 

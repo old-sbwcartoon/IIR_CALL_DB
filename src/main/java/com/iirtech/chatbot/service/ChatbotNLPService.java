@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.snu.ids.ha.ma.MorphemeAnalyzer;
+
 /**
  * @Package   : com.iirtech.chatbot.service.impl
  * @FileName  : ChatbotNLPService.java
@@ -18,9 +20,9 @@ public interface ChatbotNLPService {
 
 	String selectKeyword(String keywordType, Map<String, Object> conditionInfoMap);
 
-	String getSubThemeStatusCd(String procText);
+	String getSubThemeStatusCd(String procText, MorphemeAnalyzer ma);
 
-	HashMap<String, ArrayList<String>> getMorpListMap(String str);
+	HashMap<String, ArrayList<String>> getMorpListMap(String str, MorphemeAnalyzer ma);
 	
 	HashMap<String, ArrayList<?>> getMaxSimilarityAndFileName(String filePath, ArrayList<String> candidateList,
 			HashMap<String, ArrayList<String>> dictNameListMap, ArrayList<String> keywordList, double minSimilarityScore);

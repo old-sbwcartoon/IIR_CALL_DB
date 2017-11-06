@@ -3,6 +3,8 @@ package com.iirtech.chatbot.service;
 import java.util.List;
 import java.util.Map;
 
+import org.snu.ids.ha.ma.MorphemeAnalyzer;
+
 /**
  * @Package   : com.iirtech.chatbot.service
  * @FileName  : ChatbotScriptService.java
@@ -13,7 +15,7 @@ import java.util.Map;
 public interface ChatbotScriptService {
 
 	Map<String, Object> getMessageInfo(String statusCd, String exStatusCd, String procInputText, String messageIdx, String subMessageIdx,
-			Map<String, Object> conditionInfoMap, Map<String, Object> shortTermInfoMap);
+			Map<String, Object> conditionInfoMap, Map<String, Object> shortTermInfoMap, MorphemeAnalyzer ma);
 
 	List<String> findAllOperationStrings(String message);
 	

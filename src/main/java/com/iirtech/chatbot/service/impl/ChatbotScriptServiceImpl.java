@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.apache.log4j.Logger;
+import org.snu.ids.ha.ma.MorphemeAnalyzer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -45,7 +46,8 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	
 	@Override
 	public Map<String, Object> getMessageInfo(String statusCd, String exStatusCd, String procInputText
-			, String messageIdx, String subMessageIdx, Map<String,Object> conditionInfoMap, Map<String,Object> shortTermInfoMap) {
+			, String messageIdx, String subMessageIdx, Map<String,Object> conditionInfoMap, Map<String,Object> shortTermInfoMap
+			,MorphemeAnalyzer ma) {
 		log.debug("*************************getMessageInfo*************************");
 		
 		//컨트롤러로 리턴할 리턴 값들을 담는 맵객체 
@@ -61,7 +63,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	    		if(statusCd.equals(DialogStatus.ONGOING_TOPIC.getStatusCd()) && messageIdx.equals("0")) {
 				
 				exStatusCd = statusCd;
-				statusCd = cbns.getSubThemeStatusCd(procInputText);
+				statusCd = cbns.getSubThemeStatusCd(procInputText, ma);
     				
 	    		}
 
@@ -240,7 +242,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 				//blank 채우기 //본래 스크립트로 돌아갈 경우에, 직전 사용한 스크립트를 다시 사용
 				if (!hasReturnToScript) {
 					shortTermInfoMap.put("procInputText", procInputText);
-					shortTermInfoMap = getCompleteMap(optmzMessage, statusCd, shortTermInfoMap);
+					shortTermInfoMap = getCompleteMap(optmzMessage, statusCd, shortTermInfoMap, ma);
 				}
 				
 				if(applySysOprtResultMap.get("CIT")!=null) {
@@ -571,7 +573,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	 * @param shortTermInfoMap
 	 * @return 완성된 단기 기억 맵
 	 */
-	private Map<String, Object> getCompleteMap(String nextMessage, String statusCd, Map<String, Object> shortTermInfoMap) {
+	private Map<String, Object> getCompleteMap(String nextMessage, String statusCd, Map<String, Object> shortTermInfoMap, MorphemeAnalyzer ma) {
 		
 		Map<String, Object> resultMap = shortTermInfoMap;
 		
@@ -596,7 +598,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			}
 			
 			if (hasTarget) {
-				resultMap = fillBlank(nextMessage, statusCd, shortTermInfoMap, sysKeywordArr);
+				resultMap = fillBlank(nextMessage, statusCd, shortTermInfoMap, sysKeywordArr, ma);
 				nextMessage = getMessageWithRightJosa((String)resultMap.get("nextMessage"));
 			}
 			
@@ -610,7 +612,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	}
 	
 
-	private Map<String, Object> fillBlank(String nextMessage, String statusCd, Map<String, Object> shortTermInfoMap, String[] sysKeywordArr) {
+	private Map<String, Object> fillBlank(String nextMessage, String statusCd, Map<String, Object> shortTermInfoMap, String[] sysKeywordArr, MorphemeAnalyzer ma) {
 		
 		Map<String, Object> resultMap = shortTermInfoMap;
 		
@@ -627,7 +629,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 		dictNameListInBlank.put("where", new ArrayList<String>(Arrays.asList(new String[]{dictNameArr[5], dictNameArr[7], dictNameArr[11]})));
 		dictNameListInBlank.put("what",  new ArrayList<String>(Arrays.asList(dictNameArr))); // what일 경우 모든 사전찾음
 		
-		HashMap<String, ArrayList<String>> inputMorpListMap = cbns.getMorpListMap(inputStr);
+		HashMap<String, ArrayList<String>> inputMorpListMap = cbns.getMorpListMap(inputStr, ma);
 		if (!(inputMorpListMap.get("jList").isEmpty() && inputMorpListMap.get("vList").isEmpty() && inputMorpListMap.get("nList").isEmpty())) {
 			
 			double minSimilarityScore = 0.8;

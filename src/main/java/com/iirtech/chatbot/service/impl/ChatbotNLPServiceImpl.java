@@ -100,7 +100,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 	 * @return 서브 테마 code
 	 */
 	@Override
-	public String getSubThemeStatusCd(String procText) {
+	public String getSubThemeStatusCd(String procText, MorphemeAnalyzer ma) {
 		String subThemeStatusCd = null;
 		String strToExtrtKwrd = procText;
 		
@@ -146,7 +146,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			// 조사 + 동사 = 사용자 문장 : 예문 문장
 			// 명사 = 사용자 키워드 단어 : 사전 단어
 			
-				HashMap<String, ArrayList<String>> inputMorpMap = getMorpListMap(strToExtrtKwrd);
+				HashMap<String, ArrayList<String>> inputMorpMap = getMorpListMap(strToExtrtKwrd, ma);
 				ArrayList<String> inputJList = inputMorpMap.get("jList");
 				ArrayList<String> inputVList = inputMorpMap.get("vList");
 				ArrayList<String> inputNList = inputMorpMap.get("nList");
@@ -169,7 +169,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 					int nCnt = 0;
 					for (String expStr : expInputList) {
 //						expStr; 예문 문장
-						expMorpMap = getMorpListMap(expStr);
+						expMorpMap = getMorpListMap(expStr, ma);
 						
 						ArrayList<String> expJList = expMorpMap.get("jList");
 						ArrayList<String> expVList = expMorpMap.get("vList");
@@ -311,7 +311,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 	 * @return HashMap("jList", jlist), HashMap("vList", vlist), HashMap("nList", nlist)
 	 */
 	@Override
-	public HashMap<String, ArrayList<String>> getMorpListMap(String str) {
+	public HashMap<String, ArrayList<String>> getMorpListMap(String str, MorphemeAnalyzer ma) {
 		HashMap<String, ArrayList<String>> resultMap = null;
 		
 		if (str != null && str != "") {
@@ -322,7 +322,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			ArrayList<String> nList = new ArrayList<String>(); // 입력 문장 속 명사 리스트
 			
 			// 사용자 입력 문장 형태소 분석
-			MorphemeAnalyzer ma = new MorphemeAnalyzer();
+			
 //					ma.createLogger(null);
 		
 			try {
