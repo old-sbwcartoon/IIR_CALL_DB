@@ -40,6 +40,10 @@ public class MessageInfo {
 		
 	}
 	
+	public void fixMessages(String[] newMessageArray) {
+		this.messages = newMessageArray;
+	}
+	
 	public String getStatusCd() {
 		return statusCd;
 	}
@@ -73,7 +77,6 @@ public class MessageInfo {
 //			br = new BufferedReader(new FileReader(url.toString()));
 			String str = "";
 			while ((str=br.readLine()) != null) {
-			
 				messagesArr.add(str);
 			}
 		} catch (FileNotFoundException e) {
