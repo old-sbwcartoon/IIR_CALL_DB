@@ -70,6 +70,7 @@ public class ReactRulePerAutomata {
 			resultKeyStr = normalSentenceTypeList.contains(SentenceClassifyConstants.IS_MORE_THAN_TWO_SENTENCE) ? 
 					SentenceClassifyConstants.IS_NORMAL_SENTENCE : SentenceClassifyConstants.IS_ERROR_SENTENCE; 
 			result.put(resultKeyStr, SentenceClassifyConstants.IS_MORE_THAN_TWO_SENTENCE);
+			return result;
 		}
 		
 		//무의미하게 얼버무리는 문장인지 판별 
@@ -77,6 +78,7 @@ public class ReactRulePerAutomata {
 			resultKeyStr = normalSentenceTypeList.contains(SentenceClassifyConstants.IS_MORE_THAN_TWO_SENTENCE) ? 
 					SentenceClassifyConstants.IS_NORMAL_SENTENCE : SentenceClassifyConstants.IS_ERROR_SENTENCE; 
 			result.put(resultKeyStr, SentenceClassifyConstants.IS_MORE_THAN_TWO_SENTENCE);
+			return result;
 		}
 		
 		//오타있는 문장인지 판별
@@ -84,6 +86,7 @@ public class ReactRulePerAutomata {
 			resultKeyStr = normalSentenceTypeList.contains(SentenceClassifyConstants.IS_TYPO_SENTENCE) ? 
 					SentenceClassifyConstants.IS_NORMAL_SENTENCE : SentenceClassifyConstants.IS_ERROR_SENTENCE; 
 			result.put(resultKeyStr, SentenceClassifyConstants.IS_TYPO_SENTENCE);
+			return result;
 		}
 		
 		UtilsForGGMA ufg = new UtilsForGGMA();
