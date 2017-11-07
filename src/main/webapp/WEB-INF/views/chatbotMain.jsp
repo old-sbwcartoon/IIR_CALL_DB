@@ -78,7 +78,7 @@
 						</ul>
 						<!-- <div class="macro" style="width:475px; background:whitesmoke;">대화를 입력하세요:<textarea id="userInput" rows="4" cols="50"></textarea> -->
 						<div class="macro" style="background:whitesmoke; border-radius:0px"><textarea id="userInput" rows="3" cols="50"></textarea>
-							<button id="btnInput" style="width:80px;">입력</button>
+							<button id="btnInput" class="btn_disabled" style="width:80px;">입력</button>
 						</div>
 					</div>
 				</div>

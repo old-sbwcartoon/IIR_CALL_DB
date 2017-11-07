@@ -63,6 +63,10 @@
 	margin-left: -1px;
 }
 
+.btn_disabled {
+	color: #eeeeee;
+}
+
 .frame{
     background:#e0e0e0;
     height:450px;

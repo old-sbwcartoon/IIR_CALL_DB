@@ -28,10 +28,9 @@ function btnEvent() {
 	$('#btnInput').on('click', function(e) {
 
 		var inputMsg = $('#userInput').val()
-		if (inputMsg == null || inputMsg == "") {
-			alert("문장을 입력하세요!");
-			return;
-		}
+//		if (inputMsg == null || inputMsg == "") {
+//			return;
+//		}
 
 		insertUser($('#userInput').val(), $('#imgSrc').val()); // user
 		doInput($('#statusCd').val(), $('#exStatusCd').val(), $('#messageIdx').val(), $('#subMessageIdx').val()); // bot
@@ -44,14 +43,26 @@ function btnEvent() {
 			scrollTop : '+=400'
 		}, 'slow');
 
+		$(this).attr("disabled", true);
+		$(this).addClass("btn_disabled");
 	});
 
-	$('#userInput').keypress(function(e) {
+	$('#userInput').on('keyup', function(e) {
+		var inputMsg = $(this).val()
+		if (inputMsg == null || inputMsg.trim() == "") {
+//			alert("문장을 입력하세요!");
+			$('#btnInput').attr("disabled", true);
+			$('#btnInput').addClass("btn_disabled");
+			return;
+		} else {
+			$('#btnInput').attr("disabled", false);
+			$('#btnInput').removeClass("btn_disabled");
+		}
 		if (e.which == 13) {
 			event.preventDefault();
-			insertUser($('#userInput').val(), $('#imgSrc').val());
+			insertUser($(this).val(), $('#imgSrc').val());
 			doInput($('#statusCd').val(), $('#exStatusCd').val(), $('#messageIdx').val(), $('#subMessageIdx').val());
-			$('#userInput').val('');
+			$(this).val('');
 			// 스크롤바 focusing
 			$("html, body").animate({
 				scrollTop : '+=400'
@@ -59,7 +70,7 @@ function btnEvent() {
 			$(".dialog-ul").animate({
 				scrollTop : '+=400'
 			}, 'slow');
-
+			
 //			$('#exStatusCd').val($('#statusCd').val());
 		}
 	});
