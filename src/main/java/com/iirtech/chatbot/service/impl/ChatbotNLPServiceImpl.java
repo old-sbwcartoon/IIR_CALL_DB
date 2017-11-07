@@ -143,7 +143,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 //			expInput.put("inn", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 숙소로 갔어요~"})));
 //			expInput.put("getLuggage", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 짐을 찾았어요~"})));
 //			expInput.put("carRental", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 차를 빌렸어요~"})));
-			expInput.put("shopping", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 쇼핑했어요~", "도착하자마자 옷을 샀어요~", "도착하자마자 물건을 샀어요~", "도착하자마자 기념품을 샀어요~"})));
+			expInput.put("shopping", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 쇼핑했어요~" , "도착하자마자 옷을 샀어요~", "도착하자마자 물건을 샀어요~", "도착하자마자 기념품을 샀어요~" })));
 //			expInput.put("meetFriend", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 친구를/가족을 만났어요~"})));
 //			expInput.put("exchangeMoney", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 환전을 했어요~"})));
 //			expInput.put("loseMyWay", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 길을 잃어버렸어요~"})));
@@ -169,9 +169,9 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 					
 					String subTheme = subThemeArr[i];
 					ArrayList<String> expInputList = expInput.get(subTheme); // 예문 리스트
-					int jCnt = 0;
-					int vCnt = 0;
-					int nCnt = 0;
+					double jCnt = 0;
+					double vCnt = 0;
+					double nCnt = 0;
 					for (String expStr : expInputList) {
 //						expStr; 예문 문장
 						expMorpMap = getMorpListMap(expStr, ma);
@@ -183,7 +183,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 						for (int j = 0; j < expJList.size(); j++) {
 							for (String inputJ : inputJList) {
 								if (inputJ.equalsIgnoreCase(expJList.get(j))) {
-									jCnt++;
+									jCnt += 1 / expJList.size();
 								}
 							}
 						}
@@ -191,7 +191,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 						for (int j = 0; j < expVList.size(); j++) {
 							for (String inputV : inputVList) {
 								if (inputV.equalsIgnoreCase(expVList.get(j))) {
-									vCnt++;
+									vCnt += 1 / expVList.size();
 								}
 							}
 						}
@@ -199,7 +199,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 						for (int j = 0; j < expNList.size(); j++) {
 							for (String inputN : inputNList) {
 								if (inputN.equalsIgnoreCase(expNList.get(j))) {
-									nCnt++;
+									nCnt += 1 / expNList.size();
 								}
 							}
 						}
@@ -607,10 +607,10 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 	 * @return hashMap.infoType(translation 또는 errorCode), hashMap.data(번역을 요청한 단어 또는 오류 주석 코드)
 	 */
 	@Override
-	public HashMap<String, String> getPauseCondition(String procInputText) {
+	public HashMap<String, String> getPauseCondition(String procInputText, MorphemeAnalyzer ma) {
 		HashMap<String, String> resultMap = new HashMap<String, String>();
 		
-		String askContent = getAskContent(procInputText);
+		String askContent = getAskContent(procInputText, ma);
 		
 		if (askContent != null) {
 			int askCode = getContentCode(askContent);
@@ -624,10 +624,13 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 				// 번역에 관한 질문일 경우
 				String korContent = askContent;
 				String engContent = cbns.getEngByKor(korContent);
+				// 번역되었을 때 마지막 글자 은, 는, 이, 가 삭제 후 표출
+				String lastWord = korContent.substring(korContent.length() - 1, korContent.length());
 				
-				// 질문한 내용이 번역되지 않았을 경우 -- 마지막 글자 은, 는, 이, 가 삭제 후 다시 번역 
-				if (engContent == null || engContent.equals("")) {
-					String lastWord = korContent.substring(korContent.length() - 1, korContent.length());
+				if (lastWord.equals(" ")) {
+					korContent = korContent.substring(0, korContent.length() - 1);
+				} else {
+					// 마지막 문자가 공백이 아닐 경우(형태소 분석기에서 조사를 지우지 않았을 경우) 마지막 문자 은, 는, 이, 가 삭제
 					String[] chkArr = {"은", "는", "이", "가"};
 					for (String chk : chkArr) {
 						if (lastWord.equals(chk)) {
@@ -635,6 +638,10 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 							break;
 						}
 					}
+				}
+				
+				// 질문한 내용이 번역되지 않았을 경우 -- 마지막 글자 은, 는, 이, 가 삭제 후 다시 번역 
+				if (engContent == null || engContent.equals("")) {
 					engContent = cbns.getEngByKor(korContent);
 				}
 				resultMap.put("infoType", "translation");
@@ -695,10 +702,11 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 	/**
 	 * 사용자 입력문이 질문인지 확인해서 결과 반환
 	 * @param procInputText
-	 * @return 질문이라면 문장에서 질문글 제거한 문장, 일반 응답문이라면 null
+	 * @return 질문이라면 문장에서 질문글 제거한 문장, 일반 응답문이라면 null<br>
+	 * !질문글 제거한 문장에서 조사를 지웠을 경우 마지막에 공백 추가!
 	 */
 	@Override
-	public String getAskContent(String procInputText) {
+	public String getAskContent(String procInputText, MorphemeAnalyzer ma) {
 		boolean isAsk = false;
 		String askContent = null;
 		String[] wordArr  = null;
@@ -743,34 +751,34 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 										}
 									}
 									
-//									시간 오래 걸리므로 getEngByKor를 여러 번 돌려서 제어
+									// 시간 오래 걸리므로 getEngByKor를 여러 번 돌려서 제어
 									// 사용자 입력 문장 형태소 분석
 //									MorphemeAnalyzer ma = new MorphemeAnalyzer();
-//
-//									try {
-//										List<MExpression> ret = ma.analyze(str);
-//										ret = ma.postProcess(ret);
-//										ret = ma.leaveJustBest(ret);
-//								
-//										List<Sentence> stl = ma.divideToSentences(ret);
-//										
-//										for( Sentence st : stl ) {
-//											
-//											for( Eojeol eojeol : st ) {
-//												
-//												for (Morpheme morp : eojeol) {
-//													
-//													if (morp.getIndex() == askContent.length() - 1) {
-//														if (morp.getTag().contains("JK") || morp.getTag().equals("JX")) {
-//															askContent = askContent.substring(0, askContent.length() - 1);
-//														}
-//													}
-//												}
-//											}
-//										}
-//									} catch (Exception e) {
-//										e.printStackTrace();
-//									}
+
+									try {
+										List<MExpression> ret = ma.analyze(str);
+										ret = ma.postProcess(ret);
+										ret = ma.leaveJustBest(ret);
+								
+										List<Sentence> stl = ma.divideToSentences(ret);
+										
+										for( Sentence st : stl ) {
+											
+											for( Eojeol eojeol : st ) {
+												
+												for (Morpheme morp : eojeol) {
+													
+													if (morp.getIndex() == askContent.length() - 1) {
+														if (morp.getTag().contains("JK") || morp.getTag().equals("JX")) {
+															askContent = askContent.substring(0, askContent.length() - 1) + " "; // 조사를 지웠을 경우 마지막에 공백 추가
+														}
+													}
+												}
+											}
+										}
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
 									
 									isAsk = true;
 									break;

@@ -76,7 +76,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			
 			
 			boolean hasReturnToScript = false; // 본래 스크립트 이외 질문, 오류 등 스크립트가 끝났을 경우 true
-    			HashMap<String, String> pauseInfo = cbns.getPauseCondition(procInputText);
+    			HashMap<String, String> pauseInfo = cbns.getPauseCondition(procInputText, ma);
 			
     			// statusCd가 서브 테마가 아니라면
 			if ( !DialogStatus.get(statusCd).name().contains("SUB_") ) {
@@ -621,7 +621,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 		dictNameListInBlank.put("what",  new ArrayList<String>(Arrays.asList(dictNameArr))); // what일 경우 모든 사전찾음
 		
 		HashMap<String, ArrayList<String>> inputMorpListMap = cbns.getMorpListMap(inputStr, ma);
-		if (!(inputMorpListMap.get("jList").isEmpty() && inputMorpListMap.get("vList").isEmpty() && inputMorpListMap.get("nList").isEmpty())) {
+//		if (!(inputMorpListMap.get("jList").isEmpty() && inputMorpListMap.get("vList").isEmpty() && inputMorpListMap.get("nList").isEmpty())) {
 			
 			double minSimilarityScore = 0.8;
 			ArrayList<String> nList = inputMorpListMap.get("nList");
@@ -692,10 +692,10 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			
 			
 			
-		} else {
-			// 예외 처리: 입력문에서 명사, 동사, 조사가 분석되지 않았을 경우
-			
-		}
+//		} else {
+//			// 예외 처리: 입력문에서 명사, 동사, 조사가 분석되지 않았을 경우
+//
+//		}
 		// {name}은 오류문이라도 교체
 		if (nextMessage.contains("{name}")) {
 			map.put("name", String.valueOf(shortTermInfoMap.get("name")));

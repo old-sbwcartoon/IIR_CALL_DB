@@ -33,9 +33,9 @@ public interface ChatbotNLPService {
 
 	public String getEngByKor(String korStr);
 
-	HashMap<String, String> getPauseCondition(String procInputText);
+	HashMap<String, String> getPauseCondition(String procInputText, MorphemeAnalyzer ma);
 
-	String getAskContent(String procInputText);
+	String getAskContent(String procInputText, MorphemeAnalyzer ma);
 
 
 
