@@ -78,7 +78,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			
 			
 			boolean hasReturnToScript = false; // 본래 스크립트 이외 질문, 오류 등 스크립트가 끝났을 경우 true
-    			HashMap<String, String> pauseInfo = cbns.getPauseCondition(procInputText, ma);
+    			HashMap<String, String> pauseInfo = cbns.getPauseCondition(procInputText,ma);
 			
     			// statusCd가 서브 테마가 아니라면
 			if ( !DialogStatus.get(statusCd).name().contains("SUB_") ) {
@@ -164,7 +164,6 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 				
 				
 			}
-				
 			
 			if (statusCd.equals(DialogStatus.START_CONVERSATION.getStatusCd()) && conditionInfoMap.containsKey("CIT")) {
 				conditionInfoMap.remove("CITKeyword");
@@ -173,7 +172,8 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			
 	    		scriptFilePath = this.addTopicScriptPath(statusCd, urlFilePath + "script/iitp_bot/", conditionInfoMap);
 			MessageInfo info = new MessageInfo(statusCd, scriptFilePath);
-			
+			//랜덤하게 select한 발화문으로 고쳐서 다시 info 객체의 message set 하기!
+			this.randomlySelectOneSentence(info);//return void 
 
 			String nextMessage = "";
 			if (!pauseInfo.isEmpty()) {
@@ -182,15 +182,11 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 				
 				if (infoType.equals("systemAsk") || infoType.equals("translation")) {
 					nextMessage = pauseInfo.get("data");
-					
 				} else {
 					// 사용자 입력문 = 오류 체크일 경우
 					
 				}
-				
-				
 			} else {
-
 //				scriptFilePath = this.addTopicScriptPath(statusCd, urlFilePath + "script/iitp_bot/", conditionInfoMap);
 //				info = new MessageInfo(statusCd, scriptFilePath);
 				String nextMessages = info.getMessageByIdx(idx);
@@ -223,14 +219,13 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 						nextAutomataIdx = nextIdx;
 					}
 					info = new MessageInfo(info.getNextStatusCd(), scriptFilePath);//messages = [쌤이 말하는 것은 꼭 따라 하기로 해요~\n한 문장씩 써 주세요~\n문장 끝에 . ?를 넣어주세요.\n, S000]
-					
-					//랜덤하게 select한 발화문으로 고쳐서 다시 info 객체의 message set 하기!
-					this.randomlySelectOneSentence(info);//return void 
-					
+					this.randomlySelectOneSentence(info);
 					nextMessages = info.getMessageByIdx(nextAutomataIdx);
 					nextIdx = nextAutomataIdx;
 					exStatusCd = statusCd;
 				}
+				
+				
 				//현재 nextMessages 는 | 가 붙은 상태임. 따라서 optimize할때는 짤라내고 루프돌면서 한개씩 처리
 				//인자값으로 conditionInfoMap(oldUser, newUser , isPositive/isNegative/isAsking)등의 정보들을 넣어줌 
 				applySysOprtResultMap = (Map<String, Object>) this.applySysOprt(nextMessages, conditionInfoMap);
@@ -249,7 +244,6 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 				
 				nextMessage = this.parseForHtml(String.valueOf(shortTermInfoMap.get("nextMessage")));
 			}
-			
 			
 			log.debug("optimizedMsg>>>>>>>>>"+nextMessage);
 			
@@ -627,7 +621,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 		dictNameListInBlank.put("what",  new ArrayList<String>(Arrays.asList(dictNameArr))); // what일 경우 모든 사전찾음
 		
 		HashMap<String, ArrayList<String>> inputMorpListMap = cbns.getMorpListMap(inputStr, ma);
-//		if (!(inputMorpListMap.get("jList").isEmpty() && inputMorpListMap.get("vList").isEmpty() && inputMorpListMap.get("nList").isEmpty())) {
+		if (!(inputMorpListMap.get("jList").isEmpty() && inputMorpListMap.get("vList").isEmpty() && inputMorpListMap.get("nList").isEmpty())) {
 			
 			double minSimilarityScore = 0.8;
 			ArrayList<String> nList = inputMorpListMap.get("nList");
@@ -698,10 +692,10 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			
 			
 			
-//		} else {
-//			// 예외 처리: 입력문에서 명사, 동사, 조사가 분석되지 않았을 경우
-//
-//		}
+		} else {
+			// 예외 처리: 입력문에서 명사, 동사, 조사가 분석되지 않았을 경우
+			
+		}
 		// {name}은 오류문이라도 교체
 		if (nextMessage.contains("{name}")) {
 			map.put("name", String.valueOf(shortTermInfoMap.get("name")));
@@ -826,61 +820,73 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	public void randomlySelectOneSentence(MessageInfo info) {
 		//messages = [쌤이 말하는 것은 꼭 따라 하기로 해요~\n한 문장씩 써 주세요~\n문장 끝에 . ?를 넣어주세요.\n, S000]
 		String[] messages = info.getMessages();
+		
 		String regex = "\\{(.*?)\\}";
-		String message = messages[0];
 		Pattern pattern = Pattern.compile(regex);
-		Matcher matcher = pattern.matcher(message);
 		
-		List<Integer> startIdxs = new ArrayList<Integer>();
-		List<Integer> endIdxs = new ArrayList<Integer>();
-		List<String> replaceStr = new ArrayList<String>();
-		while(matcher.find()) {
-			startIdxs.add(matcher.start());
-			endIdxs.add(matcher.end());
-			int len = matcher.end() - matcher.start();
-			String replacement = "";
-			for (int i = 0; i < len; i++) {
-				replacement += "#";
-			}
-			replaceStr.add(replacement);
-		}
+		String r = "([A-Z]{1}\\d{0,})";
+		Pattern p = Pattern.compile(r);
 		
-		String newMessage = message;
-		int startIdx = 0;
-		for (int i = 0; i < startIdxs.size(); i++) {
-			startIdx = startIdxs.get(i);
-			int endIdx = endIdxs.get(i);
-			String compareStr = newMessage.substring(startIdx, endIdx);
-			newMessage = newMessage.replace(compareStr, replaceStr.get(i));
-		}
-		
-		List<Integer> indexesOfPipeline = new ArrayList<Integer>();
-		char[] newMessageChars = newMessage.toCharArray();
-		for (int i = 0; i < newMessageChars.length; i++) {
-			if(newMessageChars[i] == '|') {
-				indexesOfPipeline.add(i);
-			}
-		}
-		
-		char[] messageChar = message.toCharArray();
-		for (int i = 0; i < indexesOfPipeline.size(); i++) {
-			messageChar[indexesOfPipeline.get(i)] = '#';
-		}
+		String elmntOfMessageArray = "";
+		List<String> newMessageList = new ArrayList<String>();
+		for (int k = 0; k < messages.length; k++) {
+			Matcher m = p.matcher(messages[k]);
+			if(m.matches()) {//S000 등일때
+				elmntOfMessageArray = messages[k];
+			}else {
+				List<Integer> startIdxs = new ArrayList<Integer>();
+				List<Integer> endIdxs = new ArrayList<Integer>();
+				List<String> replaceStr = new ArrayList<String>();
+				Matcher matcher = pattern.matcher(messages[k]);
+				while(matcher.find()) {
+					startIdxs.add(matcher.start());
+					endIdxs.add(matcher.end());
+					int len = matcher.end() - matcher.start();
+					String replacement = "";
+					for (int i = 0; i < len; i++) {
+						replacement += "#";
+					}
+					replaceStr.add(replacement);
+				}
+				
+				String newMessage = messages[k];
+				int startIdx = 0;
+				for (int i = 0; i < startIdxs.size(); i++) {
+					startIdx = startIdxs.get(i);
+					int endIdx = endIdxs.get(i);
+					String compareStr = newMessage.substring(startIdx, endIdx);
+					newMessage = newMessage.replace(compareStr, replaceStr.get(i));
+				}
+				
+				List<Integer> indexesOfPipeline = new ArrayList<Integer>();
+				char[] newMessageChars = newMessage.toCharArray();
+				for (int i = 0; i < newMessageChars.length; i++) {
+					if(newMessageChars[i] == '|') {
+						indexesOfPipeline.add(i);
+					}
+				}
+				
+				char[] messageChar = messages[k].toCharArray();
+				for (int i = 0; i < indexesOfPipeline.size(); i++) {
+					messageChar[indexesOfPipeline.get(i)] = '#';
+				}
 
-		message = String.valueOf(messageChar);
-		String[] seperatedSentences = message.split("#");
-		
-		//랜덤선택
-		Random rd = new Random();
-		int range = seperatedSentences.length-1;
-		int rndNum = rd.nextInt(range);
-		String selectedSentence = seperatedSentences[rndNum];
-		
-		log.debug(">>>>>>>>>>selected message: " + selectedSentence);
-		
-		//info 객체의 messages 값에 변경된 메시지 어레이를 set
-		String[] newMessageArray = {selectedSentence, messages[1]};
-		info.fixMessages(newMessageArray);
+				messages[k] = String.valueOf(messageChar);
+				String[] seperatedSentences = messages[k].split("#");
+				
+				//랜덤선택
+				Random rd = new Random();
+				int range = seperatedSentences.length;
+				int rndNum = rd.nextInt(range);
+				String selectedSentence = seperatedSentences[rndNum];
+				log.debug(">>>>>>>>>>selected message: " + selectedSentence);
+				
+				elmntOfMessageArray = selectedSentence;
+			}
+			newMessageList.add(elmntOfMessageArray);
+		}
+		String[] result = new String[newMessageList.size()];
+		info.fixMessages(newMessageList.toArray(result));
 		
 	}
 
