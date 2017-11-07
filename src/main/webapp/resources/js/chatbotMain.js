@@ -83,7 +83,7 @@ function doInput(statusCd, exStatusCd, messageIdx, subMessageIdx) {
 function socketHandler(clientMessage) {
 
 	// var sock = new WebSocket("ws://106.255.230.162:1148/sockethandler.do");
-	var sock = new WebSocket("ws://localhost:7080/sockethandler.do");
+	var sock = new WebSocket("ws://localhost:7090/sockethandler.do");
 	// var sock = new WebSocket("ws://localhost:8090/sockethandler.do");
 	/* server 연결시 바로 */
 	sock.onopen = function() {
@@ -94,6 +94,7 @@ function socketHandler(clientMessage) {
 	/* message 받아옴 */
 	sock.onmessage = function(serverMessage) {
 		var data = JSON.parse(serverMessage.data);
+		
 		$('#statusCd').val(data.statusCd);
 		$('#exStatusCd').val(data.exStatusCd);
 		$('#messageIdx').val(data.messageIdx);
@@ -102,12 +103,14 @@ function socketHandler(clientMessage) {
 		$('#shortTermInfos').val(data.shortTermInfoMap);
 		// script path hidden 기록
 		$('#scriptPath').val(data.scriptFilePath);
-		insertBot(data.message, data.imgSrc, data.messageIdx, data.subMessageIdx, data.statusCd);
+		insertBot(data.message, data.imgSrc, data.messageIdx, data.subMessageIdx, data.statusCd, data.exStatusCd);
+		
 
 		// 시각화 부분
 		$('#dialogShowBoxText').remove();
 		$('#dialogShowBox-navigation').html(data.dialogLogStr);
 		$('#dialogShowBox-frame').html(data.dialogLogStr);
+		
 	};
 
 	/* server 연결 단절 */
@@ -116,6 +119,21 @@ function socketHandler(clientMessage) {
 		sock.close();
 	};
 }
+
+
+function redirectPage(controller){
+	//location.href='http://106.255.230.125:11480/' + controller;
+	if(controller == 'index.do'){
+		if(confirm('정말 나가겠습니까?')==true){
+			location.href='http://localhost:7090/' + controller;
+		}else{
+			return;
+		}
+	}else{
+		location.reload();
+	}
+}
+
 
 function formatAMPM(date) {
 	var hours = date.getHours();
@@ -128,7 +146,7 @@ function formatAMPM(date) {
 	return strTime;
 }
 
-function insertBot(text, imgfilepath, messageIdx, subMessageIDx, statusCd) {
+function insertBot(text, imgfilepath, messageIdx, subMessageIDx, statusCd, exStatusCd) {
 	var control = "";
 	var date = formatAMPM(new Date());
 	var seq = $('#idSeq').val();
@@ -136,36 +154,69 @@ function insertBot(text, imgfilepath, messageIdx, subMessageIDx, statusCd) {
 	var subMessageIdx = $('#subMessageIdx').val();
 
 	// sleep(text.length * 100); //사용자 입력과 동시에 나오지 않도록 잠시 정지. 글자 수에 따라 정지 시간
-	// 길어짐. 버벅댐.
-	control = '<li>' + '<div class="msj macro">' +
-	// '<div class="avatar"><img class="img-circle" style="width:100%;" src="'+
-	// imgfilepath + bot.avatar +'" /></div>' +
-	'<div class="avatar"><img style="width:46%;" src="'
-			+ imgfilepath
-			+ bot.avatar
-			+ '" /></div>'
-			+ '<div class="text text-l">'
-			+ '<p>'
-			+ text
-			+ '<button onclick="activeFixBox('
-			+ seq
-			+ ')" class="btnFix btnSmall btnUpper align-right">추가</button></p>'
-			+ '<div class="fixBox" style="display:none">'
-			+ '<textarea class="fixText" rows="3" cols="30"></textarea><br>'
-			+ '<button onclick="addFixText('
-			+ seq
-			+ ',\''
-			+ statusCd
-			+ '\',\''
-			+ messageIdx
-			+ '\',\''
-			+ subMessageIdx
-			+ '\',\'ADD\',\'0\', this)" class="btnFixInput btnSmall">입력</button>'
-			+ '<button onclick="cancleFixText(' + seq
-			+ ')" class="cancleFixInput btnSmall">취소</button>' + '</div>'
-			+ '<p><div class="date">' + date + '</div></p>' + '</div>'
-			+ '</div>' + '</li>';
-
+	if(statusCd == "S070" && exStatusCd == "S060"){ //마지막 발화일 경우 페이지 아웃할 수 있게
+		control = '<li>' + '<div class="msj macro">' +
+		// '<div class="avatar"><img class="img-circle" style="width:100%;" src="'+
+		// imgfilepath + bot.avatar +'" /></div>' +
+		'<div class="avatar"><img style="width:46%;" src="'
+				+ imgfilepath
+				+ bot.avatar
+				+ '" /></div>'
+				+ '<div class="text text-l">'
+				+ '<p>'
+				+ text
+				+ '<br>대화가 끝났어요.<br>다시 같은 내용으로 공부할래요?'
+				+ '<button onclick="redirectPage(\'chatbotMain.do\')" class="btnFix btnSmall btnUpper align-right">네</button>'
+				+ '<button onclick="redirectPage(\'index.do\')" class="btnFix btnSmall btnUpper align-right">아니오</button>'
+				+ '</p>'
+				+ '<div class="fixBox" style="display:none">'
+				+ '<textarea class="fixText" rows="3" cols="30"></textarea><br>'
+				+ '<button onclick="addFixText('
+				+ seq
+				+ ',\''
+				+ statusCd
+				+ '\',\''
+				+ messageIdx
+				+ '\',\''
+				+ subMessageIdx
+				+ '\',\'ADD\',\'0\', this)" class="btnFixInput btnSmall">입력</button>'
+				+ '<button onclick="cancleFixText(' + seq
+				+ ')" class="cancleFixInput btnSmall">취소</button>' + '</div>'
+				+ '<p><div class="date">' + date + '</div></p>' + '</div>'
+				+ '</div>' + '</li>';
+	}
+	else{
+		control = '<li>' + '<div class="msj macro">' +
+		// '<div class="avatar"><img class="img-circle" style="width:100%;" src="'+
+		// imgfilepath + bot.avatar +'" /></div>' +
+		'<div class="avatar"><img style="width:46%;" src="'
+				+ imgfilepath
+				+ bot.avatar
+				+ '" /></div>'
+				+ '<div class="text text-l">'
+				+ '<p>'
+				+ text
+//				+ '<button onclick="activeFixBox('
+//				+ seq
+//				+ ')" class="btnFix btnSmall btnUpper align-right">추가</button>
+				+ '</p>'
+				+ '<div class="fixBox" style="display:none">'
+				+ '<textarea class="fixText" rows="3" cols="30"></textarea><br>'
+				+ '<button onclick="addFixText('
+				+ seq
+				+ ',\''
+				+ statusCd
+				+ '\',\''
+				+ messageIdx
+				+ '\',\''
+				+ subMessageIdx
+				+ '\',\'ADD\',\'0\', this)" class="btnFixInput btnSmall">입력</button>'
+				+ '<button onclick="cancleFixText(' + seq
+				+ ')" class="cancleFixInput btnSmall">취소</button>' + '</div>'
+				+ '<p><div class="date">' + date + '</div></p>' + '</div>'
+				+ '</div>' + '</li>';
+	}
+	
 	setTimeout(function() {
 		$(".dialog-ul").append(control);
 	});
