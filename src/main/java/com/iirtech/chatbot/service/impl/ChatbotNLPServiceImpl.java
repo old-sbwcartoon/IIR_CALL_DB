@@ -143,7 +143,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 //			expInput.put("inn", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 숙소로 갔어요~"})));
 //			expInput.put("getLuggage", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 짐을 찾았어요~"})));
 //			expInput.put("carRental", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 차를 빌렸어요~"})));
-			expInput.put("shopping", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 쇼핑했어요~" , "도착하자마자 옷을 샀어요~", "도착하자마자 물건을 샀어요~", "도착하자마자 기념품을 샀어요~" })));
+			expInput.put("shopping", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 쇼핑했어요~" /*, "도착하자마자 옷을 샀어요~", "도착하자마자 물건을 샀어요~", "도착하자마자 기념품을 샀어요~" */})));
 //			expInput.put("meetFriend", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 친구를/가족을 만났어요~"})));
 //			expInput.put("exchangeMoney", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 환전을 했어요~"})));
 //			expInput.put("loseMyWay", new ArrayList<String>(Arrays.asList(new String[]{"도착하자마자 길을 잃어버렸어요~"})));

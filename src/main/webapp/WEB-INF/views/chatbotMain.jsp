@@ -4,7 +4,7 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <html>
 <head>
-	<title>CALL SYSTEM</title>
+	<title>대화형 한국어 학습 시스템</title>
 	<link href="resources/css/chatbotMain.css?ver=1" rel="stylesheet" type="text/css">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <script src="resources/js/jquery-1.10.2.min.js"></script>
@@ -15,12 +15,12 @@
 	<!-- Bootstrap  -->
 	<link rel="stylesheet" href="resources/css/bootstrap.css">
 	<!-- Magnific Popup -->
-	<link rel="stylesheet" href="resources/css/magnific-popup.css">
+	<!-- <link rel="stylesheet" href="resources/css/magnific-popup.css"> -->
 	<!-- Theme style  -->
 	<link rel="stylesheet" href="resources/css/style.css">
 
 	<!-- Modernizr JS -->
-	<script src="resources/js/modernizr-2.6.2.min.js"></script>
+	<!-- <script src="resources/js/modernizr-2.6.2.min.js"></script> -->
 	<!-- FOR IE9 below -->
 	<!--[if lt IE 9]>
 	<script src="js/respond.min.js"></script>
@@ -40,27 +40,27 @@
 <body onresize="resizeFt()">
 
 	<br>
-		<center><h1>CALL</h1><center>
+		<center><h1>대화형 한국어 학습 시스템</h1><center>
 		<input type="hidden" id="idSeq" value="" />
 	<!-- navigator -->
-	<nav class="gtco-nav" role="navigation" style="background-color: black; display: none;">
+	<%-- <nav class="gtco-nav" role="navigation" style="background-color: black; display: none;">
 		<div class="container">
 			<div class="row">
 				<div class="col-xs-10 text-right menu-1 main-nav">
 					<ul>
 						<div class="dialog-div" id="dialogShowBox-navigation" style="float: left; overflow: auto; color: white;">
-							<%-- ${dialogLogStr} --%>
+							${dialogLogStr}
 						</div>
 					</ul>
 				</div>
 			</div>
 			
 		</div>
-	</nav>
+	</nav> --%>
 	
 		<div class="container">
 			<div class="row">
-				<div class="col-md-6" style="border-color: black;">
+				<div class="col-md-6 col-md-offset-3" style="border-color: black;">
 					<div class="dialog-div" style="float: left;">
 						<ul class="dialog-ul" style="height: 600px; overflow:auto">
 							<li>
@@ -111,9 +111,9 @@
 	<!-- Stellar -->
 	<script src="resources/js/jquery.stellar.min.js"></script>
 	<!-- Magnific Popup -->
-	<script src="resources/js/jquery.magnific-popup.min.js"></script>
-	<script src="resources/js/magnific-popup-options.js"></script>
+	<!-- <script src="resources/js/jquery.magnific-popup.min.js"></script>
+	<script src="resources/js/magnific-popup-options.js"></script> -->
 	<!-- Main -->
-	<script src="resources/js/nav.js"></script>
+	<!-- <script src="resources/js/nav.js"></script> -->
 </body>
 </html>

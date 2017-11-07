@@ -28,9 +28,6 @@ function btnEvent() {
 	$('#btnInput').on('click', function(e) {
 
 		var inputMsg = $('#userInput').val()
-//		if (inputMsg == null || inputMsg == "") {
-//			return;
-//		}
 
 		insertUser($('#userInput').val(), $('#imgSrc').val()); // user
 		doInput($('#statusCd').val(), $('#exStatusCd').val(), $('#messageIdx').val(), $('#subMessageIdx').val()); // bot
@@ -47,33 +44,95 @@ function btnEvent() {
 		$(this).addClass("btn_disabled");
 	});
 
-	$('#userInput').on('keyup', function(e) {
-		var inputMsg = $(this).val()
-		if (inputMsg == null || inputMsg.trim() == "") {
-//			alert("문장을 입력하세요!");
-			$('#btnInput').attr("disabled", true);
-			$('#btnInput').addClass("btn_disabled");
-			return;
-		} else {
-			$('#btnInput').attr("disabled", false);
-			$('#btnInput').removeClass("btn_disabled");
+	$('#userInput').on({
+		
+		'keyup' : function(e) {
+	
+			var inputMsg = $(this).val();
+			if (inputMsg == null || inputMsg.trim() == "") {
+				$('#btnInput').attr("disabled", true);
+				$('#btnInput').addClass("btn_disabled");
+				if (e.which == 13) {
+					event.preventDefault();
+				}
+				return;
+			} else {
+				$('#btnInput').attr("disabled", false);
+				$('#btnInput').removeClass("btn_disabled");
+			}
 		}
-		if (e.which == 13) {
-			event.preventDefault();
-			insertUser($(this).val(), $('#imgSrc').val());
-			doInput($('#statusCd').val(), $('#exStatusCd').val(), $('#messageIdx').val(), $('#subMessageIdx').val());
-			$(this).val('');
-			// 스크롤바 focusing
-			$("html, body").animate({
-				scrollTop : '+=400'
-			}, 'slow');
-			$(".dialog-ul").animate({
-				scrollTop : '+=400'
-			}, 'slow');
+	
+		, 'keydown' : function(e) {
 			
-//			$('#exStatusCd').val($('#statusCd').val());
+			var inputMsg = $(this).val();
+			if (inputMsg == null || inputMsg.trim() == "") {
+				$('#btnInput').attr("disabled", true);
+				$('#btnInput').addClass("btn_disabled");
+				if (e.which == 13) {
+					event.preventDefault();
+				}
+				return;
+			} else {
+				$('#btnInput').attr("disabled", false);
+				$('#btnInput').removeClass("btn_disabled");
+			}
+			
+			if (e.which == 13) {
+				event.preventDefault();
+				insertUser($(this).val(), $('#imgSrc').val());
+				doInput($('#statusCd').val(), $('#exStatusCd').val(), $('#messageIdx').val(), $('#subMessageIdx').val());
+				$(this).val('');
+				// 스크롤바 focusing
+				$("html, body").animate({
+					scrollTop : '+=400'
+				}, 'slow');
+				$(".dialog-ul").animate({
+					scrollTop : '+=400'
+				}, 'slow');
+				
+	//			$('#exStatusCd').val($('#statusCd').val());
+			}
+		}
+		, 'cut' : function() {
+			$.ajax({
+				url : btnOnOff()
+				, success : function() {
+					
+					var inputMsg = $('#userInput').val();
+					if (inputMsg == null || inputMsg.trim() == "") {
+						$('#btnInput').attr("disabled", true);
+						$('#btnInput').addClass("btn_disabled");
+						return;
+					} else {
+						$('#btnInput').attr("disabled", false);
+						$('#btnInput').removeClass("btn_disabled");
+					}
+				}
+			});
+		}
+		, 'paste' : function() {
+			$.ajax({
+				url : btnOnOff()
+				, success : function() {
+					
+					var inputMsg = $('#userInput').val();
+					if (inputMsg == null || inputMsg.trim() == "") {
+						$('#btnInput').attr("disabled", true);
+						$('#btnInput').addClass("btn_disabled");
+						return;
+					} else {
+						$('#btnInput').attr("disabled", false);
+						$('#btnInput').removeClass("btn_disabled");
+					}
+				}
+			});
 		}
 	});
+}
+
+function btnOnOff() {
+	//do nothing
+	//dummy function
 }
 
 function doInput(statusCd, exStatusCd, messageIdx, subMessageIdx) {
@@ -158,22 +217,22 @@ function insertBot(text, imgfilepath, messageIdx, subMessageIDx, statusCd) {
 			+ '<div class="text text-l">'
 			+ '<p>'
 			+ text
-			+ '<button onclick="activeFixBox('
-			+ seq
-			+ ')" class="btnFix btnSmall btnUpper align-right">추가</button></p>'
-			+ '<div class="fixBox" style="display:none">'
-			+ '<textarea class="fixText" rows="3" cols="30"></textarea><br>'
-			+ '<button onclick="addFixText('
-			+ seq
-			+ ',\''
-			+ statusCd
-			+ '\',\''
-			+ messageIdx
-			+ '\',\''
-			+ subMessageIdx
-			+ '\',\'ADD\',\'0\', this)" class="btnFixInput btnSmall">입력</button>'
-			+ '<button onclick="cancleFixText(' + seq
-			+ ')" class="cancleFixInput btnSmall">취소</button>' + '</div>'
+//			+ '<button onclick="activeFixBox('
+//			+ seq
+//			+ ')" class="btnFix btnSmall btnUpper align-right">추가</button></p>'
+//			+ '<div class="fixBox" style="display:none">'
+//			+ '<textarea class="fixText" rows="3" cols="30"></textarea><br>'
+//			+ '<button onclick="addFixText('
+//			+ seq
+//			+ ',\''
+//			+ statusCd
+//			+ '\',\''
+//			+ messageIdx
+//			+ '\',\''
+//			+ subMessageIdx
+//			+ '\',\'ADD\',\'0\', this)" class="btnFixInput btnSmall">입력</button>'
+//			+ '<button onclick="cancleFixText(' + seq
+//			+ ')" class="cancleFixInput btnSmall">취소</button>' + '</div>'
 			+ '<p><div class="date">' + date + '</div></p>' + '</div>'
 			+ '</div>' + '</li>';
 

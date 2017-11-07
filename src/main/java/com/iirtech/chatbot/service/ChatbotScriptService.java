@@ -25,5 +25,5 @@ public interface ChatbotScriptService {
 
 	String getAnswerSentence(int code, String korContent, String engContent);
 	
-	void randomlySelectOneSentence(MessageInfo info);
+	void randomlySelectOneSentence(MessageInfo info);   
 }
