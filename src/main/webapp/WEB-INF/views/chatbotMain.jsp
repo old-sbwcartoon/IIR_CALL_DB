@@ -83,11 +83,11 @@
 					</div>
 				</div>
 				
-				<div id="toggle" class="col-md-6">
+<%-- 				<div id="toggle" class="col-md-6">
 					<div class="dialog-div" id="dialogShowBox-frame" style="float: left; overflow: auto;">
-						<%-- ${dialogLogStr} --%>
+						${dialogLogStr}
 					</div>
-				</div>
+				</div> --%>
 			</div>
 		</div>
 	

@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.snu.ids.ha.ma.MorphemeAnalyzer;
 
+import com.iirtech.chatbot.dto.MessageInfo;
+
 /**
  * @Package   : com.iirtech.chatbot.service
  * @FileName  : ChatbotScriptService.java
@@ -22,4 +24,6 @@ public interface ChatbotScriptService {
 	Object applySysOprt(String message, Map<String, Object> conditionInfos);
 
 	String getAnswerSentence(int code, String korContent, String engContent);
+	
+	void randomlySelectOneSentence(MessageInfo info);
 }

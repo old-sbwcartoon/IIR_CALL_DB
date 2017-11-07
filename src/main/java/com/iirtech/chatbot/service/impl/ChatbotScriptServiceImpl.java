@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.snu.ids.ha.ma.MorphemeAnalyzer;
@@ -220,7 +222,11 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 						}
 						nextAutomataIdx = nextIdx;
 					}
-					info = new MessageInfo(info.getNextStatusCd(), scriptFilePath);
+					info = new MessageInfo(info.getNextStatusCd(), scriptFilePath);//messages = [쌤이 말하는 것은 꼭 따라 하기로 해요~\n한 문장씩 써 주세요~\n문장 끝에 . ?를 넣어주세요.\n, S000]
+					
+					//랜덤하게 select한 발화문으로 고쳐서 다시 info 객체의 message set 하기!
+					this.randomlySelectOneSentence(info);//return void 
+					
 					nextMessages = info.getMessageByIdx(nextAutomataIdx);
 					nextIdx = nextAutomataIdx;
 					exStatusCd = statusCd;
@@ -812,8 +818,70 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 		
 		result += "<br>궁금한게 있으면 언제든 물어보세요.";
 		
-		
 		return result;
+	}
+
+	//랜덤하게 봇 발화문 선택하기
+	@Override
+	public void randomlySelectOneSentence(MessageInfo info) {
+		//messages = [쌤이 말하는 것은 꼭 따라 하기로 해요~\n한 문장씩 써 주세요~\n문장 끝에 . ?를 넣어주세요.\n, S000]
+		String[] messages = info.getMessages();
+		String regex = "\\{(.*?)\\}";
+		String message = messages[0];
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(message);
+		
+		List<Integer> startIdxs = new ArrayList<Integer>();
+		List<Integer> endIdxs = new ArrayList<Integer>();
+		List<String> replaceStr = new ArrayList<String>();
+		while(matcher.find()) {
+			startIdxs.add(matcher.start());
+			endIdxs.add(matcher.end());
+			int len = matcher.end() - matcher.start();
+			String replacement = "";
+			for (int i = 0; i < len; i++) {
+				replacement += "#";
+			}
+			replaceStr.add(replacement);
+		}
+		
+		String newMessage = message;
+		int startIdx = 0;
+		for (int i = 0; i < startIdxs.size(); i++) {
+			startIdx = startIdxs.get(i);
+			int endIdx = endIdxs.get(i);
+			String compareStr = newMessage.substring(startIdx, endIdx);
+			newMessage = newMessage.replace(compareStr, replaceStr.get(i));
+		}
+		
+		List<Integer> indexesOfPipeline = new ArrayList<Integer>();
+		char[] newMessageChars = newMessage.toCharArray();
+		for (int i = 0; i < newMessageChars.length; i++) {
+			if(newMessageChars[i] == '|') {
+				indexesOfPipeline.add(i);
+			}
+		}
+		
+		char[] messageChar = message.toCharArray();
+		for (int i = 0; i < indexesOfPipeline.size(); i++) {
+			messageChar[indexesOfPipeline.get(i)] = '#';
+		}
+
+		message = String.valueOf(messageChar);
+		String[] seperatedSentences = message.split("#");
+		
+		//랜덤선택
+		Random rd = new Random();
+		int range = seperatedSentences.length-1;
+		int rndNum = rd.nextInt(range);
+		String selectedSentence = seperatedSentences[rndNum];
+		
+		log.debug(">>>>>>>>>>selected message: " + selectedSentence);
+		
+		//info 객체의 messages 값에 변경된 메시지 어레이를 set
+		String[] newMessageArray = {selectedSentence, messages[1]};
+		info.fixMessages(newMessageArray);
+		
 	}
 
 
