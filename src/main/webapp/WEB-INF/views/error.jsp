@@ -3,7 +3,7 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<meta http-equiv="refresh" content="2;url=http://localhost:9090/index.do">
+	<meta http-equiv="refresh" content="2;url=http://106.255.230.162:11480/index.do">
 	<meta name="viewport"content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
 	<title>대화형 한국어 학습 시스템</title>
 	<link   href="resources/css/index.css" rel="stylesheet" type="text/css">
