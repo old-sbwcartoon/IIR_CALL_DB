@@ -50,6 +50,12 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 	String urlFilePath;
 	@Value("#{systemProp['systemdelimeter']}") 
 	String systemDelimeter;
+	
+	@Value("#{systemProp['papagoclientId']}") 
+	String clientId;	//후보아이디1: S3PJoLLxPOJUy9hNLtv7,	후보아이디2: JeP6rRJ4lQfBmEndNrMd
+	@Value("#{systemProp['papagoclientPwd']}") 
+	String clientPwd;				//후보암호1: NVKI_JDMU3,				후보암호2: WfUqaWRsRU
+	
 	@Override
 	public Map<String,Object> preProcess(String procInputText) {
 		log.debug("*************************preProcess*************************");
@@ -583,13 +589,10 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 	 * @return engStr
 	 */
 	@Override
-	public String getEngByKor(String korStr) {
+	public String getEngByKor(String korStr,String clientId, String clientPwd) {
 		String engStr = null;
 		
 		UtilsForPPGO ufp = new UtilsForPPGO();
-		
-		String clientId = "v_norw0FYk6gNwbDHt7Q";	//후보아이디1: S3PJoLLxPOJUy9hNLtv7,	후보아이디2: JeP6rRJ4lQfBmEndNrMd
-		String clientPwd = "CxWLhAMS5C";				//후보암호1: NVKI_JDMU3,				후보암호2: WfUqaWRsRU
 		String fromLang = "KOR";
 		
 		if (korStr != null) {
@@ -607,7 +610,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 	 * @return hashMap.infoType(translation 또는 errorCode), hashMap.data(번역을 요청한 단어 또는 오류 주석 코드)
 	 */
 	@Override
-	public HashMap<String, String> getPauseCondition(String procInputText, MorphemeAnalyzer ma) {
+	public HashMap<String, String> getPauseCondition(String procInputText, MorphemeAnalyzer ma, String clientId, String clientPwd) {
 		HashMap<String, String> resultMap = new HashMap<String, String>();
 		
 		String askContent = getAskContent(procInputText, ma);
@@ -623,7 +626,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 			} else {
 				// 번역에 관한 질문일 경우
 				String korContent = askContent;
-				String engContent = cbns.getEngByKor(korContent);
+				String engContent = cbns.getEngByKor(korContent, clientId, clientPwd);
 				// 번역되었을 때 마지막 글자 은, 는, 이, 가 삭제 후 표출
 				String lastWord = korContent.substring(korContent.length() - 1, korContent.length());
 				
@@ -642,7 +645,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 				
 				// 질문한 내용이 번역되지 않았을 경우 -- 마지막 글자 은, 는, 이, 가 삭제 후 다시 번역 
 				if (engContent == null || engContent.equals("")) {
-					engContent = cbns.getEngByKor(korContent);
+					engContent = cbns.getEngByKor(korContent, clientId, clientPwd);
 				}
 				resultMap.put("infoType", "translation");
 				resultMap.put("data", cbss.getAnswerSentence(askCode, korContent, engContent));

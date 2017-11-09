@@ -48,6 +48,11 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 	String urlSystemImgFilePath;
 	@Value("#{systemProp['filepath']}")
 	String urlFilePath;
+	@Value("#{systemProp['papagoclientId']}") 
+	String clientId;	//후보아이디1: S3PJoLLxPOJUy9hNLtv7,	후보아이디2: JeP6rRJ4lQfBmEndNrMd
+	@Value("#{systemProp['papagoclientPwd']}") 
+	String clientPwd;				//후보암호1: NVKI_JDMU3,				후보암호2: WfUqaWRsRU
+	
 	
 	@Override
 	public Map<String, Object> getMessageInfo(String statusCd, String exStatusCd, String procInputText
@@ -78,7 +83,7 @@ public class ChatbotScriptServiceImpl implements ChatbotScriptService {
 			
 			
 			boolean hasReturnToScript = false; // 본래 스크립트 이외 질문, 오류 등 스크립트가 끝났을 경우 true
-    			HashMap<String, String> pauseInfo = cbns.getPauseCondition(procInputText,ma);
+    			HashMap<String, String> pauseInfo = cbns.getPauseCondition(procInputText,ma,clientId,clientPwd);
 			
     			// statusCd가 서브 테마가 아니라면
 			if ( !DialogStatus.get(statusCd).name().contains("SUB_") ) {

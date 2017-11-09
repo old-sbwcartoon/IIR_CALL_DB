@@ -153,7 +153,7 @@ function doInput(statusCd, exStatusCd, messageIdx, subMessageIdx) {
 function socketHandler(clientMessage) {
 
 	// var sock = new WebSocket("ws://106.255.230.162:1148/sockethandler.do");
-	var sock = new WebSocket("ws://106.255.230.162:11480/sockethandler.do");
+	var sock = new WebSocket("ws://localhost:7090/sockethandler.do");
 	// var sock = new WebSocket("ws://localhost:8090/sockethandler.do");
 	/* server 연결시 바로 */
 	sock.onopen = function() {
@@ -173,6 +173,9 @@ function socketHandler(clientMessage) {
 		$('#shortTermInfos').val(data.shortTermInfoMap);
 		// script path hidden 기록
 		$('#scriptPath').val(data.scriptFilePath);
+		
+		var dialogUlHtml = $('.dialog-ul').html();
+		
 		insertBot(data.message, data.imgSrc, data.messageIdx, data.subMessageIdx, data.statusCd, data.exStatusCd);
 		
 
@@ -195,7 +198,7 @@ function redirectPage(controller){
 	//location.href='http://106.255.230.125:11480/' + controller;
 	if(controller == 'index.do'){
 		if(confirm('정말 나가겠습니까?')==true){
-			location.href='http://106.255.230.162:11480/' + controller;
+			location.href='http://localhost:7090/' + controller;
 		}else{
 			return;
 		}
@@ -223,6 +226,8 @@ function insertBot(text, imgfilepath, messageIdx, subMessageIDx, statusCd, exSta
 	var messageIdx = $('#messageIdx').val();
 	var subMessageIdx = $('#subMessageIdx').val();
 
+	
+	var dialogUlHtml = $(".dialog-ul").html();
 	// sleep(text.length * 100); //사용자 입력과 동시에 나오지 않도록 잠시 정지. 글자 수에 따라 정지 시간
 	if(statusCd == "S070" && exStatusCd == "S060"){ //마지막 발화일 경우 페이지 아웃할 수 있게
 		control = '<li>' + '<div class="msj macro">' +
@@ -264,11 +269,13 @@ function insertBot(text, imgfilepath, messageIdx, subMessageIDx, statusCd, exSta
 				+ bot.avatar
 				+ '" /></div>'
 				+ '<div class="text text-l">'
-				+ '<p>'
+				+ '<p id = "text_'+seq+'">'
 				+ text
-//				+ '<button onclick="activeFixBox('
-//				+ seq
-//				+ ')" class="btnFix btnSmall btnUpper align-right">추가</button>
+				+ '<select id="fromLang_'+seq+'" class="btnFix btnSmall btnUpper align-right" onChange="javascript:translateLang('+seq+ ',\'' +text+'\')">'
+				+ '<option value="" selected>language</option>'
+				+ '<option value="KOR">English</option>'
+				+ '<option value="JP">日本語</option>'
+				+ '<option value="CN">中文</option></select>'
 				+ '</p>'
 				+ '<div class="fixBox" style="display:none">'
 				+ '<textarea class="fixText" rows="3" cols="30"></textarea><br>'
@@ -294,6 +301,43 @@ function insertBot(text, imgfilepath, messageIdx, subMessageIDx, statusCd, exSta
 	var preIdSeq = parseInt($('#idSeq').val());
 	$('#idSeq').val(preIdSeq + 1);
 }
+
+function translateLang(seq, text){
+	var lang = $("#fromLang_"+seq+" option:selected").val();
+	
+	$.ajax({
+		url : 'translateLang.do',
+		async : false,
+		type : 'POST',
+		data : {
+			fromLang : lang
+			,text : text
+		},
+		error : function() {
+			$('#info').html('<p>An error has occurred</p>');
+		},
+		dataType : 'text',
+		success : function(data) {
+			var jsonObj = JSON.parse(data)
+//			alert(jsonObj.result);
+			var translatedStr = jsonObj.translatedStr;
+			var newText = text + '<br>[' + translatedStr + ']' 
+			+ '<select id="fromLang_'+seq+'" class="btnFix btnSmall btnUpper align-right" onChange="javascript:translateLang('+seq+ ',\'' +text+'\')">'
+			+ '<option value="" selected>language</option>'
+			+ '<option value="KOR">English</option>'
+			+ '<option value="JP">日本語</option>'
+			+ '<option value="CN">中文</option></select>';
+			$('#text_'+seq+'').html(newText);
+			$('.fixText').val('');
+			// 시각화 부분
+			$('#dialogShowBoxText').remove();
+			$('#dialogShowBox-navigation').html(jsonObj.dialogLogStr);
+			// $('#dialogShowBox1 #dialogShowBoxText').remove();
+			$('#dialogShowBox-frame').html(jsonObj.dialogLogStr);
+		}
+	});
+}
+
 
 function insertUser(text, imgfilepath) {
 	var control = "";

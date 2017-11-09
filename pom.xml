@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.iirtech</groupId>
 	<artifactId>chatbot</artifactId>
-	<name>IITP_CHATBOT</name>
+	<name>KOREAN_TUTOR_CHATBOT</name>
 	<packaging>war</packaging>
 	<version>1.0.0-BUILD-SNAPSHOT</version>
 	<properties>

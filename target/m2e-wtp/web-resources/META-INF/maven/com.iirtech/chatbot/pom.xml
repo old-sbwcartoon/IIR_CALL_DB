@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.iirtech</groupId>
 	<artifactId>chatbot</artifactId>
-	<name>CALL</name>
+	<name>KOREAN_TUTOR_CHATBOT</name>
 	<packaging>war</packaging>
 	<version>1.0.0-BUILD-SNAPSHOT</version>
 	<properties>
@@ -187,7 +187,14 @@
 			<artifactId>junit</artifactId>
 			<version>4.7</version>
 			<scope>test</scope>
-		</dependency>        
+		</dependency>
+		
+		<!-- 유사도 -->
+		<dependency>
+		    <groupId>info.debatty</groupId>
+		    <artifactId>java-string-similarity</artifactId>
+		    <version>RELEASE</version>
+		</dependency>
 	</dependencies>
     <build>
         <plugins>

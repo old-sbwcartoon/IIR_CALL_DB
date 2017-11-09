@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -22,6 +23,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.iirtech.common.utils.ChatbotAPIUtil;
+import com.iirtech.common.utils.UtilsForPPGO;
 
 
 
@@ -38,6 +40,11 @@ public class ChatbotAPIController {
 	private Logger log = Logger.getLogger(this.getClass());
 	@Autowired
 	ChatbotAPIUtil cbau;
+	
+	@Value("#{systemProp['papagoclientId']}") 
+	String clientId;
+	@Value("#{systemProp['papagoclientPwd']}") 
+	String clientPwd;
 	
 	//for test
 	//REST API
@@ -89,6 +96,20 @@ public class ChatbotAPIController {
 		return mav;
 	}
 
+	
+	//문장을 번역하는 ajax 호출에 응답한다.
+	@RequestMapping(value = "translateLang.do")
+	public ModelAndView translateLang(@RequestParam Map<String, Object> param) {
+		ModelAndView mav = new ModelAndView("jsonView");
+		String fromLang = (String) param.get("fromLang");
+	    String korStr = (String) param.get("text");
+		log.debug("translate language: " + fromLang + ", " + korStr);
+		UtilsForPPGO ufp = new UtilsForPPGO();
+		
+		String translatedStr = ufp.getTranslation(korStr, clientId, clientPwd, fromLang);
+		mav.addObject("translatedStr", translatedStr);
+		return mav;
+	}
 	
 
 }
