@@ -61,6 +61,7 @@ public class ChatbotNLPServiceImpl implements ChatbotNLPService {
 		//문장정보 파악~ isPositive/isNegative/isAsking
 		textTypes.add("isPositive");//일단 긍정으로 하드코딩 
 		textTypes.add("isCorrect");//일단 맞음으로 하드코딩 
+		textTypes.add("good");//일단 맞음으로 하드코딩 
 		
 		//전처리된 문장과 전처리 후 파악된 문장정보를 맵객체에 담아서 리턴
 		resultMap.put("procText", procText);
