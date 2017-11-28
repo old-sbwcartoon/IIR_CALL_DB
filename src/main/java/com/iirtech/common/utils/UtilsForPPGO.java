@@ -48,6 +48,11 @@ public class UtilsForPPGO {
 	            		postParams = "source=en&target=ko&text=" + text;
 	            }else if(fromLang.equals("KOR")) {
 		            	postParams = "source=ko&target=en&text=" + text;
+	            }else if(fromLang.equals("CN")) {
+	            		postParams = "source=ko&target=zh-CN&text=" + text;
+	            }else if(fromLang.equals("JP")) {
+	            		String tempEng = this.getTranslation(korStr, clientId, clientPwd, "KOR");
+	            		postParams = "source=en&target=ja&text=" + tempEng;
 	            }
 	            con.setDoOutput(true);
 	            DataOutputStream wr = new DataOutputStream(con.getOutputStream());

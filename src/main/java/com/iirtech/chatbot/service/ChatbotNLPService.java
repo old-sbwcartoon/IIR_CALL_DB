@@ -31,9 +31,9 @@ public interface ChatbotNLPService {
 
 	boolean hasLastKoreanWordJongsung(char lastWord);
 
-	public String getEngByKor(String korStr);
+	public String getEngByKor(String korStr, String clientId, String clientPwd);
 
-	HashMap<String, String> getPauseCondition(String procInputText, MorphemeAnalyzer ma);
+	HashMap<String, String> getPauseCondition(String procInputText, MorphemeAnalyzer ma, String clientId, String clientPwd);
 
 	String getAskContent(String procInputText, MorphemeAnalyzer ma);
 
